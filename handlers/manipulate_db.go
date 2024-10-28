@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -41,6 +42,53 @@ func Insert_Post(p *Posts) {
 	}
 }
 
-func Update_Post(p *Posts){
-	
+func Update_Post(p *Posts) {
+	file, err := sql.Open("sqlite3", "Data_base/data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	statement, err := file.Prepare(`UPDATE Posts
+	SET Title=?,
+	Content = ?,
+	Updated_at = ?
+	WHERE
+	PostId = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(p.Title, p.Content, p.Updated_At, p.PostId)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Delete_Post(p *Posts) {
+	file, err := sql.Open("sqlite3", "Data_base/data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	statement, err := file.Prepare(`DELETE FROM Posts WHERE PostId = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = statement.Exec(p.PostId)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Read_Post(id int) *Posts {
+	file, err := sql.Open("sqlite3", "Data_base/data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	query := `SELECT * FROM Posts WHERE PostId = ?`
+	row := file.QueryRow(query, id)
+	Post := &Posts{}
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At, &Post.Updated_At)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// print(res)
+	return Post
 }

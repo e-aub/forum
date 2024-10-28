@@ -1,32 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"forum/handlers"
 )
 
 func main() {
-	// server := http.Server{
-	// 	Addr : "127.0.0.1:8080",
-	// 	Handler : handlers.Mux,
-	// }
-
-	// handlers.Mux.HandleFunc("/", handlers.Home)
-
-	// fmt.Println("serve has been launched at localhost:8080")
-	// fmt.Println("http://localhost:8080")
-
-	// err := server.ListenAndServe()
-	// if err != nil {
-	// 	fmt.Println("\nfatal:\n\tserver has been closed. port specified already on use")
-	// 	return
-	// }
 	var post handlers.Posts
-	post.Content = "we need to test it"
-	post.Title = "testing"
+	post.Content = "wa l update"
+	post.Title = "khdmiiiii"
 	post.UserId = 10
-	post.Created_At = time.Now().GoString()
+	post.PostId = 6
+	post.Updated_At = time.April.String()
 	handlers.Creat_TAble_Posts()
-	handlers.Insert_Post(&post)
+	// handlers.Insert_Post(&post)
+	// handlers.Update_Post(&post)
+	var post2 handlers.Posts
+	post2.PostId = 7
+	handlers.Delete_Post(&post2)
+	 handlers.Read_Post(1)
 }
