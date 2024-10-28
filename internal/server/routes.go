@@ -7,9 +7,10 @@ import (
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.HelloWorldHandler)
+
+	mux.HandleFunc("/api/comments", s.HandleComments)
 
 	mux.HandleFunc("/health", s.healthHandler)
 
@@ -30,7 +31,6 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, err := json.Marshal(s.db.Health())
-
 	if err != nil {
 		log.Fatalf("error handling JSON marshal. Err: %v", err)
 	}

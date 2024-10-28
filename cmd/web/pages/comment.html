@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Comment System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .post {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .comments {
+            margin-top: 20px;
+        }
+
+        .comment {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-content {
+            flex-grow: 1;
+        }
+
+        .comment-form {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .comment-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.9em;
+        }
+
+        .meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="post">
+        <h2>Example Post</h2>
+        <p>This is an example post content. You can add and delete comments below.</p>
+
+        <div class="comments">
+        </div>
+
+        <div class="comment-form">
+            <input type="text" id="comment-input" class="comment-input" placeholder="Write a comment...">
+            <button class="add-button">Add Comment</button>
+        </div>
+    </div>
+    <script type="module">
+        import { addComment, getComment, deleteComment } from "../static/comment.js";
+
+        const comment = document.getElementById('comment-input')
+        await getComment()
+        await addComment(comment)
+        deleteComment()
+    </script>
+</body>
+
+</html>
