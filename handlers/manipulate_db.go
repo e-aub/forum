@@ -85,10 +85,18 @@ func Read_Post(id int) *Posts {
 	query := `SELECT * FROM Posts WHERE PostId = ?`
 	row := file.QueryRow(query, id)
 	Post := &Posts{}
-	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At, &Post.Updated_At)
+	_ = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At, &Post.Updated_At)
+	return Post
+}
+
+func Get_Last() int {
+	file, err := sql.Open("sqlite3", "Data_base/data.db")
 	if err != nil {
 		log.Fatal(err)
 	}
-	// print(res)
-	return Post
+	query := `SELECT MAX(PostId) FROM Posts `
+	row := file.QueryRow(query)
+	result := 0
+	_ = row.Scan(&result)
+	return result
 }
