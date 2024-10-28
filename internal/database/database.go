@@ -18,6 +18,8 @@ type Service interface {
 	// Health returns a map of health status information.
 	// The keys and values in the map are service-specific.
 	Health() map[string]string
+	IsUserRegistered( email, username string) (bool, error) 
+	RegisterUser( username, email, password string) error
 
 	// Close terminates the database connection.
 	// It returns an error if the connection cannot be closed.
@@ -49,6 +51,7 @@ func New() Service {
 	dbInstance = &service{
 		db: db,
 	}
+	dbInstance.init()
 	return dbInstance
 }
 
@@ -110,4 +113,39 @@ func (s *service) Health() map[string]string {
 func (s *service) Close() error {
 	log.Printf("Disconnected from database: %s", dburl)
 	return s.db.Close()
+}
+
+func init() {
+	db, err := sql.Open("sqlite3", dburl)
+	if err != nil {
+		// This will not be a connection error, but a DSN parse error or
+		// another initialization error.
+		log.Fatal(err)
+	}
+	createTableQuery := `
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+    );
+    `
+	if _, err := db.Exec(createTableQuery); err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
+
+}
+
+func (s *service)IsUserRegistered( email, username string) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?);`
+	err := s.db.QueryRow(query, email, username).Scan(&exists)
+	return exists, err
+}
+
+// Register a new user in the database
+func (s *service)RegisterUser( username, email, password string) error {
+	insertQuery := `INSERT INTO users (username, email, password) VALUES (?, ?, ?);`
+	_, err := s.db.Exec(insertQuery, username, email, password)
+	return err
 }
