@@ -1,15 +1,15 @@
 package handlers
 
 type Posts struct {
-	PostId     int
-	UserId     int
+	PostId     float64
+	UserId     float64
 	Title      string
 	Content    string
 	Created_At string
 	Updated_At string
 }
 
-func (*Posts) Creat_New_Post() *Posts {
+func Creat_New_Post() *Posts {
 	return &Posts{}
 }
 

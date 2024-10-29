@@ -34,7 +34,6 @@ func gracefulShutdown(apiServer *http.Server) {
 }
 
 func main() {
-
 	server := server.NewServer()
 
 	go gracefulShutdown(server)
