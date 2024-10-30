@@ -1,43 +1,24 @@
-# Simple Makefile for a Go project
+IMAGE_NAME=forum-image
 
-# Build the application
-all: build test
+DOCKERFILE=Dockerfile.dev
+
+CONTAINER_NAME=forum-container
 
 build:
-	@echo "Building..."
-	
-	
-	@go build -o main cmd/api/main.go
+	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
-# Run the application
 run:
-	@go run cmd/api/main.go
+	sudo docker run --name $(CONTAINER_NAME) -p 8080:8080 -v $(PWD):/app $(IMAGE_NAME)
 
-# Test the application
-test:
-	@echo "Testing..."
-	@go test ./... -v
+stop:
+	sudo docker stop $(CONTAINER_NAME) || true
+	sudo docker rm $(CONTAINER_NAME) || true
 
-# Clean the binary
 clean:
-	@echo "Cleaning..."
-	@rm -f main
+	sudo rm -rf forum tmp || true
+	sudo docker rm $(CONTAINER_NAME) || true
+	sudo docker rmi $(IMAGE_NAME) || true
 
-# Live Reload
-watch:
-	@if command -v air > /dev/null; then \
-            air; \
-            echo "Watching...";\
-        else \
-            read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
-            if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
-                go install github.com/air-verse/air@latest; \
-                air; \
-                echo "Watching...";\
-            else \
-                echo "You chose not to install air. Exiting..."; \
-                exit 1; \
-            fi; \
-        fi
+up: stop clean build run
 
-.PHONY: all build run test clean watch
+.PHONY: build run stop clean up

@@ -1,0 +1,19 @@
+# Use Golang base image with Air installed
+FROM golang:1.23.1 AS dev
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y gcc libc-dev
+
+# Copy only go.mod and go.sum initially to take advantage of Docker's caching
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+RUN go get github.com/mattn/go-sqlite3
+
+# Install air
+RUN go install github.com/air-verse/air@latest
+
+# Set Air as the entrypoint
+CMD ["air"]

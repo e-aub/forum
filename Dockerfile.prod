@@ -1,0 +1,23 @@
+FROM golang:1.23.1 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build -o forum cmd/main.go
+
+FROM alpine:latest
+
+#Set enviroment variables
+ENV PORT=8080
+ENV DB_PATH="/app/db/data.db"
+WORKDIR /app
+
+COPY --from=builder /app/forum .
+
+EXPOSE ${PORT}
+
+CMD ["./forum"]
