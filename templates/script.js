@@ -38,6 +38,7 @@ function RenderPost(args) {
         <li> time : ${element.Created_At} </li>
         <li> Content : ${element.Content} </li> 
         </ul>
+        <button class="Delete_Content" type="submit">Delete</button>
         `;
         container.append(Post)
     });
@@ -85,6 +86,8 @@ function RenderParam() {
         <textarea class="Content" placeholder="write your Content"></textarea>
         <button class="submit_content" type="submit">Submit</button>`
 }
+
+function 
 
 export function Active_Events() {
     New_Post()
