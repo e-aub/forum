@@ -1,5 +1,9 @@
 # Use Golang base image with Air installed
-FROM golang:1.23.1 AS dev
+FROM golang:1.23.1
+
+#Set enviroment variables
+ENV PORT=8080
+ENV DB_PATH="db/data.db"
 
 WORKDIR /app
 
@@ -11,6 +15,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 RUN go get github.com/mattn/go-sqlite3
+
+# RUN sqlite3 db/data.db
 
 # Install air
 RUN go install github.com/air-verse/air@latest

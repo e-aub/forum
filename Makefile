@@ -19,6 +19,6 @@ clean:
 	sudo docker rm $(CONTAINER_NAME) || true
 	sudo docker rmi $(IMAGE_NAME) || true
 
-up: stop clean build run
+all: stop clean build run
 
 .PHONY: build run stop clean up
