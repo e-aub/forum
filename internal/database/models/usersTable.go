@@ -1,4 +1,4 @@
-package models
+package database
 
 var UsersTable = `CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -6,10 +6,11 @@ var UsersTable = `CREATE TABLE IF NOT EXISTS users (
 	email TEXT NOT NULL UNIQUE,
 	password TEXT NOT NULL,
 	session
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-);`
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+`
 
-var SessionsTable = `CREATE TABLE sessions (
+var SessionsTable = `CREATE TABLE IF NOT EXISTS sessions (
     session_id TEXT PRIMARY KEY,      -- UUID if enabled, otherwise a unique identifier (could be INT if UUID is not used)
     user_id INTEGER NOT NULL,         -- Foreign key referencing users table
     expires_at DATETIME NOT NULL,     -- Expiration datetime for the session

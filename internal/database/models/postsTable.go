@@ -1,4 +1,4 @@
-package models
+package database
 
 var PostsTable = `CREATE TABLE IF NOT EXISTS posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -7,4 +7,6 @@ var PostsTable = `CREATE TABLE IF NOT EXISTS posts (
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );`
+    );
+	
+	`
