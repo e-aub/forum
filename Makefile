@@ -5,19 +5,19 @@ DOCKERFILE=Dockerfile.dev
 CONTAINER_NAME=forum-container
 
 build:
-	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	sudo docker run --name $(CONTAINER_NAME) -p 8080:8080 -v $(PWD):/app $(IMAGE_NAME)
+	docker run --name $(CONTAINER_NAME) -p 8080:8080 -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
-	sudo docker stop $(CONTAINER_NAME) || true
-	sudo docker rm $(CONTAINER_NAME) || true
+	docker stop $(CONTAINER_NAME) || true
+	docker rm $(CONTAINER_NAME) || true
 
 clean:
-	sudo rm -rf forum tmp || true
-	sudo docker rm $(CONTAINER_NAME) || true
-	sudo docker rmi $(IMAGE_NAME) || true
+	rm -rf forum tmp || true
+	docker rm $(CONTAINER_NAME) || true
+	docker rmi $(IMAGE_NAME) || true
 
 all: stop clean build run
 
