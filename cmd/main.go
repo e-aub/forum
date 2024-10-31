@@ -3,16 +3,21 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var (
+	Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
+)
+
 func main() {
 	dbPath := os.Getenv("DB_PATH")
-	fmt.Println(dbPath)
-	// port := os.Getenv("PORT")
+	port := os.Getenv("PORT")
+	fmt.Println(port)
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		fmt.Println("Error opening database:", err)
@@ -22,10 +27,14 @@ func main() {
 
 	// Verify the connection
 	if err = db.Ping(); err != nil {
-		fmt.Printf("\033[41mError accessing database: %s\033[0m\n", err.Error())
-		return
+		log.Fatalf("%sError accessing database: %s%s\n", Colors["red"], err.Error(), Colors["reset"])
 	} else {
-		fmt.Println("\033[42mDatabase created/opened successfully!\033[0m")
+		fmt.Printf("%sDatabase created/opened successfully!%s\n", Colors["green"], Colors["reset"])
+	}
+
+	_, err = db.Exec(`PRAGMA foreign_keys=ON;`)
+	if err != nil {
+		log.Fatalf("%sError enabling foreign keys: %s%s\n", Colors["red"], err.Error(), Colors["reset"])
 	}
 	time.Sleep(time.Minute)
 }
