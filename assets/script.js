@@ -5,6 +5,7 @@ export const GetData = async () => {
         if (!response.ok) throw new Error("Network response was not ok");
 
         let data = await response.json();
+        console.log(data);
 
         if (data) {
             for (let i = data; i > 0; i--) {

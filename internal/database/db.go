@@ -60,12 +60,12 @@ func Update_Post(p *utils.Posts) {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	statement, err := file.Prepare(`UPDATE Posts
-	SET Title=?,
-	Content = ?,
-	Updated_at = ?
+	statement, err := file.Prepare(`UPDATE posts
+	SET title=?,
+	content = ?,
+	updated_at = ?
 	WHERE
-	PostId = ?`)
+	id= ?`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func Delete_Post(p *utils.Posts) {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	statement, err := file.Prepare(`DELETE FROM Posts WHERE PostId = ?`)
+	statement, err := file.Prepare(`DELETE FROM posts WHERE id = ?`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,10 +97,10 @@ func Read_Post(id int) *utils.Posts {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	query := `SELECT * FROM Posts WHERE PostId = ?`
+	query := `SELECT * FROM posts WHERE id = ?`
 	row := file.QueryRow(query, id)
 	Post := &utils.Posts{}
-	_ = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At, &Post.Updated_At)
+	_ = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
 	return Post
 }
 
@@ -110,7 +110,7 @@ func Get_Last() int {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	query := `SELECT MAX(PostId) FROM Posts `
+	query := `SELECT MAX(id) FROM posts `
 	row := file.QueryRow(query)
 	result := 0
 	_ = row.Scan(&result)
