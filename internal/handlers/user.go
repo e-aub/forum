@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
+	"encoding/json"
 	middleware "forum/internal/middleware"
 	"html/template"
 	"net/http"
@@ -10,33 +10,42 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Register(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+var requestData struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		return
+	}
 	t, err := template.ParseFiles("web/templates/register.html")
 	if err != nil {
-		http.Error(w, "Template not found", http.StatusInternalServerError)
+		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
 
-	if r.Method == http.MethodGet {
-		if err := t.Execute(w, nil); err != nil {
-			http.Error(w, "Error executing template", http.StatusInternalServerError)
-			return
-		}
+	if err := t.Execute(w, nil); err != nil {
+		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		return
 	}
 
+}
+func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
 		return
 	}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-
-	email := r.FormValue("email")
-	if len(username) < 8 || len(password) < 8 {
-		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
+	// Decode the JSON body
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
+	username := requestData.Username
+	email := requestData.Email
+	password := requestData.Password
 	ok, err := middleware.IsUserRegistered(db, email, username)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
@@ -46,41 +55,57 @@ func Register(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
+	if len(username) < 8 || len(password) < 8 || len(username) > 30 || len(password) > 64 {
+		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
+		return
+	}
+
 	hachedPassword, err := HashPassword(password)
 	if err != nil {
 		http.Error(w, "Invalid password", http.StatusNotAcceptable)
-
+		return
 	}
 	err = middleware.RegisterUser(db, username, email, hachedPassword)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
+		return
 	}
-	fmt.Fprintln(w, "user registred")
+	w.WriteHeader(http.StatusOK)
+
 }
 
-func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		return
+	}
 	t, err := template.ParseFiles("web/templates/login.html")
 	if err != nil {
-		http.Error(w, "Template not found", http.StatusInternalServerError)
+		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
 
-	if r.Method == http.MethodGet {
-		if err := t.Execute(w, nil); err != nil {
-			http.Error(w, "Error executing template", http.StatusInternalServerError)
-			return
-		}
+	if err := t.Execute(w, nil); err != nil {
+		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		return
 	}
+}
 
+func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
 		return
 	}
-	username := r.FormValue("username")
-	email := r.FormValue("email")
+	// Decode the JSON body
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Invalid input data", http.StatusBadRequest)
+		return
+	}
 
-	password := r.FormValue("password")
+	username := requestData.Username
+	email := requestData.Email
+	password := requestData.Password
+
 	ok, err := middleware.IsUserRegistered(db, email, username)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
@@ -92,10 +117,10 @@ func Login(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !ok || !CheckPasswordHash(password, hachedPassword) {
-		http.Error(w, "User not exists", http.StatusConflict)
+		http.Error(w, "Incorrect password or Username", http.StatusConflict)
 		return
 	}
-	fmt.Fprintln(w, "logiin succefully")
+	w.WriteHeader(http.StatusOK)
 
 }
 

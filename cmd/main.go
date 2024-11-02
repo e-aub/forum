@@ -40,14 +40,20 @@ func main() {
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", handlers.NewPostHandler)
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Register(db, w, r)
+		handlers.Register(w, r)
 	})
 	mainMux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Login(db, w, r)
+		handlers.Login(w, r)
 	})
 
 	apiMux := http.NewServeMux()
 	apiMux.HandleFunc("/api", enableCors(handlers.Controlle_Api))
+	apiMux.HandleFunc("/api/users", enableCors(func(w http.ResponseWriter, r *http.Request) {
+		handlers.Register_Api(db, w, r)
+	}))
+	apiMux.HandleFunc("/api/login", enableCors(func(w http.ResponseWriter, r *http.Request) {
+		handlers.Login_Api(db, w, r)
+	}))
 
 	go func() {
 		log.Println("API server running on http://localhost:8000")
