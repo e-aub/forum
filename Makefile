@@ -8,7 +8,7 @@ build:
 	docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	docker run --name $(CONTAINER_NAME) -p 8080:8080 -v $(PWD):/app $(IMAGE_NAME)
+	docker run --name $(CONTAINER_NAME) -p 8080:8080 -p 8000:8000 -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
 	docker stop $(CONTAINER_NAME) || true
