@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Post</title>
+</head>
+
+<body>
+    <h1>Create New Post</h1>
+    <form action="/New_Post" method="post">
+        <h2>Title</h2>
+        <textarea name="title" placeholder="Write your title" required></textarea>
+
+        <h2>Content</h2>
+        <textarea name="content" placeholder="Write your content here" required></textarea>
+
+        <h2>Category</h2>
+        <select name="category" class="category">
+            <option value="sport">Sport</option>
+            <option value="anime">Anime</option>
+            <option value="science">Science</option>
+        </select>
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+
+</html>

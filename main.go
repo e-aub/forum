@@ -4,19 +4,18 @@ import (
 	"log"
 	"net/http"
 
-	"forum/handlers/controllers"
+	"forum/internal/handlers"
 )
 
 func main() {
 	server := http.NewServeMux()
 
 	// Serve static files from the "templates" directory under the "/templates/" path
-	fs := http.FileServer(http.Dir("templates"))
-	server.Handle("/templates/", http.StripPrefix("/templates/", fs))
+
 
 	// Define other routes
-	server.HandleFunc("/", controllers.Controlle_Home)
-	server.HandleFunc("/api", controllers.Controlle_Api)
+	server.HandleFunc("/", handlers.Controlle_Home)
+	server.HandleFunc("/api", handlers.Controlle_Api)
 
 	// Start the server
 	log.Println("Server running on http://localhost:8000")
