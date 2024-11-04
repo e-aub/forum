@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	database "forum/internal/database/models"
 	utils "forum/internal/utils"
@@ -130,4 +131,18 @@ func Get_session(ses string) (float64, error) {
 		return 0, err
 	}
 	return sessionid, nil
+}
+
+func GetUserIDByUsername(db *sql.DB, username string) (int, error) {
+	var userID int
+	err := db.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
+func InsertSession(db *sql.DB, sessionID string, userID int, expiration time.Time) error {
+	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", sessionID, userID, expiration)
+	return err
 }

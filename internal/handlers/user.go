@@ -3,10 +3,13 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"forum/internal/database"
 	middleware "forum/internal/middleware"
 	"html/template"
 	"net/http"
+	"time"
 
+	"github.com/gofrs/uuid/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -70,6 +73,29 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
 	}
+	userID, err := database.GetUserIDByUsername(db, username)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	// Create a session and set a cookie
+	sessionID, err := GenerateSessionID()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	expiration := time.Now().Add(24 * time.Hour)
+	err = database.InsertSession(db, sessionID, userID, expiration)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionID,
+		Expires:  expiration,
+		HttpOnly: true,
+	})
 	w.WriteHeader(http.StatusOK)
 
 }
@@ -120,8 +146,39 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Incorrect password or Username", http.StatusConflict)
 		return
 	}
+	userID, err := database.GetUserIDByUsername(db, username)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	// Create a session and set a cookie
+	sessionID, err := GenerateSessionID()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	expiration := time.Now().Add(24 * time.Hour)
+	err = database.InsertSession(db, sessionID, userID, expiration)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionID,
+		Expires:  expiration,
+		HttpOnly: true,
+	})
+
 	w.WriteHeader(http.StatusOK)
 
+}
+func GenerateSessionID() (string, error) {
+	sessionID, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return sessionID.String(), nil
 }
 
 func HashPassword(password string) (string, error) {
