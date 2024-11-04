@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
 </head>
+
 <body>
     <h2>Login</h2>
     <form id="loginForm" action="/login" method="post">
@@ -23,7 +25,7 @@
 
     <script>
         // JavaScript to handle form validation and submission
-        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
             event.preventDefault();  // Prevent default form submission
 
             // Capture form data
@@ -51,11 +53,12 @@
             try {
                 const response = await fetch("http://localhost:8000/api/login", {
                     method: "POST",
-        
+
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password }),
+                    credentials: "include",
                 });
 
                 if (response.ok) {
@@ -73,4 +76,5 @@
         });
     </script>
 </body>
+
 </html>

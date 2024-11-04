@@ -3,11 +3,13 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"forum/internal/database"
-	middleware "forum/internal/middleware"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
+
+	"forum/internal/database"
+	middleware "forum/internal/middleware"
 
 	"github.com/gofrs/uuid/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -34,8 +36,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		return
 	}
-
 }
+
 func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
@@ -85,19 +87,20 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expiration := time.Now().Add(24 * time.Hour)
+	log.Println(expiration)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    sessionID,
-		Expires:  expiration,
-		HttpOnly: true,
+		Name:    "session_token",
+		Path:    "/",
+		Value:   sessionID,
+		Expires: expiration,
+		// HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -165,14 +168,15 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
+		Path:     "/",
 		Value:    sessionID,
 		Expires:  expiration,
 		HttpOnly: true,
 	})
 
 	w.WriteHeader(http.StatusOK)
-
 }
+
 func GenerateSessionID() (string, error) {
 	sessionID, err := uuid.NewV4()
 	if err != nil {

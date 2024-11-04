@@ -19,6 +19,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
+	fmt.Println(r.Cookies())
 
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("web/templates/posts.html")
@@ -76,7 +77,6 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Controlle_Api(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Received request on API endpoint")
 	if r.URL.Path != "/api" {
 		http.Error(w, "not found", 404)
 	}
