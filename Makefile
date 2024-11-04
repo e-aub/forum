@@ -8,7 +8,7 @@ build:
 	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	sudo docker run --name $(CONTAINER_NAME) -p 8080:8080 -p 8000:8000 -v $(PWD):/app $(IMAGE_NAME)
+	sudo docker run --name $(CONTAINER_NAME) --network host -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
 	sudo docker stop $(CONTAINER_NAME) || true

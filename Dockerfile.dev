@@ -21,5 +21,7 @@ RUN go get github.com/mattn/go-sqlite3
 # Install air
 RUN go install github.com/air-verse/air@latest
 
+EXPOSE ${PORT}
+
 # Set Air as the entrypoint
 CMD ["air"]

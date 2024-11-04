@@ -28,6 +28,8 @@ import (
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
+	port := os.Getenv("PORT")
+	log.Printf(port)
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
@@ -54,8 +56,8 @@ func main() {
 		handlers.Login_Api(db, w, r)
 	})
 
-	log.Println("Route server running on http://localhost:8080")
-	if err := http.ListenAndServe(":8080", mainMux); err != nil {
+	log.Printf("Route server running on http://localhost:%s\n", port)
+	if err := http.ListenAndServe(":"+port, mainMux); err != nil {
 		log.Fatalf("Route server failed: %v", err)
 	}
 }
