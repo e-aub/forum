@@ -18,6 +18,11 @@ clean:
 	sudo rm -rf forum tmp || true
 	sudo docker rm $(CONTAINER_NAME) || true
 	sudo docker rmi $(IMAGE_NAME) || true
+push: clean
+	@read -p "Enter commit message: " msg; \
+	git add .; \
+	git commit -m "$$msg"; \
+	git push
 all: stop clean build run
 
 .PHONY: build run stop clean up
