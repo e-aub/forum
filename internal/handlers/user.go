@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
 	"time"
 
@@ -87,7 +86,7 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expiration := time.Now().Add(24 * time.Hour)
-	log.Println(expiration)
+	// log.Println(expiration)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

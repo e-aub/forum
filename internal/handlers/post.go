@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,7 +18,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
-	fmt.Println(r.Cookies())
+	// fmt.Println(r.Cookies())
 
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("web/templates/posts.html")
