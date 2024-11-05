@@ -51,7 +51,7 @@
 
             // Send data to the API if validation passes
             try {
-                const response = await fetch("http://localhost:8000/api/login", {
+                const response = await fetch("http://localhost:8080/api/login", {
                     method: "POST",
 
                     headers: {
@@ -64,10 +64,13 @@
                 if (response.ok) {
                     messageElement.textContent = "Login successful!";
                     messageElement.style.color = "green";
+                    window.location.href = 'http://localhost:8080/';
                 } else {
                     const errorData = await response.text();  // Get error text
                     messageElement.textContent = `Error: ${errorData}`;
                     messageElement.style.color = "red";
+
+
                 }
             } catch (error) {
                 messageElement.textContent = "An error occurred during login.";

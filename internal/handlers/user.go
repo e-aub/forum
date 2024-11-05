@@ -86,18 +86,17 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expiration := time.Now().Add(24 * time.Hour)
-	// log.Println(expiration)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Path:    "/",
-		Value:   sessionID,
-		Expires: expiration,
-		// HttpOnly: true,
+		Name:  "session_token",
+		Path:  "/",
+		Value: sessionID,
+		// Expires: expiration,
+		HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
 }

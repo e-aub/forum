@@ -1,7 +1,7 @@
 export const GetData = async () => {
     let target = []
     try {
-        let response = await fetch('http://localhost:8080/api');
+        let response = await fetch('http://localhost:8080/api/posts');
         if (!response.ok) throw new Error("Network response was not ok");
 
         let data = await response.json();
@@ -9,7 +9,7 @@ export const GetData = async () => {
 
         if (data) {
             for (let i = data; i > 0; i--) {
-                let link = `http://localhost:8080/api?id=${i}`;
+                let link = `http://localhost:8080/api/posts?id=${i}`;
                 let postResponse = await fetch(link);
                 if (!postResponse.ok) throw new Error("Failed to fetch post data");
                 let post = await postResponse.json();
@@ -43,7 +43,24 @@ function RenderPost(args) {
         container.append(Post)
     });
 }
+document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('http://localhost:8080/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
 
+        if (response.ok) {
+            // Handle successful logout
+            console.log('Logged out successfully');
+            window.location.href = '/login'; // Redirect to login page
+        } else {
+            console.error('Logout failed');
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+});
 // async function New_Post() {
 //     const Botton = document.querySelector('.New_Post')
 //     Botton.addEventListener('click', (Event) => {

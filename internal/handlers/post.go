@@ -35,7 +35,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {
@@ -63,8 +63,8 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 		post := &util.Posts{
 			Title:      r.PostFormValue("title"),
 			Content:    r.PostFormValue("content"),
-			Created_At: time.Now().String(),
-			UserId:     10,
+			Created_At: time.Now(),
+			UserId:     userId,
 		}
 		db.Insert_Post(post)
 
@@ -76,7 +76,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Controlle_Api(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/api" {
+	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
 	}
 	if r.Method != "GET" {
@@ -86,6 +86,8 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
 		post := db.Read_Post(idint)
+
+		// log.Println(post)
 		json, err := json.Marshal(post)
 		if err != nil {
 			log.Fatal(err)

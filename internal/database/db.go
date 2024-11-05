@@ -39,17 +39,16 @@ func CreateTables(db *sql.DB) {
 }
 
 func Insert_Post(p *utils.Posts) {
-	log.Printf("yess")
 	file, err := sql.Open("sqlite3", "db/data.db")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
-	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content,created_at) Values (?,?,?,?)`)
+	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
 		panic(err)
 	}
-	_, err = statement.Exec(p.UserId, p.Title, p.Content, p.Created_At)
+	_, err = statement.Exec(p.UserId, p.Title, p.Content)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +69,7 @@ func Update_Post(p *utils.Posts) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(p.Title, p.Content, p.Updated_At, p.PostId)
+	_, err = statement.Exec(p.Title, p.Content, p.PostId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,7 +100,10 @@ func Read_Post(id int) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := file.QueryRow(query, id)
 	Post := &utils.Posts{}
-	_ = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return Post
 }
 
