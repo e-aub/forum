@@ -12,8 +12,20 @@ type Posts struct {
 	Created_At time.Time
 }
 
+type Comment struct {
+	Comment_id int    `json:"comment_id"`
+	Post_id    int    `json:"post_id"`
+	User_id    int    `json:"user_id"`
+	Content    string `json:"content"`
+	Created_at string `json:"created_at"`
+}
+
 func Creat_New_Post() *Posts {
 	return &Posts{}
+}
+
+func Creat_New_Comment() *Comment {
+	return &Comment{}
 }
 
 func (p *Posts) Update_Post(title string, content string, time time.Time) {

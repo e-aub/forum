@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -147,4 +148,67 @@ func GetUserIDByUsername(db *sql.DB, username string) (int, error) {
 func InsertSession(db *sql.DB, sessionID string, userID int, expiration time.Time) error {
 	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", sessionID, userID, expiration)
 	return err
+}
+
+func CreateComment(c *utils.Comment) error {
+	if c.Content == "" || c.Post_id == 0 || c.User_id == 0 {
+		return errors.New("comment DATA issue")
+	}
+
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	query := `
+	INSERT INTO comments (user_id, post_id, content, created_at)
+	VALUES (?, ?, ?, ?)
+	`
+	result, err := file.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	c.Comment_id = int(id)
+
+	return nil
+}
+
+func GetComments(postID int) ([]utils.Comment, error) {
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	query := `
+	SELECT id AS comment_id, post_id, user_id, content, created_at
+	FROM comments
+	WHERE post_id = ?
+	`
+	rows, err := file.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []utils.Comment
+	for rows.Next() {
+		var comment utils.Comment
+		err := rows.Scan(&comment.Comment_id, &comment.Post_id, &comment.User_id, &comment.Content, &comment.Created_at)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
 }

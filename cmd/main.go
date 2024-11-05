@@ -40,6 +40,7 @@ func main() {
 
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
+	mainMux.HandleFunc("/api/comments", handlers.Controlle_Api_Comment)
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register_Api(db, w, r)
 	})
