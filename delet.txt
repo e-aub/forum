@@ -1,0 +1,50 @@
+	case "DELETE": //"http://localhost:8080/api/comments?comment=${comment.id}&user=${user.id}"
+		fmt.Println("detext")
+		// commentID, _ := strconv.Atoi(r.URL.Query().Get("comment"))
+		// userID, _ := strconv.Atoi(r.URL.Query().Get("user"))
+		// if err := DeleteComment(commentID, userID); err != nil {
+		// 	respondWithError(w, http.StatusBadRequest, err.Error())
+		// 	return
+		// }
+	//
+	
+func DeleteComment(commentID int, userID int) error {
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	query := `
+	SELECT user_id FROM comments 
+	WHERE comment_id = ?
+	`
+	var dbUserID int
+	err = file.QueryRow(query, commentID).Scan(&dbUserID)
+	if err == sql.ErrNoRows {
+		return errors.New("comment not found")
+	}
+	if err != nil {
+		return err
+	}
+
+	if dbUserID != userID {
+		return errors.New("unauthorized: only comment owner can delete")
+	}
+
+	query = `DELETE FROM comments WHERE comment_id = ?`
+	result, err := file.Exec(query, commentID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return errors.New("comment not found")
+	}
+
+	return nil
+}
