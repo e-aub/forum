@@ -33,16 +33,16 @@ func GetPasswordByUsername(db *sql.DB, username string) (string, error) {
 	return password, nil
 }
 
-func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (float64, error) {
+func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (float64, bool) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return 0, err
+		return 0, false
 	}
 	userid, err := database.Get_session(cookie.Value)
 	if err != nil {
-		return 0, err
+		return 0, false
 	}
-	return userid, nil
+	return userid, true
 }
 
 func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {

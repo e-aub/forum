@@ -25,8 +25,8 @@ func main() {
 	////////////////ROUTES////////////////////////////
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
-		userId, err := auth.ValidUser(w, r, db)
-		if err != nil || userId == 0 {
+		userId, is_user := auth.ValidUser(w, r, db)
+		if !is_user {
 			http.Redirect(w, r, "/login", 303)
 		}
 		handlers.NewPostHandler(w, r, userId)
@@ -40,7 +40,11 @@ func main() {
 
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
-	mainMux.HandleFunc("/api/comments", handlers.Controlle_Api_Comment)
+	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
+		user_id, is_user := auth.ValidUser(w, r, db)
+		handlers.Controlle_Api_Comment(w, r, user_id, is_user)
+	})
+
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register_Api(db, w, r)
 	})

@@ -187,9 +187,10 @@ func GetComments(postID int) ([]utils.Comment, error) {
 	defer file.Close()
 
 	query := `
-	SELECT id AS comment_id, post_id, user_id, content, created_at
-	FROM comments
-	WHERE post_id = ?
+	SELECT comments.id, comments.content, comments.created_at, users.username FROM comments
+    INNER JOIN users ON comments.user_id = users.id
+    WHERE comments.post_id = ?
+	ORDER BY comments.created_at DESC;
 	`
 	rows, err := file.Query(query, postID)
 	if err != nil {
@@ -200,15 +201,29 @@ func GetComments(postID int) ([]utils.Comment, error) {
 	var comments []utils.Comment
 	for rows.Next() {
 		var comment utils.Comment
-		err := rows.Scan(&comment.Comment_id, &comment.Post_id, &comment.User_id, &comment.Content, &comment.Created_at)
+		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name)
 		if err != nil {
 			return nil, err
 		}
+		comment.Post_id = postID
 		comments = append(comments, comment)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-
 	return comments, nil
+}
+
+func GetUserName(id int) (string, error) {
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	var name string
+	err = file.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
+	if err != nil {
+		return "", err
+	}
+	return name, nil
 }

@@ -100,7 +100,7 @@ const getComment = async (post, id) => {
                     const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
-                <strong>${comment.user_id}:</strong> ${comment.content}
+                <strong>${comment.user_name}:</strong> ${comment.content}
                 `
                     post.insertAdjacentElement('beforeend', com)
                 }
@@ -112,20 +112,23 @@ const getComment = async (post, id) => {
 }
 
 const createComment = async (post, comment_part, post_id) => {
-    const guest = 99 // still need how i get the user id from his session and check that have permission to add comment
     const comment = post.querySelector('.comment-input')
     post.querySelector('.comment-submit').addEventListener('click', async (e) => {
         try {
             if (comment.value) {
-                const res = await fetch(`http://localhost:8080/api/comments?post=${post_id}&user=${guest}&comment=${comment.value}`, { method: 'POST' })
-                if (res.ok) {
+                const res = await fetch(`http://localhost:8080/api/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST' })
+                const respons = await res.json()
+                if (res.status === 401) {
+                    alert(respons)
+                } else if (res.ok) {
                     const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
-                    <strong>${guest}:</strong> ${comment.value}
+                    <strong>${respons.user_name}:</strong> ${comment.value}
                     `
                     comment_part.insertAdjacentElement('beforeend', com)
                 }
+                comment.value = ''
             }
         } catch (error) {
             console.error(error);
