@@ -40,6 +40,9 @@ func main() {
 	////////////////ROUTES////////////////////////////
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", handlers.NewPostHandler)
+	mainMux.HandleFunc("/categories/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CategoriesHandler(w, r, db)
+	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
 	})

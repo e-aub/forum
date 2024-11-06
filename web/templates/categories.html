@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Categories</title>
+</head>
+<body>
+
+<h1>Select a Category</h1>
+
+<form id="categoryForm" method="post">
+    {{range .}}
+    <button type="button" onclick="submitForm('{{.Id}}')">{{.Name}}</button>
+    {{end}}
+</form>
+
+<script>
+    function submitForm(category) {
+        const form = document.getElementById("categoryForm");
+        form.action = `/categories/${category}`;
+        form.submit();
+    }
+</script>
+
+</body>
+</html>
