@@ -7,29 +7,14 @@ import (
 
 	"forum/internal/database"
 	"forum/internal/handlers"
+	auth "forum/internal/middleware"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// func enableCors(handler http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-// 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-// 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-// 		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-// 		if r.Method == "OPTIONS" {
-// 			w.WriteHeader(http.StatusOK)
-// 			return
-// 		}
-// 		handler(w, r)
-// 	}
-// }
-
 func main() {
 	dbPath := os.Getenv("DB_PATH")
 	port := os.Getenv("PORT")
-	log.Printf(port)
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
@@ -39,9 +24,12 @@ func main() {
 	mainMux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	////////////////ROUTES////////////////////////////
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
-	mainMux.HandleFunc("/New_Post", handlers.NewPostHandler)
-	mainMux.HandleFunc("/categories/", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CategoriesHandler(w, r, db)
+	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
+		userId, is_user := auth.ValidUser(w, r, db)
+		if !is_user {
+			http.Redirect(w, r, "/login", 303)
+		}
+		handlers.NewPostHandler(w, r, userId)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
@@ -51,12 +39,21 @@ func main() {
 	})
 
 	///////////////API////////////////////
-	mainMux.HandleFunc("/api", handlers.Controlle_Api)
+	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
+	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
+		user_id, is_user := auth.ValidUser(w, r, db)
+		handlers.Controlle_Api_Comment(w, r, user_id, is_user)
+	})
+
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register_Api(db, w, r)
 	})
 	mainMux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Login_Api(db, w, r)
+	})
+	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
+		auth.RemoveUser(w, r, db)
+		http.Redirect(w, r, "/", 303)
 	})
 
 	log.Printf("Route server running on http://localhost:%s\n", port)

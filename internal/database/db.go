@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -39,17 +40,16 @@ func CreateTables(db *sql.DB) {
 }
 
 func Insert_Post(p *utils.Posts) {
-	log.Printf("yess")
 	file, err := sql.Open("sqlite3", "db/data.db")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
-	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content,created_at) Values (?,?,?,?)`)
+	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
 		panic(err)
 	}
-	_, err = statement.Exec(p.UserId, p.Title, p.Content, p.Created_At)
+	_, err = statement.Exec(p.UserId, p.Title, p.Content)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +70,7 @@ func Update_Post(p *utils.Posts) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = statement.Exec(p.Title, p.Content, p.Updated_At, p.PostId)
+	_, err = statement.Exec(p.Title, p.Content, p.PostId)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -101,7 +101,14 @@ func Read_Post(id int) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := file.QueryRow(query, id)
 	Post := &utils.Posts{}
-	_ = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	if err != nil {
+		fmt.Println(err)
+	}
+	Post.UserName, err = GetUserName(int(Post.PostId))
+	if err != nil {
+		fmt.Println(err)
+	}
 	return Post
 }
 
@@ -145,4 +152,82 @@ func GetUserIDByUsername(db *sql.DB, username string) (int, error) {
 func InsertSession(db *sql.DB, sessionID string, userID int, expiration time.Time) error {
 	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", sessionID, userID, expiration)
 	return err
+}
+
+func CreateComment(c *utils.Comment) error {
+	if c.Content == "" || c.Post_id == 0 || c.User_id == 0 {
+		return errors.New("comment DATA issue")
+	}
+
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	query := `
+	INSERT INTO comments (user_id, post_id, content, created_at)
+	VALUES (?, ?, ?, ?)
+	`
+	result, err := file.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	c.Comment_id = int(id)
+
+	return nil
+}
+
+func GetComments(postID int) ([]utils.Comment, error) {
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	query := `
+	SELECT comments.id, comments.content, comments.created_at, users.username FROM comments
+    INNER JOIN users ON comments.user_id = users.id
+    WHERE comments.post_id = ?
+	ORDER BY comments.created_at DESC;
+	`
+	rows, err := file.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []utils.Comment
+	for rows.Next() {
+		var comment utils.Comment
+		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name)
+		if err != nil {
+			return nil, err
+		}
+		comment.Post_id = postID
+		comments = append(comments, comment)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func GetUserName(id int) (string, error) {
+	file, err := sql.Open("sqlite3", "db/data.db")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	var name string
+	err = file.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
+	if err != nil {
+		return "", err
+	}
+	return name, nil
 }
