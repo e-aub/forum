@@ -99,6 +99,9 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
+
+	http.Redirect(w, r, "/", 303)
+
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -134,6 +137,10 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	password := requestData.Password
 
 	ok, err := middleware.IsUserRegistered(db, email, username)
+	if !ok {
+		http.Error(w, "Incorect Username", http.StatusConflict)
+		return
+	}
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
@@ -143,8 +150,8 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
 	}
-	if !ok || !CheckPasswordHash(password, hachedPassword) {
-		http.Error(w, "Incorrect password or Username", http.StatusConflict)
+	if !CheckPasswordHash(password, hachedPassword) {
+		http.Error(w, "Incorrect Password", http.StatusConflict)
 		return
 	}
 	userID, err := database.GetUserIDByUsername(db, username)
@@ -173,6 +180,7 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/", 303)
 }
 
 func GenerateSessionID() (string, error) {

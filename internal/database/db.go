@@ -120,8 +120,8 @@ func Get_Last() int {
 	return result
 }
 
-func Get_session(ses string) (float64, error) {
-	var sessionid float64
+func Get_session(ses string) (int64, error) {
+	var sessionid int64
 	file, err := sql.Open("sqlite3", "db/data.db")
 	if err != nil {
 		log.Fatal(err)

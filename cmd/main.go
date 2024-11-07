@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -26,8 +27,16 @@ func main() {
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
 		userId, err := auth.ValidUser(w, r, db)
-		if err != nil || userId == 0 {
-			http.Redirect(w, r, "/login", 303)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				handlers.Login(w, r)
+				return
+			}
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		if err == sql.ErrNoRows {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 		}
 		handlers.NewPostHandler(w, r, userId)
 	})
@@ -35,9 +44,26 @@ func main() {
 		handlers.Register(w, r)
 	})
 	mainMux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Login(w, r)
+		cookie, err := r.Cookie("session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				handlers.Login(w, r)
+				return
+			}
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		_, err = database.Get_session(cookie.Value)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				handlers.Login(w, r)
+				return
+			}
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
-
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -45,10 +71,11 @@ func main() {
 	})
 	mainMux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Login_Api(db, w, r)
+
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
 		auth.RemoveUser(w, r, db)
-		http.Redirect(w, r, "/", 303)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	log.Printf("Route server running on http://localhost:%s\n", port)
