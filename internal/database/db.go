@@ -105,6 +105,10 @@ func Read_Post(id int) *utils.Posts {
 	if err != nil {
 		fmt.Println(err)
 	}
+	Post.UserName, err = GetUserName(int(Post.PostId))
+	if err != nil {
+		fmt.Println(err)
+	}
 	return Post
 }
 

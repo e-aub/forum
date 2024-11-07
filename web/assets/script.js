@@ -34,14 +34,12 @@ function RenderPost(args) {
 
         post.innerHTML = `
         <div class="post-header">
-            <span class="post-index">Post N ${index + 1}</span>
+            <span class="post-index"> ${element.Title}</span>
         </div>
         <div class="post-content">
-            <p><strong>PostId:</strong> ${element.PostId}</p>
-            <p><strong>UserId:</strong> ${element.UserId}</p>
-            <p><strong>Title:</strong> ${element.Title}</p>
-            <p><strong>Time:</strong> ${element.Created_At}</p>
+            <p><strong>User name:</strong> ${element.UserName}</p>
             <p><strong>Content:</strong> ${element.Content}</p>
+            <p><strong>Time:</strong> ${element.Created_At}</p>
         </div>
         <button class="comment-button">Comments</button>
         `;

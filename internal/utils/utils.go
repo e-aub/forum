@@ -7,6 +7,7 @@ var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": 
 type Posts struct {
 	PostId     float64
 	UserId     float64
+	UserName   string
 	Title      string
 	Content    string
 	Created_At time.Time
