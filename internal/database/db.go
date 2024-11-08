@@ -38,6 +38,20 @@ func CreateTables(db *sql.DB) {
 	fmt.Println("Created all tables succesfully")
 }
 
+func CleanupExpiredSessions(db *sql.DB) {
+	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
+	if err != nil {
+		log.Printf("Error cleaning up expired sessions: %v", err)
+	}
+}
+
+// func CleanupUserSession(db *sql.DB, sessionID string) {
+// 	_, err := db.Exec("DELETE FROM sessions WHERE session_id = ? AND expires_at < ?", sessionID, time.Now())
+// 	if err != nil {
+// 		log.Printf("Error cleaning up expired sessions: %v", err)
+// 	}
+// }
+
 func Insert_Post(p *utils.Posts) {
 	file, err := sql.Open("sqlite3", "db/data.db")
 	if err != nil {
@@ -120,15 +134,10 @@ func Get_Last() int {
 	return result
 }
 
-func Get_session(ses string) (int64, error) {
+func Get_session(db *sql.DB, ses string) (int64, error) {
 	var sessionid int64
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
 	query := `SELECT user_id FROM sessions WHERE session_id = ?`
-	err = file.QueryRow(query, ses).Scan(&sessionid)
+	err := db.QueryRow(query, ses).Scan(&sessionid)
 	if err != nil {
 		return 0, err
 	}

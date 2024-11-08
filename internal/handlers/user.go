@@ -47,6 +47,7 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
+
 	username := requestData.Username
 	email := requestData.Email
 	password := requestData.Password
@@ -85,17 +86,18 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(24 * time.Hour)
+	expiration := time.Now().Add(30 * time.Second)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Path:  "/",
-		Value: sessionID,
-		// Expires: expiration,
+		Name:    "session_token",
+		Path:    "/",
+		Value:   sessionID,
+		Expires: expiration,
+
 		HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
@@ -165,7 +167,7 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(24 * time.Hour)
+	expiration := time.Now().Add(30 * time.Second)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

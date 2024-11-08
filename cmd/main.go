@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +18,7 @@ func main() {
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
+	database.CleanupExpiredSessions(db)
 	mainMux := http.NewServeMux()
 	///////////////////FOR FILE JS /////////////////////
 	fs := http.FileServer(http.Dir("web/assets"))
@@ -26,43 +26,32 @@ func main() {
 	////////////////ROUTES////////////////////////////
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
-		userId, err := auth.ValidUser(w, r, db)
+		ok, userID, err := auth.ValidUser(w, r, db)
 		if err != nil {
-			if err == http.ErrNoCookie {
-				handlers.Login(w, r)
-				return
-			}
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			// here adding template for eroor
 			return
 		}
-		if err == sql.ErrNoRows {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		if ok {
+			handlers.NewPostHandler(w, r, userID)
+			return
 		}
-		handlers.NewPostHandler(w, r, userId)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
 	})
 	mainMux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session_token")
+		ok, _, err := auth.ValidUser(w, r, db)
 		if err != nil {
-			if err == http.ErrNoCookie {
-				handlers.Login(w, r)
-				return
-			}
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			// here adding template for eroor
 			return
 		}
-		_, err = database.Get_session(cookie.Value)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				handlers.Login(w, r)
-				return
-			}
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		if ok {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		handlers.Login(w, r)
+
 	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
@@ -74,7 +63,11 @@ func main() {
 
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
-		auth.RemoveUser(w, r, db)
+		err := auth.RemoveUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
+		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
