@@ -39,6 +39,20 @@ func CreateTables(db *sql.DB) {
 	fmt.Println("Created all tables succesfully")
 }
 
+func CleanupExpiredSessions(db *sql.DB) {
+	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
+	if err != nil {
+		log.Printf("Error cleaning up expired sessions: %v", err)
+	}
+}
+
+// func CleanupUserSession(db *sql.DB, sessionID string) {
+// 	_, err := db.Exec("DELETE FROM sessions WHERE session_id = ? AND expires_at < ?", sessionID, time.Now())
+// 	if err != nil {
+// 		log.Printf("Error cleaning up expired sessions: %v", err)
+// 	}
+// }
+
 func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
 	statement, err := db.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
