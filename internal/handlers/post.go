@@ -74,7 +74,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64, db *
 			UserId:     userId,
 		}
 		// category := r.PostFormValue("category")
-		postId, err := database.Insert_Post(post)
+		postId, err := database.Insert_Post(post, db)
 		if err != nil {
 			http.Error(w, "internal", http.StatusInternalServerError)
 			return
@@ -97,7 +97,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64, db *
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func Controlle_Api(w http.ResponseWriter, r *http.Request) {
+func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
 	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
 	}
@@ -107,8 +107,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := database.Read_Post(idint)
-
+		post := database.Read_Post(idint, file)
 		// log.Println(post)
 		json, err := json.Marshal(post)
 		if err != nil {
@@ -117,7 +116,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(json)
 		return
 	}
-	lastindex := database.Get_Last()
+	lastindex := database.Get_Last(file)
 	json, err := json.Marshal(lastindex)
 	if err != nil {
 		log.Fatal(err)

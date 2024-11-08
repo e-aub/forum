@@ -38,7 +38,7 @@ func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (float64, boo
 	if err != nil {
 		return 0, false
 	}
-	userid, err := database.Get_session(cookie.Value)
+	userid, err := database.Get_session(cookie.Value, db)
 	if err != nil {
 		return 0, false
 	}
