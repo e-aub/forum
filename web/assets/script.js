@@ -42,6 +42,10 @@ function RenderPost(args) {
             <p><strong>Time:</strong> ${element.Created_At}</p>
         </div>
         <button class="comment-button">Comments</button>
+        <div class="likes">
+            <button class="like">Like</button>
+            <button class="dislike">Dislike</button>
+        </div>
         `;
 
         let display_comment = false
@@ -99,6 +103,10 @@ const getComment = async (post, id) => {
                     com.classList.add('comment');
                     com.innerHTML = `
                 <strong>${comment.user_name}:</strong> ${comment.content}
+                <div class="likes">
+                    <button class="like">Like</button>
+                    <button class="dislike">Dislike</button>
+                </div>
                 `
                     post.insertAdjacentElement('beforeend', com)
                 }
@@ -123,6 +131,10 @@ const createComment = async (post, comment_part, post_id) => {
                     com.classList.add('comment');
                     com.innerHTML = `
                     <strong>${respons.user_name}:</strong> ${comment.value}
+                    <div class="likes">
+                        <button class="like">Like</button>
+                        <button class="dislike">Dislike</button>
+                    </div>
                     `
                     comment_part.insertAdjacentElement('beforeend', com)
                 }
