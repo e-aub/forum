@@ -1,16 +1,17 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
-	db "forum/internal/database"
+	"forum/internal/database"
 	util "forum/internal/utils"
 )
 
-func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float64, valided bool) {
+func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float64, valided bool, file *sql.DB) {
 	if r.URL.Path != "/api/comments" {
 		http.Error(w, "not found", 404)
 	}
@@ -18,7 +19,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float
 	switch r.Method {
 	case "GET": //"http://localhost:8080/api/comments?post=${post.id}
 		postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
-		comments, err := db.GetComments(postID)
+		comments, err := database.GetComments(postID, file)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -29,7 +30,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float
 		if valided {
 			postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
 			content := r.URL.Query().Get("comment")
-			user_name, err := db.GetUserName(int(user_id))
+			user_name, err := database.GetUserName(int(user_id), file)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
@@ -41,7 +42,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float
 			comment.Content = content
 			comment.Created_at = time.Now().Format(time.RFC3339)
 
-			if err := db.CreateComment(comment); err != nil {
+			if err := database.CreateComment(comment, file); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}

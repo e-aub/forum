@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -35,7 +36,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64, file *sql.DB) {
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {
@@ -66,7 +67,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
 			Created_At: time.Now(),
 			UserId:     userId,
 		}
-		db.Insert_Post(post)
+		db.Insert_Post(post, file)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -75,7 +76,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func Controlle_Api(w http.ResponseWriter, r *http.Request) {
+func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
 	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
 	}
@@ -85,9 +86,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := db.Read_Post(idint)
-
-		// log.Println(post)
+		post := db.Read_Post(idint, file)
 		json, err := json.Marshal(post)
 		if err != nil {
 			log.Fatal(err)
@@ -95,7 +94,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(json)
 		return
 	}
-	lastindex := db.Get_Last()
+	lastindex := db.Get_Last(file)
 	json, err := json.Marshal(lastindex)
 	if err != nil {
 		log.Fatal(err)

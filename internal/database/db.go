@@ -39,13 +39,8 @@ func CreateTables(db *sql.DB) {
 	fmt.Println("Created all tables succesfully")
 }
 
-func Insert_Post(p *utils.Posts) {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
+func Insert_Post(p *utils.Posts, db *sql.DB) {
+	statement, err := db.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
 		panic(err)
 	}
@@ -55,13 +50,8 @@ func Insert_Post(p *utils.Posts) {
 	}
 }
 
-func Update_Post(p *utils.Posts) {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	statement, err := file.Prepare(`UPDATE posts
+func Update_Post(p *utils.Posts, db *sql.DB) {
+	statement, err := db.Prepare(`UPDATE posts
 	SET title=?,
 	content = ?,
 	updated_at = ?
@@ -76,13 +66,8 @@ func Update_Post(p *utils.Posts) {
 	}
 }
 
-func Delete_Post(p *utils.Posts) {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	statement, err := file.Prepare(`DELETE FROM posts WHERE id = ?`)
+func Delete_Post(p *utils.Posts, db *sql.DB) {
+	statement, err := db.Prepare(`DELETE FROM posts WHERE id = ?`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,48 +77,33 @@ func Delete_Post(p *utils.Posts) {
 	}
 }
 
-func Read_Post(id int) *utils.Posts {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+func Read_Post(id int, db *sql.DB) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
-	row := file.QueryRow(query, id)
+	row := db.QueryRow(query, id)
 	Post := &utils.Posts{}
-	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	err := row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
 	if err != nil {
 		fmt.Println(err)
 	}
-	Post.UserName, err = GetUserName(int(Post.PostId))
+	Post.UserName, err = GetUserName(int(Post.PostId), db)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return Post
 }
 
-func Get_Last() int {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+func Get_Last(db *sql.DB) int {
 	query := `SELECT MAX(id) FROM posts `
-	row := file.QueryRow(query)
+	row := db.QueryRow(query)
 	result := 0
 	_ = row.Scan(&result)
 	return result
 }
 
-func Get_session(ses string) (float64, error) {
+func Get_session(ses string, db *sql.DB) (float64, error) {
 	var sessionid float64
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
 	query := `SELECT user_id FROM sessions WHERE session_id = ?`
-	err = file.QueryRow(query, ses).Scan(&sessionid)
+	err := db.QueryRow(query, ses).Scan(&sessionid)
 	if err != nil {
 		return 0, err
 	}
@@ -154,22 +124,16 @@ func InsertSession(db *sql.DB, sessionID string, userID int, expiration time.Tim
 	return err
 }
 
-func CreateComment(c *utils.Comment) error {
+func CreateComment(c *utils.Comment, db *sql.DB) error {
 	if c.Content == "" || c.Post_id == 0 || c.User_id == 0 {
 		return errors.New("comment DATA issue")
 	}
-
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
 	query := `
 	INSERT INTO comments (user_id, post_id, content, created_at)
 	VALUES (?, ?, ?, ?)
 	`
-	result, err := file.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
+	result, err := db.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
 	if err != nil {
 		return err
 	}
@@ -183,20 +147,14 @@ func CreateComment(c *utils.Comment) error {
 	return nil
 }
 
-func GetComments(postID int) ([]utils.Comment, error) {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+func GetComments(postID int, db *sql.DB) ([]utils.Comment, error) {
 	query := `
 	SELECT comments.id, comments.content, comments.created_at, users.username FROM comments
     INNER JOIN users ON comments.user_id = users.id
     WHERE comments.post_id = ?
 	ORDER BY comments.created_at DESC;
 	`
-	rows, err := file.Query(query, postID)
+	rows, err := db.Query(query, postID)
 	if err != nil {
 		return nil, err
 	}
@@ -218,14 +176,9 @@ func GetComments(postID int) ([]utils.Comment, error) {
 	return comments, nil
 }
 
-func GetUserName(id int) (string, error) {
-	file, err := sql.Open("sqlite3", "db/data.db")
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
+func GetUserName(id int, db *sql.DB) (string, error) {
 	var name string
-	err = file.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
+	err := db.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
 	if err != nil {
 		return "", err
 	}

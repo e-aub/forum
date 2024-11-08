@@ -27,9 +27,9 @@ func main() {
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
 		userId, is_user := auth.ValidUser(w, r, db)
 		if !is_user {
-			http.Redirect(w, r, "/login", 303)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 		}
-		handlers.NewPostHandler(w, r, userId)
+		handlers.NewPostHandler(w, r, userId, db)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
@@ -39,10 +39,12 @@ func main() {
 	})
 
 	///////////////API////////////////////
-	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
+	mainMux.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
+		handlers.Controlle_Api(w, r, db)
+	})
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
 		user_id, is_user := auth.ValidUser(w, r, db)
-		handlers.Controlle_Api_Comment(w, r, user_id, is_user)
+		handlers.Controlle_Api_Comment(w, r, user_id, is_user, db)
 	})
 
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +55,7 @@ func main() {
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
 		auth.RemoveUser(w, r, db)
-		http.Redirect(w, r, "/", 303)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	log.Printf("Route server running on http://localhost:%s\n", port)

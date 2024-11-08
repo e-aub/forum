@@ -165,10 +165,10 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Path:     "/",
-		Value:    sessionID,
-		Expires:  expiration,
+		Name:  "session_token",
+		Path:  "/",
+		Value: sessionID,
+		// Expires:  expiration,
 		HttpOnly: true,
 	})
 
