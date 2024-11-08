@@ -10,7 +10,7 @@ import (
 	util "forum/internal/utils"
 )
 
-func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float64, valided bool) {
+func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id int, valided bool) {
 	if r.URL.Path != "/api/comments" {
 		http.Error(w, "not found", 404)
 	}
@@ -29,7 +29,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float
 		if valided {
 			postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
 			content := r.URL.Query().Get("comment")
-			user_name, err := db.GetUserName(int(user_id))
+			user_name, err := db.GetUserName(user_id)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
@@ -37,7 +37,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id float
 			comment := util.Creat_New_Comment()
 			comment.Post_id = postID
 			comment.User_name = user_name
-			comment.User_id = int(user_id)
+			comment.User_id = user_id
 			comment.Content = content
 			comment.Created_at = time.Now().Format(time.RFC3339)
 

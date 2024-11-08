@@ -32,7 +32,7 @@ func GetPasswordByUsername(db *sql.DB, username string) (string, error) {
 	return password, nil
 }
 
-func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (bool, int64, error) {
+func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (bool, int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		return false, 0, nil

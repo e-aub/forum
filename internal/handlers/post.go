@@ -35,7 +35,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int64) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int) {
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {

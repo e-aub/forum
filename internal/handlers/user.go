@@ -86,7 +86,7 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(30 * time.Second)
+	expiration := time.Now().Add(1 * time.Hour)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -167,7 +167,7 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(30 * time.Second)
+	expiration := time.Now().Add(1 * time.Hour)
 	err = database.InsertSession(db, sessionID, userID, expiration)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

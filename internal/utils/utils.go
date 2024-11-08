@@ -5,8 +5,8 @@ import "time"
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
 type Posts struct {
-	PostId     float64
-	UserId     int64
+	PostId     int
+	UserId     int
 	UserName   string
 	Title      string
 	Content    string

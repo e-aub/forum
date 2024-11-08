@@ -51,13 +51,17 @@ func main() {
 			return
 		}
 		handlers.Login(w, r)
-
 	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
-		// user_id, is_user := auth.ValidUser(w, r, db)
-		// handlers.Controlle_Api_Comment(w, r, user_id, is_user)
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			return
+		}
+		handlers.Controlle_Api_Comment(w, r, userID, ok)
+		// http.Redirect(w, r, "/login", http.StatusSeeOther)
+
 	})
 
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +74,6 @@ func main() {
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
 		err := auth.RemoveUser(w, r, db)
 		if err != nil {
-			// here adding template for eroor
 			return
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
