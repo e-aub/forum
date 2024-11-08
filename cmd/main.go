@@ -18,7 +18,7 @@ func main() {
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
-	// database.CleanupExpiredSessions(db)
+	database.CleanupExpiredSessions(db)
 	mainMux := http.NewServeMux()
 	///////////////////FOR FILE JS /////////////////////
 	fs := http.FileServer(http.Dir("web/assets"))
