@@ -101,8 +101,8 @@ func Get_Last(db *sql.DB) int {
 	return result
 }
 
-func Get_session(ses string, db *sql.DB) (float64, error) {
-	var sessionid float64
+func Get_session(ses string, db *sql.DB) (int, error) {
+	var sessionid int
 	query := `SELECT user_id FROM sessions WHERE session_id = ?`
 	err := db.QueryRow(query, ses).Scan(&sessionid)
 	if err != nil {

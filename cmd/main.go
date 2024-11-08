@@ -11,13 +11,14 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
-//testing
+
 func main() {
 	dbPath := os.Getenv("DB_PATH")
 	port := os.Getenv("PORT")
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
+	// database.CleanupExpiredSessions(db)
 	mainMux := http.NewServeMux()
 	///////////////////FOR FILE JS /////////////////////
 	fs := http.FileServer(http.Dir("web/assets"))
@@ -31,26 +32,44 @@ func main() {
 	})
 
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
-		userId, is_user := auth.ValidUser(w, r, db)
-		if !is_user {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
 		}
-		handlers.NewPostHandler(w, r, userId, db)
+		if ok {
+			handlers.NewPostHandler(w, r, userID, db)
+			return
+		}
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
 	})
 	mainMux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		ok, _, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
+		}
+		if ok {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
 		handlers.Login(w, r)
 	})
-
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Controlle_Api(w, r, db)
 	})
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
-		user_id, is_user := auth.ValidUser(w, r, db)
-		handlers.Controlle_Api_Comment(w, r, user_id, is_user, db)
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			return
+		}
+		handlers.Controlle_Api_Comment(w, r, userID, ok, db)
+		// http.Redirect(w, r, "/login", http.StatusSeeOther)
+
 	})
 
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -58,9 +77,13 @@ func main() {
 	})
 	mainMux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Login_Api(db, w, r)
+
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
-		auth.RemoveUser(w, r, db)
+		err := auth.RemoveUser(w, r, db)
+		if err != nil {
+			return
+		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
