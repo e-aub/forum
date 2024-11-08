@@ -2,7 +2,6 @@ package auth
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"time"
 
@@ -33,21 +32,22 @@ func GetPasswordByUsername(db *sql.DB, username string) (string, error) {
 	return password, nil
 }
 
-func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (float64, bool) {
+func ValidUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (bool, int64, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return 0, false
+		return false, 0, nil
 	}
-	userid, err := database.Get_session(cookie.Value)
+	userid, err := database.Get_session(db, cookie.Value)
 	if err != nil {
-		return 0, false
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return false, 0, err
 	}
-	return userid, true
+	return true, userid, nil
 }
 
-func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
+		Name:     "session_token",
 		Value:    "",              // Clear the value
 		Expires:  time.Unix(0, 0), // Expire the cookie immediately
 		Path:     "/",             // Match original path if specified
@@ -57,16 +57,21 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		log.Println(err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return err
 	}
 	stmt, err := db.Prepare("DELETE FROM sessions WHERE session_id = ?")
 	if err != nil {
-		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(cookie.Value)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return err
+
 	}
+	return nil
 }

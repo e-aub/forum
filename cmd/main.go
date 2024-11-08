@@ -18,6 +18,7 @@ func main() {
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
+	database.CleanupExpiredSessions(db)
 	mainMux := http.NewServeMux()
 	///////////////////FOR FILE JS /////////////////////
 	fs := http.FileServer(http.Dir("web/assets"))
@@ -25,24 +26,38 @@ func main() {
 	////////////////ROUTES////////////////////////////
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
-		userId, is_user := auth.ValidUser(w, r, db)
-		if !is_user {
-			http.Redirect(w, r, "/login", 303)
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
 		}
-		handlers.NewPostHandler(w, r, userId)
+		if ok {
+			handlers.NewPostHandler(w, r, userID)
+			return
+		}
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)
 	})
 	mainMux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		ok, _, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
+		}
+		if ok {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
 		handlers.Login(w, r)
-	})
 
+	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", handlers.Controlle_Api)
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
-		user_id, is_user := auth.ValidUser(w, r, db)
-		handlers.Controlle_Api_Comment(w, r, user_id, is_user)
+		// user_id, is_user := auth.ValidUser(w, r, db)
+		// handlers.Controlle_Api_Comment(w, r, user_id, is_user)
 	})
 
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -50,10 +65,15 @@ func main() {
 	})
 	mainMux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Login_Api(db, w, r)
+
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
-		auth.RemoveUser(w, r, db)
-		http.Redirect(w, r, "/", 303)
+		err := auth.RemoveUser(w, r, db)
+		if err != nil {
+			// here adding template for eroor
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
 
 	log.Printf("Route server running on http://localhost:%s\n", port)
