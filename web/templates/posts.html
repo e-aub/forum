@@ -14,11 +14,19 @@
 
     <div class="container">
     </div>
+    {{ if . }}
     <script type="module">
         import { GetData } from './assets/script.js';
         GetData();
         console.log("yes");
     </script>
+    {{ else }}
+    <script type="module">
+        import { GetData } from './assets/script.js';
+        GetData();
+        console.log("yes");
+    </script>
+    {{ end }}
 </body>
 
 </html>

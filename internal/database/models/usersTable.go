@@ -10,10 +10,10 @@ var UsersTable = `CREATE TABLE IF NOT EXISTS users (
 `
 
 var SessionsTable = `CREATE TABLE IF NOT EXISTS sessions (
-    session_id TEXT PRIMARY KEY,      -- UUID if enabled, otherwise a unique identifier (could be INT if UUID is not used)
-    user_id INTEGER NOT NULL,         -- Foreign key referencing users table
-    expires_at DATETIME NOT NULL,     -- Expiration datetime for the session
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of session creation
+    session_id TEXT PRIMARY KEY,      
+    user_id INTEGER NOT NULL,         
+    expires_at DATETIME NOT NULL,    
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP, 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `

@@ -1,14 +1,16 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"text/template"
 	"time"
 
-	db "forum/internal/database"
+	database "forum/internal/database"
 
 	util "forum/internal/utils"
 )
@@ -27,7 +29,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
 		}
-		if err := tmpl.Execute(w, nil); err != nil {
+		if err := tmpl.Execute(w, "true"); err != nil {
 			log.Println("Error executing template:", err)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		}
@@ -35,7 +37,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64, db *sql.DB) {
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {
@@ -43,8 +45,13 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
-		err = tmpl.Execute(w, nil)
+		categories, err := GetCategories(db, false)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, "get categories", http.StatusInternalServerError)
+			return
+		}
+		err = tmpl.Execute(w, categories)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -66,8 +73,23 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId float64) {
 			Created_At: time.Now(),
 			UserId:     userId,
 		}
-		db.Insert_Post(post)
-
+		// category := r.PostFormValue("category")
+		postId, err := database.Insert_Post(post)
+		if err != nil {
+			http.Error(w, "internal", http.StatusInternalServerError)
+			return
+		}
+		category := r.PostFormValue("category")
+		stmt, err := db.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		tmp, _ := strconv.Atoi(category)
+		_, err = stmt.Exec(postId, tmp)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -85,7 +107,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := db.Read_Post(idint)
+		post := database.Read_Post(idint)
 
 		// log.Println(post)
 		json, err := json.Marshal(post)
@@ -95,7 +117,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write(json)
 		return
 	}
-	lastindex := db.Get_Last()
+	lastindex := database.Get_Last()
 	json, err := json.Marshal(lastindex)
 	if err != nil {
 		log.Fatal(err)

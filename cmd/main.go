@@ -23,13 +23,19 @@ func main() {
 	fs := http.FileServer(http.Dir("web/assets"))
 	mainMux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	////////////////ROUTES////////////////////////////
+
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
+
+	mainMux.HandleFunc("/categories/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CategoriesHandler(w, r, db)
+	})
+
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
 		userId, is_user := auth.ValidUser(w, r, db)
 		if !is_user {
 			http.Redirect(w, r, "/login", 303)
 		}
-		handlers.NewPostHandler(w, r, userId)
+		handlers.NewPostHandler(w, r, userId, db)
 	})
 	mainMux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Register(w, r)

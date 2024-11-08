@@ -9,7 +9,7 @@
 
 <h1>Select a Category</h1>
 
-<form id="categoryForm" method="post">
+<form id="categoryForm">
     {{range .}}
     <button type="button" onclick="submitForm('{{.Id}}')">{{.Name}}</button>
     {{end}}
@@ -18,8 +18,11 @@
 <script>
     function submitForm(category) {
         const form = document.getElementById("categoryForm");
-        form.action = `/categories/${category}`;
-        form.submit();
+        var params = new URLSearchParams({
+            category : category,
+        })
+        console.log(params)
+        window.location.href = `/categories?${params}`
     }
 </script>
 

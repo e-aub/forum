@@ -18,9 +18,9 @@
 
         <h2>Category</h2>
         <select name="category" class="category">
-            <option value="sport">Sport</option>
-            <option value="anime">Anime</option>
-            <option value="science">Science</option>
+            {{range .}}
+            <option value="{{.Id}}">{{.Name}}</option>
+            {{end}}
         </select>
 
         <button type="submit">Submit</button>

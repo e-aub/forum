@@ -39,20 +39,22 @@ func CreateTables(db *sql.DB) {
 	fmt.Println("Created all tables succesfully")
 }
 
-func Insert_Post(p *utils.Posts) {
+func Insert_Post(p *utils.Posts) (int64, error) {
 	file, err := sql.Open("sqlite3", "db/data.db")
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 	defer file.Close()
 	statement, err := file.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
-	_, err = statement.Exec(p.UserId, p.Title, p.Content)
+	result, err := statement.Exec(p.UserId, p.Title, p.Content)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
+
+	return result.LastInsertId()
 }
 
 func Update_Post(p *utils.Posts) {
@@ -216,6 +218,61 @@ func GetComments(postID int) ([]utils.Comment, error) {
 		return nil, err
 	}
 	return comments, nil
+}
+
+//	type Posts struct {
+//		PostId     float64
+//		UserId     float64
+//		UserName   string
+//		Title      string
+//		Content    string
+//		Created_At time.Time
+//		Category   bool
+//	}
+func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
+	stmt, err := db.Prepare(`SELECT posts.*
+	FROM post_categories
+	JOIN posts ON post_categories.post_id = posts.id
+	WHERE post_categories.category_id = ?
+	`)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(categoryId)
+	if err != nil {
+		return nil, err
+	}
+	var res []utils.Posts
+	for rows.Next() {
+		var post utils.Posts
+		err := rows.Scan(&post.PostId, &post.UserId, &post.Title, &post.Content, &post.Created_At)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, post)
+	}
+	return res, nil
+}
+
+func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
+	stmt, err := db.Prepare("SELECT post_id FROM post_categories WHERE category_id=?")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(categoryId)
+	if err != nil {
+		return nil, err
+	}
+	var ids []int
+	for rows.Next() {
+		tmp := 0
+		err := rows.Scan(&tmp)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, tmp)
+	}
+	return ids, nil
 }
 
 func GetUserName(id int) (string, error) {

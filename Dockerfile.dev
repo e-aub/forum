@@ -7,7 +7,7 @@ ENV DB_PATH="db/data.db"
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y gcc libc-dev
+# RUN apt-get update && apt-get install -y gcc libc-dev
 
 # Copy only go.mod and go.sum initially to take advantage of Docker's caching
 COPY go.mod go.sum ./
