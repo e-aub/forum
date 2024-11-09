@@ -51,18 +51,6 @@ h3 {
     margin: 8px 0;
 }
 
-button {
-    font-family: 'Orbitron', sans-serif;
-    color: var(--background);
-    background-color: var(--neon-green);
-    border: none;
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -71,8 +59,7 @@ button {
     background-color: var(--background);
 }
 
-#logout-button,
-.new-post-button {
+button {
     background-color: var(--neon-green);
     color: var(--background);
     border: none;
@@ -82,8 +69,7 @@ button {
     font-size: 1rem;
 }
 
-#logout-button:hover,
-.new-post-button:hover {
+button:hover {
     background-color: var(--secondary-text);
 }
 
@@ -93,14 +79,6 @@ button {
 .comment-submit {
     color: var(--background);
     background-color: var(--neon-green);
-}
-
-.comment-button:hover,
-.like:hover,
-.dislike:hover,
-.comment-submit:hover {
-    background-color: var(--primary-text);
-    color: var(--background);
 }
 
 .comments-section {
@@ -148,18 +126,4 @@ textarea.comment-input {
 .comment-submit {
     background-color: var(--neon-green);
     color: var(--background);
-}
-
-.comment-submit:hover {
-    background-color: var(--primary-text);
-    color: var(--background);
-}
-
-a {
-    color: var(--neon-green);
-    text-decoration: none;
-}
-
-a:hover {
-    color: var(--primary-text);
 }

@@ -97,8 +97,6 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Path:    "/",
 		Value:   sessionID,
 		Expires: expiration,
-
-		HttpOnly: true,
 	})
 	w.WriteHeader(http.StatusOK)
 
@@ -177,8 +175,6 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		Name:  "session_token",
 		Path:  "/",
 		Value: sessionID,
-		// Expires:  expiration,
-		HttpOnly: true,
 	})
 
 	w.WriteHeader(http.StatusOK)

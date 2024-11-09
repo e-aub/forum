@@ -10,25 +10,36 @@
 
 <body>
     <header class="navbar">
-        <button class="new-post-button" onclick="window.location.href='/New_Post'">New Post</button>
-        <button id="logout-button">Logout</button>
+        <div class="newPost">
+            <button class="new-post-button" onclick="window.location.href='/New_Post'">New Post</button>
+        </div>
+        <div class="registration">
+            <button id="login-logout">Logout</button>
+            <button id="register">Register</button>
+        </div>
     </header>
 
     <div class="container">
     </div>
-    {{ if . }}
     <script type="module">
-        import { GetData } from './assets/script.js';
+        import { GetData,logoutEvent } from './assets/script.js';
         GetData();
-        console.log("yes");
+        const log = document.getElementById('login-logout')
+        const register = document.getElementById('register')
+        if (document.cookie) {
+            log.textContent = 'Logout'
+            register.remove()
+            logoutEvent(log)
+        } else {
+            log.textContent = 'Login'
+            register.addEventListener('click', async () => {
+                window.location.href = '/register';
+            })
+            log.addEventListener('click', async () => {
+                window.location.href = '/login';
+            })
+        }
     </script>
-    {{ else }}
-    <script type="module">
-        import { GetData } from './assets/script.js';
-        GetData();
-        console.log("yes");
-    </script>
-    {{ end }}
 </body>
 
 </html>
