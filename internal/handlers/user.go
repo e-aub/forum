@@ -101,7 +101,6 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	http.Redirect(w, r, "/", 303)
-
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -178,7 +177,6 @@ func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	http.Redirect(w, r, "/", 303)
 }
 
 func GenerateSessionID() (string, error) {
