@@ -46,13 +46,6 @@ func CleanupExpiredSessions(db *sql.DB) {
 	}
 }
 
-// func CleanupUserSession(db *sql.DB, sessionID string) {
-// 	_, err := db.Exec("DELETE FROM sessions WHERE session_id = ? AND expires_at < ?", sessionID, time.Now())
-// 	if err != nil {
-// 		log.Printf("Error cleaning up expired sessions: %v", err)
-// 	}
-// }
-
 func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
 	statement, err := db.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
@@ -100,7 +93,7 @@ func Read_Post(id int, db *sql.DB) *utils.Posts {
 	if err != nil {
 		fmt.Println(err)
 	}
-	Post.UserName, err = GetUserName(int(Post.PostId), db)
+	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -216,61 +209,6 @@ func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
 	return res, nil
 }
 
-// func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
-// 	stmt, err := db.Prepare("SELECT post_id FROM post_categories WHERE category_id=?")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	rows, err := stmt.Query(categoryId)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var ids []int
-// 	for rows.Next() {
-// 		tmp := 0
-// 		err := rows.Scan(&tmp)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		ids = append(ids, tmp)
-// 	}
-// 	return ids, nil
-// }
-
-//	type Posts struct {
-//		PostId     float64
-//		UserId     float64
-//		UserName   string
-//		Title      string
-//		Content    string
-//		Created_At time.Time
-//		Category   bool
-//	}
-// func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
-// 	stmt, err := db.Prepare(`SELECT posts.*
-// 	FROM post_categories
-// 	JOIN posts ON post_categories.post_id = posts.id
-// 	WHERE post_categories.category_id = ?
-// 	`)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	rows, err := stmt.Query(categoryId)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var res []utils.Posts
-// 	for rows.Next() {
-// 		var post utils.Posts
-// 		err := rows.Scan(&post.PostId, &post.UserId, &post.Title, &post.Content, &post.Created_At)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		res = append(res, post)
-// 	}
-// 	return res, nil
-// }
-
 func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 	stmt, err := db.Prepare("SELECT post_id FROM post_categories WHERE category_id=?")
 	if err != nil {
@@ -295,6 +233,24 @@ func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 func GetUserName(id int, db *sql.DB) (string, error) {
 	var name string
 	err := db.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
+	if err != nil {
+		return "", err
+	}
+	return name, nil
+}
+
+func Get_CategoryofPost(idPost int, db *sql.DB) (string, error) {
+	var name string
+	stmt, err := db.Prepare(`SELECT categories.name 
+							 FROM categories 
+							 JOIN post_categories ON post_categories.category_id = categories.id 
+							 WHERE post_categories.post_id = ?`)
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(idPost).Scan(&name)
 	if err != nil {
 		return "", err
 	}

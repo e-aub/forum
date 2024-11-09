@@ -109,6 +109,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
 		idint, _ := strconv.Atoi(id)
 		post := database.Read_Post(idint, file)
 		// log.Println(post)
+		post.Category, _ = database.Get_CategoryofPost(post.PostId, file)
 		json, err := json.Marshal(post)
 		if err != nil {
 			log.Fatal(err)
