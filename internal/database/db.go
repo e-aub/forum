@@ -46,13 +46,6 @@ func CleanupExpiredSessions(db *sql.DB) {
 	}
 }
 
-// func CleanupUserSession(db *sql.DB, sessionID string) {
-// 	_, err := db.Exec("DELETE FROM sessions WHERE session_id = ? AND expires_at < ?", sessionID, time.Now())
-// 	if err != nil {
-// 		log.Printf("Error cleaning up expired sessions: %v", err)
-// 	}
-// }
-
 func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
 	statement, err := db.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
 	if err != nil {
@@ -100,7 +93,7 @@ func Read_Post(id int, db *sql.DB) *utils.Posts {
 	if err != nil {
 		fmt.Println(err)
 	}
-	Post.UserName, err = GetUserName(int(Post.PostId), db)
+	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
 		fmt.Println(err)
 	}
