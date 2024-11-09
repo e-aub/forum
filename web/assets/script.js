@@ -31,7 +31,6 @@ function RenderPost(args) {
     args.forEach((element, index) => {
         const post = document.createElement('div');
         post.classList.add('post');
-
         post.innerHTML = `
         <div class="post-header">
             <span class="post-index"> ${element.Title}</span>
@@ -40,6 +39,8 @@ function RenderPost(args) {
             <p><strong>User name:</strong> ${element.UserName}</p>
             <p><strong>Content:</strong> ${element.Content}</p>
             <p><strong>Time:</strong> ${element.Created_At}</p>
+            <p><strong>Category:</strong> ${element.Category}</p>
+            
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
