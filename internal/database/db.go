@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	database "forum/internal/database/models"
@@ -47,15 +49,57 @@ func CleanupExpiredSessions(db *sql.DB) {
 }
 
 func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
-	statement, err := db.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?)`)
+	transaction, err := db.Begin()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error starting transaction:", err)
 		return 0, err
 	}
-	result, err := statement.Exec(p.UserId, p.Title, p.Content)
+	stmt, err := transaction.Prepare(`
+	INSERT INTO posts(user_id ,title,content) Values (?,?,?);
+	`)
 	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "Error Adding post:", err)
 		return 0, err
 	}
-	return result.LastInsertId()
+	defer stmt.Close()
+
+	result, err := stmt.Exec(p.UserId, p.Title, p.Content)
+	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "Error Adding post:", err)
+		return 0, err
+	}
+	lastPostID, err := result.LastInsertId()
+	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "error in assigning category to post")
+		return 0, err
+	}
+
+	stmt1, err := transaction.Prepare(`INSERT INTO post_categories(category_id, post_id) VALUES(?, ?);`)
+	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "error in assigning category to post")
+		return 0, err
+	}
+	defer stmt1.Close()
+
+	_, err = stmt1.Exec(2, lastPostID)
+	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "error in assigning category to post")
+		transaction.Rollback()
+		return 0, err
+	}
+	err = transaction.Commit()
+	if err != nil {
+		transaction.Rollback()
+		fmt.Fprintln(os.Stderr, "transaction aborted")
+		return 0, err
+
+	}
+	return lastPostID, nil
 }
 
 func Update_Post(p *utils.Posts, db *sql.DB) {
@@ -255,4 +299,17 @@ func Get_CategoryofPost(idPost int, db *sql.DB) (string, error) {
 		return "", err
 	}
 	return name, nil
+}
+
+func LinkPostWithCategory(db *sql.DB, category string, postId int64) error {
+	stmt, err := db.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
+	if err != nil {
+		return err
+	}
+	tmp, _ := strconv.Atoi(category)
+	_, err = stmt.Exec(postId, tmp)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -42,7 +42,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {
 			log.Printf("Error parsing template: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Internal Server Errorr", http.StatusInternalServerError)
 			return
 		}
 		categories, err := GetCategories(db, false)
@@ -80,15 +80,10 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 			return
 		}
 		category := r.PostFormValue("category")
-		stmt, err := db.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
+		err = database.LinkPostWithCategory(db, category, postId)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "internal", http.StatusInternalServerError)
 			return
-		}
-		tmp, _ := strconv.Atoi(category)
-		_, err = stmt.Exec(postId, tmp)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
