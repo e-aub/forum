@@ -69,7 +69,14 @@ func main() {
 		}
 		handlers.Controlle_Api_Comment(w, r, userID, ok, db)
 		// http.Redirect(w, r, "/login", http.StatusSeeOther)
-
+	})
+	mainMux.HandleFunc("/api/likes", func(w http.ResponseWriter, r *http.Request) {
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			return
+		}
+		handlers.Controlle_Api_likes(w, r, userID, ok, db)
+		// http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
 
 	mainMux.HandleFunc("/api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +84,6 @@ func main() {
 	})
 	mainMux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		handlers.Login_Api(db, w, r)
-
 	})
 	mainMux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
 		err := auth.RemoveUser(w, r, db)

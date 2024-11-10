@@ -313,3 +313,45 @@ func LinkPostWithCategory(db *sql.DB, category string, postId int64) error {
 	}
 	return nil
 }
+
+func GetLikes(id int, db *sql.DB) (*utils.Likes, error) {
+	likes := utils.Creat_New_Likes()
+	querylike := `SELECT COUNT(*) FROM likes WHERE type="like" AND post_id=?;`
+	querydislike := `SELECT COUNT(*) FROM likes WHERE type="dislike" AND post_id=?;`
+
+	err := db.QueryRow(querylike, id).Scan(&likes.Like)
+	if err == sql.ErrNoRows {
+		likes.Like = 0
+	} else if err != nil {
+		return nil, err
+	}
+	err = db.QueryRow(querydislike, id).Scan(&likes.Dislike)
+	if err == sql.ErrNoRows {
+		likes.Dislike = 0
+	} else if err != nil {
+		return nil, err
+	}
+	return likes, nil
+}
+
+func CreateLike(post_id int, user_id int, type_like string, db *sql.DB) error {
+	if post_id == 0 || user_id == 0 {
+		return errors.New("likes DATA issue")
+	}
+
+	var exist string
+	err := db.QueryRow("SELECT type FROM likes WHERE user_id = ? AND post_id = ?", user_id, post_id).Scan(&exist)
+	if err == nil {
+		if exist == type_like {
+			return errors.New("Reaction already create")
+		} else {
+			_, err = db.Exec("UPDATE likes SET type = ? WHERE user_id = ? AND post_id = ?",
+				type_like, user_id, post_id)
+			return nil
+		}
+	}
+	if err == sql.ErrNoRows {
+		_, err = db.Exec("INSERT INTO likes (user_id, post_id, type) VALUES (?, ?, ?)", user_id, post_id, type_like)
+	}
+	return nil
+}

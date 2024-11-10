@@ -23,6 +23,15 @@ type Comment struct {
 	Created_at string `json:"created_at"`
 }
 
+type Likes struct {
+	Like    int `json:"like"`
+	Dislike int `json:"dislike"`
+}
+
+func Creat_New_Likes() *Likes {
+	return &Likes{}
+}
+
 func Creat_New_Post() *Posts {
 	return &Posts{}
 }

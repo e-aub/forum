@@ -20,30 +20,37 @@ export function RenderPost(args) {
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
-            <button class="like">Like</button>
-            <button class="dislike">Dislike</button>
+            <button class="like"><span class="number-like">0</span> ⬆</button>
+            <button class="dislike"><span class="number-dislike">0</span> ⬇</button>
         </div>
         `;
 
-        let display_comment = false
+        likesEvent(post.querySelector('.likes'), element.PostId)
+
+        let display_comment = false; let hiden = false
         post.querySelector('.comment-button').addEventListener('click', async (e) => {
-            if (!display_comment) {
-                const comment = document.createElement('div');
-                comment.classList.add('comments-section');
-                comment.innerHTML = `
-                <h3>Comments</h3>
-                <div class="comments-list">
-                </div>
-                <textarea placeholder="Add a comment..." rows="4" class="comment-input"></textarea>
-                <button class="comment-submit">Submit</button>
-                `
-                post.appendChild(comment)
-                await createComment(comment, comment.querySelector('.comments-list'), element.PostId)
-                await getComment(comment.querySelector('.comments-list'), element.PostId)
-                display_comment = true
+            if (hiden) {
+                post.querySelector('.comments-section').style.display = 'block'
+                hiden = false
             } else {
-                post.querySelector('.comments-section').remove()
-                display_comment = false
+                if (!display_comment) {
+                    const comment = document.createElement('div');
+                    comment.classList.add('comments-section');
+                    comment.innerHTML = `
+                    <h3>Comments</h3>
+                    <div class="comments-list">
+                    </div>
+                    <textarea placeholder="Add a comment..." rows="4" class="comment-input"></textarea>
+                    <button class="comment-submit">Submit</button>
+                    `
+                    post.appendChild(comment)
+                    await createComment(comment, comment.querySelector('.comments-list'), element.PostId)
+                    await getComment(comment.querySelector('.comments-list'), element.PostId)
+                    display_comment = true
+                } else {
+                    post.querySelector('.comments-section').style.display = 'none'
+                    hiden = true;
+                }
             }
         })
         container.append(post);
@@ -65,16 +72,41 @@ const createComment = async (post, comment_part, post_id) => {
                     com.innerHTML = `
                     <strong>${respons.user_name}:</strong> ${comment.value}
                     <div class="likes">
-                        <button class="like">Like</button>
-                        <button class="dislike">Dislike</button>
+                        <button class="like"><span class="number-like">0</span> ⬆</button>
+                        <button class="dislike"><span class="number-dislike">0</span> ⬇</button>
                     </div>
                     `
-                    comment_part.insertAdjacentElement('beforeend', com)
+                    comment_part.insertAdjacentElement('beforeend', com)                    
+                    likesEvent(com.querySelector('.likes'), post_id)
                 }
                 comment.value = ''
             }
         } catch (error) {
             console.error(error);
+        }
+    })
+}
+
+
+export const likesEvent = (parentClass, post_id) => {
+    const like = parentClass.querySelector('.like')
+    const dislike = parentClass.querySelector('.dislike')
+    like.addEventListener('click', async e => {
+        const res = await fetch(`http://localhost:8080/api/likes?postId=${post_id}&type=like`, { method: 'POST' })
+        if (res.ok) {
+            const num = res.json()
+            like.querySelector('.number-like').textContent = '100';
+            like.disabled = true
+            dislike.disabled = false
+        }
+    })
+    dislike.addEventListener('click', async e => {
+        const res = await fetch(`http://localhost:8080/api/likes?postId=${post_id}&type=dislike`, { method: 'POST' })
+        if (res.ok) {
+            const num = res.json()
+            dislike.querySelector('.number-dislike').textContent = '100'
+            dislike.disabled = true
+            like.disabled = false
         }
     })
 }
