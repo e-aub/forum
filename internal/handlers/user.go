@@ -100,7 +100,7 @@ func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	})
 	w.WriteHeader(http.StatusOK)
 
-	http.Redirect(w, r, "/", 303)
+	http.Redirect(w, r, "/", http.StatusPermanentRedirect)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {

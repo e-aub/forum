@@ -97,7 +97,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
 		http.Error(w, "not found", 404)
 	}
 	if r.Method != "GET" {
-		http.Error(w, "method Not allowed", 405)
+		http.Error(w, "method Not allowed", http.StatusMethodNotAllowed)
 	}
 	id := r.FormValue("id")
 	if id != "" {
