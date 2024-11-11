@@ -11,6 +11,7 @@ type Posts struct {
 	Title      string
 	Category   string
 	Content    string
+	Likes      Likes
 	Created_At time.Time
 }
 
@@ -20,6 +21,7 @@ type Comment struct {
 	User_id    int    `json:"user_id"`
 	User_name  string `json:"user_name"`
 	Content    string `json:"content"`
+	Likes      Likes	
 	Created_at string `json:"created_at"`
 }
 
@@ -28,8 +30,8 @@ type Likes struct {
 	Dislike int `json:"dislike"`
 }
 
-func Creat_New_Likes() *Likes {
-	return &Likes{}
+func Creat_New_Likes() Likes {
+	return Likes{}
 }
 
 func Creat_New_Post() *Posts {

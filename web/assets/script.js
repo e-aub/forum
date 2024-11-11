@@ -1,4 +1,4 @@
-import { RenderPost,likesEvent } from "./rendring.js"
+import { RenderPost, likesEvent } from "./rendring.js"
 
 export const GetData = async () => {
     let target = []
@@ -38,8 +38,8 @@ export const getComment = async (post, id) => {
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong> ${comment.content}
                     <div class="likes">
-                        <button class="like"><span class="number-like">0</span> ⬆</button>
-                        <button class="dislike"><span class="number-dislike">0</span> ⬇</button>
+                        <button class="like"><span class="number-like">${comment.Likes.like}</span> ⬆</button>
+                        <button class="dislike"><span class="number-dislike">${comment.Likes.dislike}</span> ⬇</button>
                     </div>
                     `
                     post.insertAdjacentElement('beforeend', com)

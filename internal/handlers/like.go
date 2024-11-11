@@ -29,11 +29,12 @@ func Controlle_Api_likes(w http.ResponseWriter, r *http.Request, user_id int, va
 		if valided {
 			postID, _ := strconv.Atoi(r.URL.Query().Get("postId"))
 			type_like := r.URL.Query().Get("type")
-			if err := database.CreateLike(postID, user_id, type_like, file); err != nil {
+			likes, err := database.CreateLike(postID, user_id, type_like, file)
+			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			respondWithJSON(w, http.StatusCreated, "like posted succesfuly")
+			respondWithJSON(w, http.StatusCreated, likes)
 		} else {
 			respondWithJSON(w, http.StatusUnauthorized, "You are in guest mode try to login")
 			return

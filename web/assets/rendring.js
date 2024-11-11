@@ -20,8 +20,8 @@ export function RenderPost(args) {
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
-            <button class="like"><span class="number-like">0</span> ⬆</button>
-            <button class="dislike"><span class="number-dislike">0</span> ⬇</button>
+            <button class="like"><span class="number-like">${element.Likes.like}</span> ⬆</button>
+            <button class="dislike"><span class="number-dislike">${element.Likes.dislike}</span> ⬇</button>
         </div>
         `;
 
@@ -72,11 +72,11 @@ const createComment = async (post, comment_part, post_id) => {
                     com.innerHTML = `
                     <strong>${respons.user_name}:</strong> ${comment.value}
                     <div class="likes">
-                        <button class="like"><span class="number-like">0</span> ⬆</button>
-                        <button class="dislike"><span class="number-dislike">0</span> ⬇</button>
+                        <button class="like"><span class="number-like">${comment.Likes.like}</span> ⬆</button>
+                        <button class="dislike"><span class="number-dislike">${comment.Likes.dislike}</span> ⬇</button>
                     </div>
                     `
-                    comment_part.insertAdjacentElement('beforeend', com)                    
+                    comment_part.insertAdjacentElement('beforeend', com)
                     likesEvent(com.querySelector('.likes'), post_id)
                 }
                 comment.value = ''
@@ -93,20 +93,22 @@ export const likesEvent = (parentClass, post_id) => {
     const dislike = parentClass.querySelector('.dislike')
     like.addEventListener('click', async e => {
         const res = await fetch(`http://localhost:8080/api/likes?postId=${post_id}&type=like`, { method: 'POST' })
-        if (res.ok) {
-            const num = res.json()
-            like.querySelector('.number-like').textContent = '100';
-            like.disabled = true
-            dislike.disabled = false
+        const data = await res.json()
+        if (res.status === 401) {
+            alert(res)
+        } else if (res.ok) {
+            like.querySelector('.number-like').textContent = data.like
+            dislike.querySelector('.number-dislike').textContent = data.dislike
         }
     })
     dislike.addEventListener('click', async e => {
         const res = await fetch(`http://localhost:8080/api/likes?postId=${post_id}&type=dislike`, { method: 'POST' })
-        if (res.ok) {
-            const num = res.json()
-            dislike.querySelector('.number-dislike').textContent = '100'
-            dislike.disabled = true
-            like.disabled = false
+        if (res.status === 401) {
+            alert(res)
+        } else if (res.ok) {
+            const data = await res.json()
+            dislike.querySelector('.number-dislike').textContent = data.dislike
+            like.querySelector('.number-dislike').textContent = data.dislike
         }
     })
 }

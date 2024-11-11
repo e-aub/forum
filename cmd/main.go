@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
+	//"os"
 
 	"forum/internal/database"
 	"forum/internal/handlers"
@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	dbPath := os.Getenv("DB_PATH")
-	port := os.Getenv("PORT")
+	dbPath := "db/data.db" //os.Getenv("DB_PATH")
+	port :=   "8080"//os.Getenv("PORT")
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 	database.CreateTables(db)
