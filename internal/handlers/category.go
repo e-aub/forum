@@ -8,45 +8,54 @@ import (
 	models "forum/internal/database/models"
 	"html/template"
 	"net/http"
+	"os"
 )
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	switch r.Method {
 	case "GET":
-		fmt.Println(r.URL.String())
 		category := r.URL.Query().Get("category")
 		if category != "" {
 			postIds, err := database.GetCategoryContentIds(db, category, userId)
 			if err != nil {
-				http.Error(w, "internal server error1", http.StatusInternalServerError)
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
 			template, err := template.ParseFiles("web/templates/posts.html")
 			if err != nil {
-				http.Error(w, "internal server error3", http.StatusInternalServerError)
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
 			jsonIds, err := json.Marshal(postIds)
 			if err != nil {
-				http.Error(w, "internal server error4", http.StatusInternalServerError)
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
 			template.Execute(w, string(jsonIds))
 			return
 		}
-		categories, err := GetCategories(db, true)
+		withCreatedAndDeleted := false
+		if userId != 0 {
+			withCreatedAndDeleted = true
+		}
+		categories, err := GetCategories(db, withCreatedAndDeleted)
 		if err != nil {
-			http.Error(w, "internal server error2", http.StatusInternalServerError)
+			fmt.Fprintln(os.Stderr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		template, err := template.ParseFiles("web/templates/categories.html")
 		if err != nil {
-			http.Error(w, "internal server error3", http.StatusInternalServerError)
+			fmt.Fprintln(os.Stderr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		template.Execute(w, categories)
 	default:
-		http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
