@@ -18,12 +18,11 @@
         <textarea name="content" placeholder="Write your content here" required></textarea>
 
         <h2>Category</h2>
-        <select name="category" class="category">
             {{range .}}
-            <option value="{{.Id}}">{{.Name}}</option>
+            <label>
+            <input type="checkbox" name="category" value="{{.Id}}">{{.Name}}
+            </label>
             {{end}}
-        </select>
-
         <button type="submit">Submit</button>
     </form>
 </body>

@@ -9,7 +9,7 @@ type Posts struct {
 	UserId     int
 	UserName   string
 	Title      string
-	Category   string
+	Categories []string
 	Content    string
 	Created_At time.Time
 }

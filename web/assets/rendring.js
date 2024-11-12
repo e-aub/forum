@@ -16,7 +16,7 @@ export function RenderPost(args) {
             <p><strong>User name:</strong> ${element.UserName}</p>
             <p><strong>Content:</strong> ${element.Content}</p>
             <p><strong>Time:</strong> ${element.Created_At}</p>
-            <p><strong>Category:</strong> ${element.Category}</p>
+            <p><strong>Category:</strong> ${element.Categories.join(', ')}</p>
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">

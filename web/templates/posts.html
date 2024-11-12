@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/post.css">
+    <link rel="stylesheet" href="/assets/post.css">
     <title>Home</title>
 </head>
 
@@ -12,6 +12,7 @@
     <header class="navbar">
         <div class="newPost">
             <button class="new-post-button" onclick="window.location.href='/New_Post'">New Post</button>
+            <button class="new-post-button" onclick="window.location.href='/categories'">Categories</button>
         </div>
         <div class="registration">
             <button id="login-logout">Logout</button>
@@ -23,7 +24,8 @@
     </div>
     <script type="module">
         import { GetData, logoutEvent } from './assets/script.js';
-        GetData();
+        let postIds = JSON.parse('{{.}}')
+        GetData(postIds);
         const log = document.getElementById('login-logout')
         const register = document.getElementById('register')
         if (document.cookie) {
