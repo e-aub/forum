@@ -15,6 +15,7 @@ import (
 
 func CreateDatabase(dbPath string) *sql.DB {
 	db, err := sql.Open("sqlite3", dbPath)
+	
 	if err != nil {
 		log.Fatalf("%sError opening database:%s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	}
