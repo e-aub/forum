@@ -202,29 +202,29 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 
 func GetComments(postID int, db *sql.DB) ([]utils.Comment, error) {
 	query := `
-	SELECT comments.id, comments.content, comments.created_at, users.username FROM comments
+	SELECT comments.id, comments.content, comments.created_at, users.username, comments.like_count , comments.dislike_count FROM comments
     INNER JOIN users ON comments.user_id = users.id
     WHERE comments.post_id = ?
 	ORDER BY comments.created_at DESC;
 	`
 	rows, err := db.Query(query, postID)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + "here 1")
 	}
 	defer rows.Close()
 
 	var comments []utils.Comment
 	for rows.Next() {
 		var comment utils.Comment
-		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name)
+		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name, &comment.LikeCount, &comment.DislikeCount)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(err.Error() + "here 2")
 		}
 		comment.Post_id = postID
 		comments = append(comments, comment)
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + "here 3")
 	}
 	return comments, nil
 }

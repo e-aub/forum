@@ -69,6 +69,8 @@ const createComment = async (post, comment_part, post_id) => {
                     com.classList.add('comment');
                     com.innerHTML = `
                     <strong>${respons.user_name}:</strong> ${comment.value}
+                    <strong>likes: ${respons.like_count}<strong>
+                    <strong>dislikes: ${respons.dislike_count}<strong>
                     <div class="likes">
                         <button class="like">Like</button>
                         <button class="dislike">Dislike</button>

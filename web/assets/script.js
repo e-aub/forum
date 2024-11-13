@@ -36,7 +36,10 @@ export const getComment = async (post, id) => {
                     const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
-                    <strong>${comment.user_name}:</strong> ${comment.content}
+                    <strong>${comment.user_name}:</strong>
+                    <strong>${comment.content}:</strong>
+                    <strong>${comment.like_count}:</strong>
+                    <strong>${comment.dislike_count}:</strong>
                     <div class="likes">
                         <button class="like">Like</button>
                         <button class="dislike">Dislike</button>
