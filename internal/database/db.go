@@ -15,7 +15,7 @@ import (
 
 func CreateDatabase(dbPath string) *sql.DB {
 	db, err := sql.Open("sqlite3", dbPath)
-	
+
 	if err != nil {
 		log.Fatalf("%sError opening database:%s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	}
@@ -134,7 +134,7 @@ func Read_Post(id int, db *sql.DB) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := db.QueryRow(query, id)
 	Post := &utils.Posts{}
-	err := row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	err := row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.LikeCount, &Post.DislikeCount, &Post.Created_At)
 	if err != nil {
 		fmt.Println(err)
 	}

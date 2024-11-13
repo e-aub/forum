@@ -1,4 +1,5 @@
 import { getComment } from "./script.js";
+import {addLikeDislikeListeners} from "./likes.js"
 
 export function RenderPost(args) {
     const container = document.querySelector(".container");
@@ -17,6 +18,8 @@ export function RenderPost(args) {
             <p><strong>Content:</strong> ${element.Content}</p>
             <p><strong>Time:</strong> ${element.Created_At}</p>
             <p><strong>Category:</strong> ${element.Category}</p>
+            <p><strong>likes:</strong> ${element.LikeCount}</p>
+            <p><strong>dislikes:</strong> ${element.DislikeCount}</p>
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
@@ -24,6 +27,8 @@ export function RenderPost(args) {
             <button class="dislike">Dislike</button>
         </div>
         `;
+
+        addLikeDislikeListeners(post, element.PostId);
 
         let display_comment = false
         post.querySelector('.comment-button').addEventListener('click', async (e) => {

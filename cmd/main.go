@@ -86,7 +86,13 @@ func main() {
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	})
-
+	mainMux.HandleFunc("/api/react/", func(w http.ResponseWriter, r *http.Request) {
+		ok, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			return
+		}
+		handlers.ReactHandler(db, userID, ok, w, r)
+	})
 	log.Printf("Route server running on http://localhost:%s\n", port)
 	if err := http.ListenAndServe(":"+port, mainMux); err != nil {
 		log.Fatalf("Route server failed: %v", err)

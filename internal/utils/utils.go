@@ -5,13 +5,15 @@ import "time"
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
 type Posts struct {
-	PostId     int
-	UserId     int
-	UserName   string
-	Title      string
-	Category   string
-	Content    string
-	Created_At time.Time
+	PostId       int
+	UserId       int
+	UserName     string
+	Title        string
+	Category     string
+	Content      string
+	LikeCount    int
+	DislikeCount int
+	Created_At   time.Time
 }
 
 type Comment struct {
