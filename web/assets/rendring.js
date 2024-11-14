@@ -23,8 +23,8 @@ export function RenderPost(args) {
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
-            <button class="like">Like</button>
-            <button class="dislike">Dislike</button>
+        <button class="like" style="background-color: white;">Like</button>
+        <button class="dislike" style="background-color: white;">Dislike</button>
         </div>
         `;
 

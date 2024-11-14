@@ -39,11 +39,11 @@ export const getComment = async (post, id) => {
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
-                    <strong>${comment.like_count}:</strong>
-                    <strong>${comment.dislike_count}:</strong>
+                    <strong>likes: ${comment.like_count}:</strong>
+                    <strong>dislikes: ${comment.dislike_count}:</strong>
                     <div class="likes">
-                        <button class="com_like">Like</button>
-                        <button class="com_dislike">Dislike</button>
+                    <button class="com_like" style="background-color: white;">Like</button>
+                    <button class="com_dislike" style="background-color: white;">Dislike</button>
                     </div>
                     `;
                     post.insertAdjacentElement('beforeend', com);
@@ -53,11 +53,11 @@ export const getComment = async (post, id) => {
                     const dislikeButton = com.querySelector('.com_dislike');
 
                     likeButton.addEventListener('click', async () => {
-                        await handleReact(comment.comment_id, 'like', "comment");
+                        await handleReact(likeButton, dislikeButton,comment.comment_id, 'like', "comment");
                     });
 
                     dislikeButton.addEventListener('click', async () => {
-                        await handleReact(comment.comment_id, 'dislike', "comment");
+                        await handleReact(dislikeButton, likeButton, comment.comment_id, 'dislike', "comment");
                     });
                 }
             }

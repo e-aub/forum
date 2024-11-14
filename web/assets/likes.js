@@ -1,14 +1,14 @@
-
-
 export function addLikeDislikeListeners(post, postId) {
     const likeButton = post.querySelector('.like');
     const dislikeButton = post.querySelector('.dislike');
 
-    likeButton.addEventListener('click', () => handleReact(postId, "like", "post"));
-    dislikeButton.addEventListener('click', () => handleReact(postId, "dislike", "post"));
+    likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, postId, "like", "post"));
+    dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, postId, "dislike", "post"));
 }
 
-export async function handleReact(postId, type , target_Type) {
+export async function handleReact(button, follow , postId, type , target_Type) {
+    button.style.backgroundColor = '#15F5BA'
+    follow.style.backgroundColor = 'white'
     // Logic to handle the "like" action
     console.log(`Liked/disliked post/comment with ID: ${postId}`);
     // Update like count, send API request, etc.
