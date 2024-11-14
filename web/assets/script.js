@@ -1,4 +1,5 @@
 import { RenderPost } from "./rendring.js"
+import {handleReact} from "./likes.js"
 
 export const GetData = async () => {
     let target = []
@@ -41,11 +42,23 @@ export const getComment = async (post, id) => {
                     <strong>${comment.like_count}:</strong>
                     <strong>${comment.dislike_count}:</strong>
                     <div class="likes">
-                        <button class="like">Like</button>
-                        <button class="dislike">Dislike</button>
+                        <button class="com_like">Like</button>
+                        <button class="com_dislike">Dislike</button>
                     </div>
-                    `
-                    post.insertAdjacentElement('beforeend', com)
+                    `;
+                    post.insertAdjacentElement('beforeend', com);
+
+                    // Add event listeners for like and dislike buttons
+                    const likeButton = com.querySelector('.com_like');
+                    const dislikeButton = com.querySelector('.com_dislike');
+
+                    likeButton.addEventListener('click', async () => {
+                        await handleReact(comment.comment_id, 'like', "comment");
+                    });
+
+                    dislikeButton.addEventListener('click', async () => {
+                        await handleReact(comment.comment_id, 'dislike', "comment");
+                    });
                 }
             }
         }

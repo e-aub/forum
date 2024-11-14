@@ -4,17 +4,17 @@ export function addLikeDislikeListeners(post, postId) {
     const likeButton = post.querySelector('.like');
     const dislikeButton = post.querySelector('.dislike');
 
-    likeButton.addEventListener('click', () => handleReact(postId, "like"));
-    dislikeButton.addEventListener('click', () => handleReact(postId, "dislike"));
+    likeButton.addEventListener('click', () => handleReact(postId, "like", "post"));
+    dislikeButton.addEventListener('click', () => handleReact(postId, "dislike", "post"));
 }
 
-async function handleReact(postId, type ) {
+export async function handleReact(postId, type , target_Type) {
     // Logic to handle the "like" action
-    console.log(`Liked/disliked post with ID: ${postId}`);
+    console.log(`Liked/disliked post/comment with ID: ${postId}`);
     // Update like count, send API request, etc.
        try {
         // Send API request
-        const response = await fetch(`/api/react/${postId}/${type}`, {
+        const response = await fetch(`/api/react/${postId}/${type}/${target_Type}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
         });
