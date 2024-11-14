@@ -7,8 +7,7 @@ export function addLikeDislikeListeners(post, postId) {
 }
 
 export async function handleReact(button, follow , postId, type , target_Type) {
-    button.style.backgroundColor = '#15F5BA'
-    follow.style.backgroundColor = 'white'
+    interactiveLike(button, follow)
     // Logic to handle the "like" action
     console.log(`Liked/disliked post/comment with ID: ${postId}`);
     // Update like count, send API request, etc.
@@ -28,6 +27,36 @@ export async function handleReact(button, follow , postId, type , target_Type) {
     }
 }
 
+function interactiveLike(button , follow ){
+    // Access the count within the specific elements
+    // Check if the button was already clicked
+    const add = button.querySelector(".count");
+    const subtract = follow.querySelector(".count");
+
+    // Parse the current count from the button's span text
+    let count = parseInt(add.textContent, 10);
+
+    if (button.getAttribute("data-clicked") === "false") {
+        count += 1;
+        add.textContent = count; // Update the displayed count
+        button.setAttribute("data-clicked", "true");
+        button.style.backgroundColor = '#15F5BA'
+        follow.style.backgroundColor = 'white'
+        if (follow.getAttribute("data-clicked") === "true") {
+            count -= 1;
+            subtract.textContent = count; // Update the displayed count
+            follow.setAttribute("data-clicked", "false");
+            //button.style.backgroundColor = '#15F5BA'
+            follow.style.backgroundColor = 'white'
+        }
+    }else if (button.getAttribute("data-clicked") === "true") {
+        count -= 1;
+        add.textContent = count; // Update the displayed count
+        button.setAttribute("data-clicked", "false");
+        button.style.backgroundColor = 'white'
+    }
+    // Increment the count
+}
 
 function showRegistrationModal() {
     // Create modal container

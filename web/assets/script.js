@@ -39,11 +39,13 @@ export const getComment = async (post, id) => {
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
-                    <strong>likes: ${comment.like_count}:</strong>
-                    <strong>dislikes: ${comment.dislike_count}:</strong>
                     <div class="likes">
-                    <button class="com_like" style="background-color: white;">Like</button>
-                    <button class="com_dislike" style="background-color: white;">Dislike</button>
+                    <button id="likeButton" class="com_like" style="background-color: white;">
+                        Like <span class="count">${comment.like_count}</span>
+                    </button>
+                    <button id="dislikeButton" class="com_dislike" style="background-color: white;">
+                        Dislike <span class="count">${comment.dislike_count}</span>
+                    </button>
                     </div>
                     `;
                     post.insertAdjacentElement('beforeend', com);

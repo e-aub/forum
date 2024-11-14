@@ -18,13 +18,16 @@ export function RenderPost(args) {
             <p><strong>Content:</strong> ${element.Content}</p>
             <p><strong>Time:</strong> ${element.Created_At}</p>
             <p><strong>Category:</strong> ${element.Category}</p>
-            <p><strong>likes:</strong> ${element.LikeCount}</p>
-            <p><strong>dislikes:</strong> ${element.DislikeCount}</p>
         </div>
         <button class="comment-button">Comments</button>
         <div class="likes">
-        <button class="like" style="background-color: white;">Like</button>
-        <button class="dislike" style="background-color: white;">Dislike</button>
+            <button data-clicked="false" class="like" style="background-color: white;">
+                Like <span class="count">${element.LikeCount}</span>
+            </button>
+            <button data-clicked="false" class="dislike" style="background-color: white;">
+                Dislike <span class="count">${element.DislikeCount}</span>
+            </button>
+        </div>
         </div>
         `;
 
