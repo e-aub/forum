@@ -1,25 +1,26 @@
 import { RenderPost } from "./rendring.js"
 import {handleReact} from "./likes.js"
 
-export const GetData = async () => {
+export const GetData = async (postIds) => {
     let target = []
-    try {
-        let response = await fetch('http://localhost:8080/api/posts');
-        if (!response.ok) throw new Error("Network response was not ok");
-
-        let data = await response.json();
-        console.log(data);
-
-        if (data) {
-            for (let i = data; i > 0; i--) {
-                let link = `http://localhost:8080/api/posts?id=${i}`;
-                let postResponse = await fetch(link);
-                if (!postResponse.ok) throw new Error("Failed to fetch post data");
-                let post = await postResponse.json();
-                if (post.PostId !== 0) {
-                    target.push(post)
-                    RenderPost(target)
-                }
+    try{
+        if (postIds === false) {
+            postIds = [];
+            let response = await fetch('http://localhost:8080/api/posts');
+            if (!response.ok) throw new Error("Network response was not ok");
+            let lastPostId = await response.json();
+            for (let postId = 1; postId <= lastPostId; postId++) {
+                postIds.push(postId);
+            }
+        }
+        for (let i = postIds.length - 1; i >= 0; i--) {
+            let link = `http://localhost:8080/api/posts?id=${postIds[i]}`;
+            let postResponse = await fetch(link);
+            if (!postResponse.ok) throw new Error("Failed to fetch post data");
+            let post = await postResponse.json();
+            if (post.PostId !== 0) {
+                target.push(post)
+                RenderPost(target)
             }
         }
     } catch (err) {

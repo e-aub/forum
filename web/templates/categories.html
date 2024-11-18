@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum Categories</title>
+    <title>Categories</title>
+    <link rel="stylesheet" href="./assets/categories.css">
 </head>
 <body>
 
-<h1>Select a Category</h1>
+<h1>Categories</h1>
 
-<form id="categoryForm">
+<form id="categoryForm" class="categoryForm">
     {{range .}}
-    <button type="button" onclick="submitForm('{{.Id}}')">{{.Name}}</button>
+    <button type="button" class="category" onclick="submitForm('{{.Id}}')">
+        <h3>{{.Name}}</h3>
+        <p>{{.Description}}</p>
+    </button>
     {{end}}
 </form>
 
 <script>
     function submitForm(category) {
-        const form = document.getElementById("categoryForm");
-        var params = new URLSearchParams({
-            category : category,
-        })
-        console.log(params)
-        window.location.href = `/categories?${params}`
+        const params = new URLSearchParams({ category: category });
+        window.location.href = `/categories?${params}`;
     }
 </script>
 

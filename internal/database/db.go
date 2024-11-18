@@ -49,15 +49,13 @@ func CleanupExpiredSessions(db *sql.DB) {
 	}
 }
 
-func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
+func Insert_Post(p *utils.Posts, db *sql.DB, categories []string) (int64, error) {
 	transaction, err := db.Begin()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error starting transaction:", err)
 		return 0, err
 	}
-	stmt, err := transaction.Prepare(`
-	INSERT INTO posts(user_id ,title,content) Values (?,?,?);
-	`)
+	stmt, err := transaction.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?);`)
 	if err != nil {
 		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "Error Adding post:", err)
@@ -74,22 +72,13 @@ func Insert_Post(p *utils.Posts, db *sql.DB) (int64, error) {
 	lastPostID, err := result.LastInsertId()
 	if err != nil {
 		transaction.Rollback()
-		fmt.Fprintln(os.Stderr, "error in assigning category to post")
+		fmt.Fprintln(os.Stderr, "error in assigning category to post", err)
 		return 0, err
 	}
 
-	stmt1, err := transaction.Prepare(`INSERT INTO post_categories(category_id, post_id) VALUES(?, ?);`)
+	categories = append(categories, "2")
+	err = LinkPostWithCategory(transaction, categories, lastPostID, p.UserId)
 	if err != nil {
-		transaction.Rollback()
-		fmt.Fprintln(os.Stderr, "error in assigning category to post")
-		return 0, err
-	}
-	defer stmt1.Close()
-
-	_, err = stmt1.Exec(2, lastPostID)
-	if err != nil {
-		transaction.Rollback()
-		fmt.Fprintln(os.Stderr, "error in assigning category to post")
 		transaction.Rollback()
 		return 0, err
 	}
@@ -254,7 +243,29 @@ func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
 	return res, nil
 }
 
-func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
+func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, error) {
+	if categoryId == "1" || categoryId == "2" {
+		stmt, err := db.Prepare(`SELECT post_id FROM post_categories WHERE category_id=? AND user_id=?`)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		rows, err := stmt.Query(categoryId, userId)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		var ids []int
+		for rows.Next() {
+			tmp := 0
+			err := rows.Scan(&tmp)
+			if err != nil {
+				return nil, err
+			}
+			ids = append(ids, tmp)
+		}
+		return ids, nil
+	}
 	stmt, err := db.Prepare("SELECT post_id FROM post_categories WHERE category_id=?")
 	if err != nil {
 		return nil, err
@@ -284,33 +295,59 @@ func GetUserName(id int, db *sql.DB) (string, error) {
 	return name, nil
 }
 
-func Get_CategoryofPost(idPost int, db *sql.DB) (string, error) {
-	var name string
+func GetPostCategories(idPost int, db *sql.DB, userId int) ([]string, error) {
+	var categories []string
 	stmt, err := db.Prepare(`SELECT categories.name 
-							 FROM categories 
-							 JOIN post_categories ON post_categories.category_id = categories.id 
-							 WHERE post_categories.post_id = ?`)
+	FROM post_categories
+	JOIN categories ON categories.id = post_categories.category_id
+	WHERE (post_categories.category_id = 1 OR post_categories.category_id = 2) 
+	AND post_categories.user_id = ? 
+	AND post_categories.post_id = ?
+	UNION
+	SELECT categories.name 
+	FROM post_categories
+	JOIN categories ON categories.id = post_categories.category_id
+	WHERE post_categories.category_id != 1 
+	AND post_categories.category_id != 2 
+	AND post_categories.post_id = ?;
+`)
 	if err != nil {
-		return "", err
+		fmt.Println(err)
+		return nil, err
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(idPost).Scan(&name)
+	rows, err := stmt.Query(userId, idPost, idPost)
 	if err != nil {
-		return "", err
+		fmt.Println(err)
+		return nil, err
 	}
-	return name, nil
+	for rows.Next() {
+		var category string
+		err := rows.Scan(&category)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+	return categories, nil
 }
 
-func LinkPostWithCategory(db *sql.DB, category string, postId int64) error {
-	stmt, err := db.Prepare(`INSERT INTO post_categories(post_id, category_id) VALUES(?, ?)`)
-	if err != nil {
-		return err
-	}
-	tmp, _ := strconv.Atoi(category)
-	_, err = stmt.Exec(postId, tmp)
-	if err != nil {
-		return err
+func LinkPostWithCategory(transaction *sql.Tx, categories []string, postId int64, userId int) error {
+	for _, category := range categories {
+		stmt, err := transaction.Prepare(`INSERT INTO post_categories(user_id, post_id, category_id) VALUES(?, ?, ?);`)
+		if err != nil {
+			return err
+		}
+		defer stmt.Close()
+		tmp, err := strconv.Atoi(category)
+		if err != nil {
+			return err
+		}
+		_, err = stmt.Exec(userId, postId, tmp)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

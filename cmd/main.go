@@ -27,8 +27,12 @@ func main() {
 
 	mainMux.HandleFunc("/", handlers.Controlle_Home)
 
-	mainMux.HandleFunc("/categories/", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CategoriesHandler(w, r, db)
+	mainMux.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
+		_, userId, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+		handlers.CategoriesHandler(w, r, db, userId)
 	})
 
 	mainMux.HandleFunc("/New_Post", func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +64,12 @@ func main() {
 	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
-		handlers.Controlle_Api(w, r, db)
+		_, userID, err := auth.ValidUser(w, r, db)
+		if err != nil {
+			return
+		}
+
+		handlers.Controlle_Api(w, r, db, userID)
 	})
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
 		ok, userID, err := auth.ValidUser(w, r, db)

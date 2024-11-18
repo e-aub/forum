@@ -2,48 +2,60 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"forum/internal/database"
 	models "forum/internal/database/models"
 	"html/template"
 	"net/http"
+	"os"
 )
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	switch r.Method {
 	case "GET":
-		fmt.Println(r.URL.String())
 		category := r.URL.Query().Get("category")
-		println(category)
 		if category != "" {
-			postIds, err := database.GetCategoryContentIds(db, category)
+			postIds, err := database.GetCategoryContentIds(db, category, userId)
 			if err != nil {
-				http.Error(w, "internal server error1", http.StatusInternalServerError)
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
-			posts, err := database.GetCategoryContent(db, category)
+			template, err := template.ParseFiles("web/templates/posts.html")
 			if err != nil {
-				http.Error(w, "internal server error1", http.StatusInternalServerError)
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
-
-			w.Header().Add("content-type", "application/json")
-			fmt.Fprintf(w, "%v\n%v", posts, postIds)
+			jsonIds, err := json.Marshal(postIds)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
+				return
+			}
+			template.Execute(w, string(jsonIds))
 			return
 		}
-		categories, err := GetCategories(db, true)
+		withCreatedAndDeleted := false
+		if userId != 0 {
+			withCreatedAndDeleted = true
+		}
+		categories, err := GetCategories(db, withCreatedAndDeleted)
 		if err != nil {
-			http.Error(w, "internal server error2", http.StatusInternalServerError)
+			fmt.Fprintln(os.Stderr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		template, err := template.ParseFiles("web/templates/categories.html")
 		if err != nil {
-			http.Error(w, "internal server error3", http.StatusInternalServerError)
+			fmt.Fprintln(os.Stderr, err)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		template.Execute(w, categories)
 	default:
-		http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 

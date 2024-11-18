@@ -29,7 +29,7 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
 		}
-		if err := tmpl.Execute(w, "true"); err != nil {
+		if err := tmpl.Execute(w, false); err != nil {
 			log.Println("Error executing template:", err)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		}
@@ -74,17 +74,13 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 			UserId:     userId,
 		}
 		// category := r.PostFormValue("category")
-		postId, err := database.Insert_Post(post, db)
+		categories := r.Form["category"]
+		_, err := database.Insert_Post(post, db, categories)
 		if err != nil {
 			http.Error(w, "internal", http.StatusInternalServerError)
 			return
 		}
-		category := r.PostFormValue("category")
-		err = database.LinkPostWithCategory(db, category, postId)
-		if err != nil {
-			http.Error(w, "internal", http.StatusInternalServerError)
-			return
-		}
+
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -92,7 +88,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
+func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
 	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
 	}
@@ -103,8 +99,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB) {
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
 		post := database.Read_Post(idint, file)
-		// log.Println(post)
-		post.Category, _ = database.Get_CategoryofPost(post.PostId, file)
+		post.Categories, _ = database.GetPostCategories(post.PostId, file, userId)
 		json, err := json.Marshal(post)
 		if err != nil {
 			log.Fatal(err)
