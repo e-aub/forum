@@ -9,7 +9,7 @@ type Posts struct {
 	UserId       int
 	UserName     string
 	Title        string
-	Category     string
+	Categories   []string
 	Content      string
 	LikeCount    int
 	DislikeCount int
@@ -17,12 +17,12 @@ type Posts struct {
 }
 
 type Comment struct {
-	Comment_id    int    `json:"comment_id"`
-	Post_id       int    `json:"post_id"`
-	User_id       int    `json:"user_id"`
-	User_name     string `json:"user_name"`
-	Content       string `json:"content"`
-	Created_at    string `json:"created_at"`
+	Comment_id   int    `json:"comment_id"`
+	Post_id      int    `json:"post_id"`
+	User_id      int    `json:"user_id"`
+	User_name    string `json:"user_name"`
+	Content      string `json:"content"`
+	Created_at   string `json:"created_at"`
 	LikeCount    int    `json:"like_count"`
 	DislikeCount int    `json:"dislike_count"`
 }
