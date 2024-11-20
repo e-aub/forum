@@ -35,18 +35,18 @@ export const getComment = async (post, id) => {
             const allComment = await res.json()
             if (allComment) {
                 for (let comment of allComment) {
-      const com = document.createElement('div');
+                    const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
                     <div class="likes">
-                    <button data-clicked="${comment.Clicked}" id="likeButton" class="com_like" 
-                    style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
+                    <button data-clicked="${comment.clicked}"  class="com_like" 
+                    style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
                         Like <span class="count">${comment.like_count}</span>
                     </button>
-                    <button data-clicked="${comment.DisClicked}" id="dislikeButton" class="com_dislike" 
-                    style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
+                    <button data-clicked="${comment.disclicked}"  class="com_dislike" 
+                    style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
                         Dislike <span class="count">${comment.dislike_count}</span>
                     </button>
                     </div>

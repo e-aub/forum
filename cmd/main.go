@@ -64,7 +64,7 @@ func main() {
 	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
-		isUser , userID, err := auth.ValidUser(w, r, db)
+		isUser, userID, err := auth.ValidUser(w, r, db)
 		if err != nil {
 			return
 		}

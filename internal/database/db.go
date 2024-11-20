@@ -142,17 +142,23 @@ func Read_Post(id int, db *sql.DB, isUser bool) *utils.Posts {
 }
 func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool) {
 	// Query to check for likes or dislikes for the given user and post.
-	query := `SELECT type FROM likes WHERE user_id = ? AND post_id = ? AND target_type = ? LIMIT 1`
+	var query string
+	if target_type == "post" {
+		query = `SELECT type FROM likes WHERE user_id = ? AND post_id = ? AND target_type = ? LIMIT 1`
+	} else if target_type == "comment" {
+		query = `SELECT type FROM likes WHERE user_id = ? AND comment_id = ? AND target_type = ? LIMIT 1`
+	}
 
 	var reactionType string
 	err := db.QueryRow(query, userId, postId, target_type).Scan(&reactionType)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No interaction found.
+			fmt.Println("\033[31m", err, "\033[0m")
 			return false, false
 		}
 		// Log error if needed and handle it appropriately.
-		fmt.Println("Error querying likes:", err)
+		fmt.Println("Error   likes:", err)
 		return false, false
 	}
 
@@ -222,7 +228,7 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	return nil
 }
 
-func GetComments(postID int, db *sql.DB) ([]utils.Comment, error) {
+func GetComments(postID int, db *sql.DB, userId int, isUser bool) ([]utils.Comment, error) {
 	query := `
 	SELECT comments.id, comments.content, comments.created_at, users.username, comments.like_count , comments.dislike_count FROM comments
     INNER JOIN users ON comments.user_id = users.id
@@ -243,6 +249,12 @@ func GetComments(postID int, db *sql.DB) ([]utils.Comment, error) {
 			return nil, errors.New(err.Error() + "here 2")
 		}
 		comment.Post_id = postID
+		if !isUser {
+			comment.Clicked, comment.DisClicked = false, false
+		} else {
+			comment.Clicked, comment.DisClicked = isLiked(db, userId, comment.Comment_id, "comment")
+		}
+
 		comments = append(comments, comment)
 	}
 	if err = rows.Err(); err != nil {

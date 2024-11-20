@@ -27,6 +27,8 @@ type Comment struct {
 	Created_at   string `json:"created_at"`
 	LikeCount    int    `json:"like_count"`
 	DislikeCount int    `json:"dislike_count"`
+	Clicked      bool   `json:"clicked"`
+	DisClicked   bool   `json:"disclicked"`
 }
 
 func Creat_New_Post() *Posts {

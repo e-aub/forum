@@ -19,7 +19,7 @@ func Controlle_Api_Comment(w http.ResponseWriter, r *http.Request, user_id int, 
 	switch r.Method {
 	case "GET": //"http://localhost:8080/api/comments?post=${post.id}
 		postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
-		comments, err := database.GetComments(postID, file)
+		comments, err := database.GetComments(postID, file, user_id , valided)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
