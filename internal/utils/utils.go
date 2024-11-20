@@ -14,6 +14,8 @@ type Posts struct {
 	LikeCount    int
 	DislikeCount int
 	Created_At   time.Time
+	Clicked      bool
+	DisClicked   bool
 }
 
 type Comment struct {

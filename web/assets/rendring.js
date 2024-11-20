@@ -21,14 +21,20 @@ export function RenderPost(args) {
             <p><strong>Category:</strong> ${element.Categories.join(', ')}</p>
         </div>
         <button class="comment-button">Comments</button>
-        <div class="likes">
-            <button data-clicked="false" class="like" style="background-color: white;">
-                Like <span class="count">${element.LikeCount}</span>
-            </button>
-            <button data-clicked="false" class="dislike" style="background-color: white;">
-                Dislike <span class="count">${element.DislikeCount}</span>
-            </button>
-        </div>
+     <div class="likes">
+    <button 
+        data-clicked="${element.Clicked}" 
+        class="like" 
+        style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
+        Like <span class="count">${element.LikeCount}</span>
+    </button>
+    <button 
+        data-clicked="${element.DisClicked}" 
+        class="dislike" 
+        style="background-color: ${element.DisClicked ? '#15F5BA' : 'white'};">
+        Dislike <span class="count">${element.DislikeCount}</span>
+    </button>
+</div>
         </div>
         `;
 

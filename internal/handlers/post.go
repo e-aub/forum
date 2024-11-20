@@ -88,7 +88,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
+func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, isUser bool, userId int) {
 	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
 	}
@@ -98,7 +98,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, userId 
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := database.Read_Post(idint, file)
+		post := database.Read_Post(idint, file, isUser)
 		post.Categories, _ = database.GetPostCategories(post.PostId, file, userId)
 		json, err := json.Marshal(post)
 		if err != nil {

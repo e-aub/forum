@@ -64,12 +64,12 @@ func main() {
 	})
 	///////////////API////////////////////
 	mainMux.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
-		_, userID, err := auth.ValidUser(w, r, db)
+		isUser , userID, err := auth.ValidUser(w, r, db)
 		if err != nil {
 			return
 		}
 
-		handlers.Controlle_Api(w, r, db, userID)
+		handlers.Controlle_Api(w, r, db, isUser, userID)
 	})
 	mainMux.HandleFunc("/api/comments", func(w http.ResponseWriter, r *http.Request) {
 		ok, userID, err := auth.ValidUser(w, r, db)

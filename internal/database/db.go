@@ -119,7 +119,7 @@ func Delete_Post(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func Read_Post(id int, db *sql.DB) *utils.Posts {
+func Read_Post(id int, db *sql.DB, isUser bool) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := db.QueryRow(query, id)
 	Post := &utils.Posts{}
@@ -127,11 +127,44 @@ func Read_Post(id int, db *sql.DB) *utils.Posts {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	if !isUser {
+		Post.Clicked = false
+		Post.DisClicked = false
+	} else {
+		Post.Clicked, Post.DisClicked = isLiked(db, Post.UserId, Post.PostId, "post")
+	}
 	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return Post
+}
+func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool) {
+	// Query to check for likes or dislikes for the given user and post.
+	query := `SELECT type FROM likes WHERE user_id = ? AND post_id = ? AND target_type = ? LIMIT 1`
+
+	var reactionType string
+	err := db.QueryRow(query, userId, postId, target_type).Scan(&reactionType)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No interaction found.
+			return false, false
+		}
+		// Log error if needed and handle it appropriately.
+		fmt.Println("Error querying likes:", err)
+		return false, false
+	}
+
+	// Determine the type of interaction.
+	switch reactionType {
+	case "like":
+		return true, false
+	case "dislike":
+		return false, true
+	default:
+		return false, false
+	}
 }
 
 func Get_Last(db *sql.DB) int {
