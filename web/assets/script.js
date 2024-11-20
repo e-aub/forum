@@ -41,14 +41,17 @@ export const getComment = async (post, id) => {
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
                     <div class="likes">
-                    <button data-clicked="false" id="likeButton" class="com_like" style="background-color: white;">
+                    <button data-clicked="${comment.Clicked}" id="likeButton" class="com_like" 
+                    style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
                         Like <span class="count">${comment.like_count}</span>
                     </button>
-                    <button data-clicked="false" id="dislikeButton" class="com_dislike" style="background-color: white;">
+                    <button data-clicked="${comment.DisClicked}" id="dislikeButton" class="com_dislike" 
+                    style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
                         Dislike <span class="count">${comment.dislike_count}</span>
                     </button>
                     </div>
                     `;
+
                     post.insertAdjacentElement('beforeend', com);
 
                     // Add event listeners for like and dislike buttons
