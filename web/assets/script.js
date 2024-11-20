@@ -35,7 +35,7 @@ export const getComment = async (post, id) => {
             const allComment = await res.json()
             if (allComment) {
                 for (let comment of allComment) {
-                    const com = document.createElement('div');
+      const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
