@@ -98,7 +98,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, isUser 
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := database.Read_Post(idint, file, isUser)
+		post := database.Read_Post(idint, file, isUser, userId)
 		post.Categories, _ = database.GetPostCategories(post.PostId, file, userId)
 		json, err := json.Marshal(post)
 		if err != nil {

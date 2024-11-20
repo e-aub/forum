@@ -119,7 +119,7 @@ func Delete_Post(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func Read_Post(id int, db *sql.DB, isUser bool) *utils.Posts {
+func Read_Post(id int, db *sql.DB, isUser bool, userId int) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := db.QueryRow(query, id)
 	Post := &utils.Posts{}
@@ -132,7 +132,7 @@ func Read_Post(id int, db *sql.DB, isUser bool) *utils.Posts {
 		Post.Clicked = false
 		Post.DisClicked = false
 	} else {
-		Post.Clicked, Post.DisClicked = isLiked(db, Post.UserId, Post.PostId, "post")
+		Post.Clicked, Post.DisClicked = isLiked(db, userId, Post.PostId, "post")
 	}
 	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
