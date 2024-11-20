@@ -74,9 +74,16 @@ const createComment = async (post, comment_part, post_id) => {
                     <strong>${respons.user_name}:</strong> ${comment.value}
                     <strong>likes: ${respons.like_count}<strong>
                     <strong>dislikes: ${respons.dislike_count}<strong>
+                            </div>
+                    <button class="comment-button">Comments</button>
+
                     <div class="likes">
-                        <button class="like">Like</button>
-                        <button class="dislike">Dislike</button>
+                        <button data-clicked="false" class="like" style="background-color: white;">
+                            Like <span class="count">${comment.LikeCount}</span>
+                        </button>
+                        <button data-clicked="false" class="dislike" style="background-color: white;">
+                            Dislike <span class="count">${comment.DislikeCount}</span>
+                        </button>
                     </div>
                     `
                     comment_part.insertAdjacentElement('beforeend', com)
