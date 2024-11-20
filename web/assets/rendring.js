@@ -1,5 +1,6 @@
 import { getComment } from "./script.js";
 import {addLikeDislikeListeners} from "./likes.js"
+import { handleReact } from "./likes.js";
 
 export function RenderPost(args) {
     const container = document.querySelector(".container");
@@ -71,18 +72,34 @@ const createComment = async (post, comment_part, post_id) => {
 
                     const com = document.createElement('div');
                     com.classList.add('comment');
-                    com.innerHTML = `
-                    <strong>${respons.user_name}:</strong> ${comment.value}
-                    <strong>likes: ${respons.like_count}<strong>
-                    <strong>dislikes: ${respons.dislike_count}<strong>
-                    <div class="likes">
-                        <button class="like">Like</button>
-                        <button class="dislike">Dislike</button>
-                    </div>
-                    `
+com.innerHTML = `
+    <strong>${respons.user_name}:</strong>
+    ${comment.value}
+    <div class="likes">
+        <button data-clicked="false" id="likeButton" class="com_like" style="background-color: white;">
+            Like <span class="count">${respons.like_count}</span>
+        </button>
+        <button data-clicked="false" id="dislikeButton" class="com_dislike" style="background-color: white;">
+            Dislike <span class="count">${respons.dislike_count}</span>
+        </button>
+    </div>
+`;
                     comment_part.insertAdjacentElement('beforeend', com)
+                    // Add event listeners for like and dislike buttons
+                    const likeButton = com.querySelector('.com_like');
+                    const dislikeButton = com.querySelector('.com_dislike');
+
+                    likeButton.addEventListener('click', async () => {
+                        await handleReact(likeButton, dislikeButton, respons.comment_id, 'like', "comment");
+                    });
+
+                    dislikeButton.addEventListener('click', async () => {
+                        await handleReact(dislikeButton, likeButton, respons.comment_id, 'dislike', "comment");
+                    });
+
                 }
                 comment.value = ''
+                
             }
         } catch (error) {
             console.error(error);
