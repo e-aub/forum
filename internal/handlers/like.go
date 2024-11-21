@@ -13,8 +13,8 @@ type Response struct {
 	Success bool   `json:"success"`
 }
 
-func ReactHandler(db *sql.DB, userID int, isUser bool, w http.ResponseWriter, r *http.Request) {
-	if !isUser {
+func ReactHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
+	if userID <= 0 {
 		http.Error(w, "Unauthorized: user not registered", http.StatusUnauthorized) // 401 status code
 		return
 	}
@@ -194,5 +194,3 @@ func removeDislike(db *sql.DB, postID int, target_type string) error {
 	}
 	return nil
 }
-
-

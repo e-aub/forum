@@ -37,7 +37,11 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.DB) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+	if userId <= 0 {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
 		if err != nil {
@@ -88,9 +92,10 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 }
 
-func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, isUser bool, userId int) {
+func PostsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
 	if r.URL.Path != "/api/posts" {
 		http.Error(w, "not found", 404)
+		return
 	}
 	if r.Method != "GET" {
 		http.Error(w, "method Not allowed", http.StatusMethodNotAllowed)
@@ -98,7 +103,7 @@ func Controlle_Api(w http.ResponseWriter, r *http.Request, file *sql.DB, isUser 
 	id := r.FormValue("id")
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
-		post := database.Read_Post(idint, file, isUser, userId)
+		post := database.Read_Post(idint, file, userId)
 		post.Categories, _ = database.GetPostCategories(post.PostId, file, userId)
 		json, err := json.Marshal(post)
 		if err != nil {

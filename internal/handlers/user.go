@@ -37,7 +37,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Register_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func Register_Api(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
 		return

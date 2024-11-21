@@ -119,7 +119,7 @@ func Delete_Post(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func Read_Post(id int, db *sql.DB, isUser bool, userId int) *utils.Posts {
+func Read_Post(id int, db *sql.DB, userId int) *utils.Posts {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row := db.QueryRow(query, id)
 	Post := &utils.Posts{}
@@ -128,7 +128,7 @@ func Read_Post(id int, db *sql.DB, isUser bool, userId int) *utils.Posts {
 		fmt.Println(err)
 	}
 
-	if !isUser {
+	if userId <= 0 {
 		Post.Clicked = false
 		Post.DisClicked = false
 	} else {
@@ -228,7 +228,7 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	return nil
 }
 
-func GetComments(postID int, db *sql.DB, userId int, isUser bool) ([]utils.Comment, error) {
+func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 	query := `
 	SELECT comments.id, comments.content, comments.created_at, users.username, comments.like_count , comments.dislike_count FROM comments
     INNER JOIN users ON comments.user_id = users.id
@@ -249,7 +249,7 @@ func GetComments(postID int, db *sql.DB, userId int, isUser bool) ([]utils.Comme
 			return nil, errors.New(err.Error() + "here 2")
 		}
 		comment.Post_id = postID
-		if !isUser {
+		if userId <= 0 {
 			comment.Clicked, comment.DisClicked = false, false
 		} else {
 			comment.Clicked, comment.DisClicked = isLiked(db, userId, comment.Comment_id, "comment")

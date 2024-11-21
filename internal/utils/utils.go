@@ -1,6 +1,10 @@
 package utils
 
-import "time"
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
 
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
@@ -42,4 +46,16 @@ func Creat_New_Comment() *Comment {
 func (p *Posts) Update_Post(title string, content string, time time.Time) {
 	p.Title = title
 	p.Content = content
+}
+
+func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	w.WriteHeader(code)
+	w.Write(response)
 }
