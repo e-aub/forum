@@ -20,8 +20,6 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 not found", http.StatusNotFound)
 		return
 	}
-	// fmt.Println(r.Cookies())
-
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("web/templates/posts.html")
 		if err != nil {
@@ -43,7 +41,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		return
 	}
 	if r.Method == "GET" {
-		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
+		tmpl, err := template.ParseFiles("web/templates/newPost.html")
 		if err != nil {
 			log.Printf("Error parsing template: %v", err)
 			http.Error(w, "Internal Server Errorr", http.StatusInternalServerError)

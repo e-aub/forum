@@ -26,9 +26,19 @@ func main() {
 	fs := http.FileServer(http.Dir("web/assets"))
 	router.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	////////////////ROUTES////////////////////////////
+
+	//HomePage handler
 	router.HandleFunc("/", handlers.Controlle_Home)
-	router.Handle("/categories", auth.AuthMiddleware(db)(handlers.CategoriesHandler))
-	router.Handle("/New_Post", auth.AuthMiddleware(db)(handlers.NewPostHandler))
+	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			userId, _ := auth.ValidUser(r, db)
+			handlers.CategoriesHandler(w, r, db, userId)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+	router.Handle("/new_post", auth.AuthMiddleware(db)(handlers.NewPostHandler))
 	router.HandleFunc("/register", handlers.Register)
 
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
