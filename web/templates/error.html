@@ -1,0 +1,14 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/error.css">
+    <title>oops</title>
+</head>
+<body>
+    <h1>{{.Message}}</h1>
+    {{if .Unauthorized}}
+        <button onclick="window.location.href='/login'">Login</button>
+    {{end}}
+</body>
+</html>

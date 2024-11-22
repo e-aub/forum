@@ -11,25 +11,24 @@ import (
 	"time"
 
 	database "forum/internal/database"
-
-	util "forum/internal/utils"
+	"forum/internal/utils"
 )
 
 func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.Error(w, "404 not found", http.StatusNotFound)
+		utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, http.StatusNotFound)
 		return
 	}
 	if r.Method == http.MethodGet {
 		tmpl, err := template.ParseFiles("web/templates/posts.html")
 		if err != nil {
 			log.Println("Error loading template:", err)
-			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 		if err := tmpl.Execute(w, false); err != nil {
 			log.Println("Error executing template:", err)
-			http.Error(w, "500 internal server error", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -37,26 +36,26 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if userId <= 0 {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		utils.RespondWithError(w, utils.Err{Message: "Unauthorized: Please login and try again", Unauthorized: true}, http.StatusUnauthorized)
 		return
 	}
 	if r.Method == "GET" {
 		tmpl, err := template.ParseFiles("web/templates/newPost.html")
 		if err != nil {
 			log.Printf("Error parsing template: %v", err)
-			http.Error(w, "Internal Server Errorr", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 		categories, err := GetCategories(db, false)
 		if err != nil {
 			fmt.Println(err)
-			http.Error(w, "get categories", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 		err = tmpl.Execute(w, categories)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 		return
@@ -65,11 +64,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			log.Printf("Error parsing form: %v", err)
-			http.Error(w, "Bad Request", http.StatusBadRequest)
+			utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
 			return
 		}
 
-		post := &util.Posts{
+		post := &utils.Posts{
 			Title:      r.PostFormValue("title"),
 			Content:    r.PostFormValue("content"),
 			Created_At: time.Now(),
@@ -79,7 +78,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		categories := r.Form["category"]
 		_, err := database.Insert_Post(post, db, categories)
 		if err != nil {
-			http.Error(w, "internal", http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 
@@ -87,16 +86,13 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		return
 	}
 
-	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 }
 
 func PostsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	if r.URL.Path != "/api/posts" {
-		http.Error(w, "not found", 404)
-		return
-	}
 	if r.Method != "GET" {
-		http.Error(w, "method Not allowed", http.StatusMethodNotAllowed)
+		utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
+		return
 	}
 	id := r.FormValue("id")
 	if id != "" {

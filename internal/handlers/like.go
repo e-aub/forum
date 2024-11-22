@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"forum/internal/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,7 +16,7 @@ type Response struct {
 
 func ReactHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
 	if userID <= 0 {
-		http.Error(w, "Unauthorized: user not registered", http.StatusUnauthorized) // 401 status code
+		utils.RespondWithError(w, utils.Err{Message: "Unauthorized: Please login and try again", Unauthorized: true}, http.StatusUnauthorized)
 		return
 	}
 	// Parse the postId from the URL
@@ -26,6 +27,7 @@ func ReactHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int
 	}
 	reaction := pathParts[4]
 	target_type := pathParts[5]
+	fmt.Println("reaction:", reaction, "\ntarget_type:", target_type)
 	// Convert postId to integer
 	postID, err := strconv.Atoi(pathParts[3])
 	if err != nil || postID < 0 {

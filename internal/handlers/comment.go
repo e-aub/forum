@@ -8,12 +8,11 @@ import (
 
 	"forum/internal/database"
 	"forum/internal/utils"
-	util "forum/internal/utils"
 )
 
 func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
 	if r.URL.Path != "/api/comments" {
-		http.Error(w, "not found", 404)
+		utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, 404)
 	}
 
 	switch r.Method {
@@ -21,7 +20,7 @@ func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 		postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
 		comments, err := database.GetComments(postID, file, userId)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 
@@ -32,10 +31,10 @@ func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 			content := r.URL.Query().Get("comment")
 			user_name, err := database.GetUserName(userId, file)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
 				return
 			}
-			comment := util.Creat_New_Comment()
+			comment := utils.Creat_New_Comment()
 			comment.Post_id = postID
 			comment.User_name = user_name
 			comment.User_id = userId
@@ -43,7 +42,7 @@ func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 			comment.Created_at = time.Now().Format(time.RFC3339)
 
 			if err := database.CreateComment(comment, file); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
 				return
 			}
 
@@ -53,6 +52,6 @@ func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 			return
 		}
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 	}
 }

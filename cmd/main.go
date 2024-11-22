@@ -42,11 +42,6 @@ func main() {
 	router.HandleFunc("/register", handlers.Register)
 
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		_, err := auth.ValidUser(r, db)
-		if err != nil {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
-		}
 		handlers.Login(w, r)
 	})
 	///////////////API////////////////////

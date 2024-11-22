@@ -2,12 +2,17 @@ package utils
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
 	"time"
 )
 
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
+type Err struct {
+	Message      string
+	Unauthorized bool
+}
 type Posts struct {
 	PostId       int
 	UserId       int
@@ -59,3 +64,15 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
+
+func RespondWithError(w http.ResponseWriter, Err Err, statuscode int) {
+	tmpl, err := template.ParseFiles("web/templates/error.html")
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(statuscode)
+	tmpl.Execute(w, Err)
+}
+
+
