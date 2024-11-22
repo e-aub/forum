@@ -16,8 +16,8 @@ stop:
 
 clean:
 	sudo rm -rf forum tmp || true
-	sudo docker rm $(CONTAINER_NAME) || true
-	sudo docker rmi $(IMAGE_NAME) || true
+	sudo docker rm -f $(CONTAINER_NAME) || true
+	sudo docker rmi -f $(IMAGE_NAME) || true
 push: clean
 	@read -p "Enter commit message: " msg; \
 	git add .; \

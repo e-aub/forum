@@ -13,31 +13,45 @@ import (
 )
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	switch r.Method {
-	case "GET":
+	if r.URL.Query().Has("category") {
 		category := r.URL.Query().Get("category")
-		if category != "" {
-			postIds, err := database.GetCategoryContentIds(db, category, userId)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
-				return
-			}
-			template, err := template.ParseFiles("web/templates/posts.html")
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
-				return
-			}
-			jsonIds, err := json.Marshal(postIds)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
-				return
-			}
-			template.Execute(w, string(jsonIds))
+
+		result, err := utils.QueryRow(db, `SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)`, category)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
+		var exists bool
+		if err := result.Scan(&exists); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		if !exists {
+			utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, http.StatusNotFound)
+			return
+		}
+		postIds, err := database.GetCategoryContentIds(db, category, userId)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		template, err := template.ParseFiles("web/templates/posts.html")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		jsonIds, err := json.Marshal(postIds)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		template.Execute(w, string(jsonIds))
+	} else {
 		withCreatedAndDeleted := false
 		if userId != 0 {
 			withCreatedAndDeleted = true
@@ -55,8 +69,6 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			return
 		}
 		template.Execute(w, categories)
-	default:
-		utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 	}
 }
 

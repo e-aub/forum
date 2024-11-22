@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql"
 	"encoding/json"
 	"html/template"
 	"net/http"
@@ -75,4 +76,28 @@ func RespondWithError(w http.ResponseWriter, Err Err, statuscode int) {
 	tmpl.Execute(w, Err)
 }
 
+type Rows struct {
+	Rows *sql.Rows
+}
 
+func QueryRows(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(args...)
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+func QueryRow(db *sql.DB, query string, args ...interface{}) (*sql.Row, error) {
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.QueryRow(args...), nil
+}

@@ -290,14 +290,8 @@ func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
 
 func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, error) {
 	if categoryId == "1" || categoryId == "2" {
-		stmt, err := db.Prepare(`SELECT post_id FROM post_categories WHERE category_id=? AND user_id=?`)
+		rows, err := utils.QueryRows(db, `SELECT post_id FROM post_categories WHERE category_id=? AND user_id=?`, categoryId, userId)
 		if err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		rows, err := stmt.Query(categoryId, userId)
-		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		var ids []int
@@ -311,11 +305,7 @@ func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, er
 		}
 		return ids, nil
 	}
-	stmt, err := db.Prepare("SELECT post_id FROM post_categories WHERE category_id=?")
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(categoryId)
+	rows, err := utils.QueryRows(db, "SELECT post_id FROM post_categories WHERE category_id=?", categoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -340,9 +330,8 @@ func GetUserName(id int, db *sql.DB) (string, error) {
 	return name, nil
 }
 
-func GetPostCategories(idPost int, db *sql.DB, userId int) ([]string, error) {
-	var categories []string
-	stmt, err := db.Prepare(`SELECT categories.name 
+func GetPostCategories(db *sql.DB, PostId int, userId int) ([]string, error) {
+	query := `SELECT categories.name 
 	FROM post_categories
 	JOIN categories ON categories.id = post_categories.category_id
 	WHERE (post_categories.category_id = 1 OR post_categories.category_id = 2) 
@@ -355,18 +344,14 @@ func GetPostCategories(idPost int, db *sql.DB, userId int) ([]string, error) {
 	WHERE post_categories.category_id != 1 
 	AND post_categories.category_id != 2 
 	AND post_categories.post_id = ?;
-`)
+`
+	rows, err := utils.QueryRows(db, query, userId, PostId, PostId)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
-	defer stmt.Close()
 
-	rows, err := stmt.Query(userId, idPost, idPost)
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
+	var categories []string
+
 	for rows.Next() {
 		var category string
 		err := rows.Scan(&category)

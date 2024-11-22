@@ -98,7 +98,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId i
 	if id != "" {
 		idint, _ := strconv.Atoi(id)
 		post := database.Read_Post(idint, file, userId)
-		post.Categories, _ = database.GetPostCategories(post.PostId, file, userId)
+		post.Categories, _ = database.GetPostCategories(file, post.PostId, userId)
 		json, err := json.Marshal(post)
 		if err != nil {
 			log.Fatal(err)
