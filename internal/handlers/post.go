@@ -76,7 +76,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		}
 		// category := r.PostFormValue("category")
 		categories := r.Form["category"]
-		_, err := database.Insert_Post(post, db, categories)
+		_, err := database.InsertPost(post, db, categories)
 		if err != nil {
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
@@ -89,27 +89,62 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 }
 
-func PostsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
+func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if r.Method != "GET" {
 		utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		return
 	}
+	w.Header().Set("content-type", "application/json")
 	id := r.FormValue("id")
 	if id != "" {
-		idint, _ := strconv.Atoi(id)
-		post := database.Read_Post(idint, file, userId)
-		post.Categories, _ = database.GetPostCategories(file, post.PostId, userId)
+		postId, err := strconv.Atoi(id)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(nil)
+			return
+		}
+		post, err := database.ReadPost(db, userId, postId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(nil)
+			return
+		}
+		post.Categories, err = database.GetPostCategories(db, post.PostId, userId)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(nil)
+			return
+		}
 		json, err := json.Marshal(post)
 		if err != nil {
-			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(nil)
+			return
 		}
-		_, _ = w.Write(json)
+		_, err = w.Write(json)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(nil)
+			return
+		}
 		return
 	}
-	lastindex := database.Get_Last(file)
+	lastindex, err := database.GetLastPostId(db)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(nil)
+		return
+	}
 	json, err := json.Marshal(lastindex)
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(nil)
+		return
 	}
-	_, _ = w.Write(json)
+	_, err = w.Write(json)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(nil)
+		return
+	}
 }

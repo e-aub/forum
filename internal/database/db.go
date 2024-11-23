@@ -49,7 +49,7 @@ func CleanupExpiredSessions(db *sql.DB) {
 	}
 }
 
-func Insert_Post(p *utils.Posts, db *sql.DB, categories []string) (int64, error) {
+func InsertPost(p *utils.Posts, db *sql.DB, categories []string) (int64, error) {
 	transaction, err := db.Begin()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error starting transaction:", err)
@@ -92,7 +92,7 @@ func Insert_Post(p *utils.Posts, db *sql.DB, categories []string) (int64, error)
 	return lastPostID, nil
 }
 
-func Update_Post(p *utils.Posts, db *sql.DB) {
+func UpdatePost(p *utils.Posts, db *sql.DB) {
 	statement, err := db.Prepare(`UPDATE posts
 	SET title=?,
 	content = ?,
@@ -108,7 +108,7 @@ func Update_Post(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func Delete_Post(p *utils.Posts, db *sql.DB) {
+func DeletePost(p *utils.Posts, db *sql.DB) {
 	statement, err := db.Prepare(`DELETE FROM posts WHERE id = ?`)
 	if err != nil {
 		log.Fatal(err)
@@ -119,13 +119,16 @@ func Delete_Post(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func Read_Post(id int, db *sql.DB, userId int) *utils.Posts {
+func ReadPost(db *sql.DB, userId int, postId int) (*utils.Posts, error) {
 	query := `SELECT * FROM posts WHERE id = ?`
-	row := db.QueryRow(query, id)
-	Post := &utils.Posts{}
-	err := row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.LikeCount, &Post.DislikeCount, &Post.Created_At)
+	row, err := utils.QueryRow(db, query, postId)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
+	}
+	Post := &utils.Posts{}
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.LikeCount, &Post.DislikeCount, &Post.Created_At)
+	if err != nil {
+		return nil, err
 	}
 
 	if userId <= 0 {
@@ -136,9 +139,9 @@ func Read_Post(id int, db *sql.DB, userId int) *utils.Posts {
 	}
 	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	return Post
+	return Post, nil
 }
 func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool) {
 	// Query to check for likes or dislikes for the given user and post.
@@ -173,12 +176,18 @@ func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool
 	}
 }
 
-func Get_Last(db *sql.DB) int {
+func GetLastPostId(db *sql.DB) (int, error) {
 	query := `SELECT MAX(id) FROM posts `
-	row := db.QueryRow(query)
+	row, err := utils.QueryRow(db, query)
+	if err != nil {
+		return 0, err
+	}
 	result := 0
-	_ = row.Scan(&result)
-	return result
+	err = row.Scan(&result)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
 }
 
 func Get_session(ses string, db *sql.DB) (int, error) {
@@ -235,7 +244,7 @@ func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
     WHERE comments.post_id = ?
 	ORDER BY comments.created_at DESC;
 	`
-	rows, err := db.Query(query, postID)
+	rows, err := utils.QueryRows(db, query, postID)
 	if err != nil {
 		return nil, errors.New(err.Error() + "here 1")
 	}
@@ -261,31 +270,6 @@ func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 		return nil, errors.New(err.Error() + "here 3")
 	}
 	return comments, nil
-}
-
-func GetCategoryContent(db *sql.DB, categoryId string) ([]utils.Posts, error) {
-	stmt, err := db.Prepare(`SELECT posts.*
-	FROM post_categories
-	JOIN posts ON post_categories.post_id = posts.id
-	WHERE post_categories.category_id = ?
-	`)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(categoryId)
-	if err != nil {
-		return nil, err
-	}
-	var res []utils.Posts
-	for rows.Next() {
-		var post utils.Posts
-		err := rows.Scan(&post.PostId, &post.UserId, &post.Title, &post.Content, &post.Created_At)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, post)
-	}
-	return res, nil
 }
 
 func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, error) {
@@ -323,7 +307,11 @@ func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, er
 
 func GetUserName(id int, db *sql.DB) (string, error) {
 	var name string
-	err := db.QueryRow("SELECT username FROM users WHERE id = ?", id).Scan(&name)
+	row, err := utils.QueryRow(db, "SELECT username FROM users WHERE id = ?", id)
+	if err != nil {
+		return "", err
+	}
+	err = row.Scan(&name)
 	if err != nil {
 		return "", err
 	}

@@ -50,7 +50,12 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
-		template.Execute(w, string(jsonIds))
+		err = template.Execute(w, string(jsonIds))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
 	} else {
 		withCreatedAndDeleted := false
 		if userId != 0 {
@@ -68,7 +73,12 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
-		template.Execute(w, categories)
+		err = template.Execute(w, categories)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -77,9 +87,9 @@ func GetCategories(db *sql.DB, withLikedAndCreated bool) ([]models.Category, err
 	var err error
 	var rows *sql.Rows
 	if withLikedAndCreated {
-		rows, err = db.Query(`SELECT id, name, description FROM categories`)
+		rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories`)
 	} else {
-		rows, err = db.Query(`SELECT id, name, description FROM categories WHERE id != 1 AND id != 2`)
+		rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories WHERE id != 1 AND id != 2`)
 	}
 	if err != nil {
 		return nil, err

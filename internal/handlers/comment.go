@@ -11,10 +11,6 @@ import (
 )
 
 func CommentsApiHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	if r.URL.Path != "/api/comments" {
-		utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, 404)
-	}
-
 	switch r.Method {
 	case "GET": //"http://localhost:8080/api/comments?post=${post.id}
 		postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
