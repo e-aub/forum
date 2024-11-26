@@ -21,12 +21,12 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 		case "post":
 			insertQuery = `INSERT INTO reactions (type_id, user_id, post_id) 
 			VALUES (?, ?, ?)
-			ON CONFLICT (user_id, post_id, comment_id) DO UPDATE SET type_id = EXCLUDED.type_id;
+			ON CONFLICT (user_id, post_id) DO UPDATE SET type_id = EXCLUDED.type_id;
 			`
 		case "comment":
 			insertQuery = `INSERT INTO reactions (type_id, user_id, comment_id) 
 			VALUES (?, ?, ?)
-			ON CONFLICT (user_id, post_id, comment_id) DO UPDATE SET type_id = EXCLUDED.type_id;
+			ON CONFLICT (user_id, comment_id) DO UPDATE SET type_id = EXCLUDED.type_id;
 			`
 		}
 		_, err := db.Exec(insertQuery, reactionType, userID, id)
