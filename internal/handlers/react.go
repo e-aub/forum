@@ -74,14 +74,14 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 
 func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	target := r.URL.Query().Get("target")
-	id := r.URL.Query().Get("id")
+	id := r.URL.Query().Get("target_id")
 	user := r.URL.Query().Get("user")
 	var query string
 	var rows *sql.Rows
 	switch target {
 	case "post":
 		if user == "false" || user == "" {
-			query = `SELECT reactions.user_id, reactions.post_id, reaction_type.name 
+			query = `SELECT reactions.user_id, reactions.post_id, reaction_type.name, reaction_id 
 			FROM reactions 
 			JOIN reaction_type 
 			ON reactions.type_id = reaction_type.reaction_id 
@@ -94,25 +94,34 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 			}
 			defer rows.Close()
 		} else if user == "true" {
-			query = `SELECT reactions.user_id, reactions.post_id, reaction_type.name 
+			query = `SELECT reactions.user_id, reactions.post_id, reaction_type.name, reaction_id 
 			FROM reactions 
 			JOIN reaction_type 
 			ON reactions.type_id = reaction_type.reaction_id 
 			WHERE reactions.post_id = ? AND reactions.user_id = ?;`
-			var err error
-			rows, err = utils.QueryRows(db, query, id, userId)
-			if err != nil {
+			row, err := utils.QueryRow(db, query, id, userId)
+			if err != nil && err != sql.ErrNoRows {
+				fmt.Println(err)
 				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Internal Server Error"}`)
 				return
 			}
-			defer rows.Close()
+			reaction := utils.Reaction{}
+			err = row.Scan(&reaction.UserId, &reaction.TargetId, &reaction.Name, &reaction.ReactionId)
+			if err != nil && err != sql.ErrNoRows {
+				fmt.Println(err)
+
+				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Internal Server Error"}`)
+				return
+			}
+			utils.RespondWithJSON(w, http.StatusOK, reaction)
+			return
 		} else {
 			utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request"}`)
 			return
 		}
 	case "comment":
 		if user == "false" || user == "" {
-			query = `SELECT reactions.user_id, reactions.comment_id, reaction_type.name 
+			query = `SELECT reactions.user_id, reactions.comment_id, reaction_type.name, reaction_id 
 			FROM reactions 
 			JOIN reaction_type 
 			ON reactions.type_id = reaction_type.reaction_id 
@@ -125,18 +134,24 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 			}
 			defer rows.Close()
 		} else if user == "true" {
-			query = `SELECT reactions.user_id, reactions.comment_id, reaction_type.name 
+			query = `SELECT reactions.user_id, reactions.comment_id, reaction_type.name, reaction_id 
 			FROM reactions 
 			JOIN reaction_type 
 			ON reactions.type_id = reaction_type.reaction_id 
 			WHERE reactions.comment_id = ? AND reactions.user_id = ?;`
-			var err error
-			rows, err = utils.QueryRows(db, query, id, userId)
+			row, err := utils.QueryRow(db, query, id, userId)
 			if err != nil {
 				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Internal Server Error"}`)
 				return
 			}
-			defer rows.Close()
+			reaction := utils.Reaction{}
+			err = row.Scan(&reaction.UserId, &reaction.TargetId, &reaction.Name, &reaction.ReactionId)
+			if err != nil && err != sql.ErrNoRows {
+				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Internal Server Error1"}`)
+				return
+			}
+			utils.RespondWithJSON(w, http.StatusOK, reaction)
+			return
 		} else {
 			utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request"}`)
 			return
@@ -145,7 +160,7 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 	var reactions []utils.Reaction
 	for rows.Next() {
 		var reaction utils.Reaction
-		err := rows.Scan(&reaction.UserId, &reaction.TargetId, &reaction.Name)
+		err := rows.Scan(&reaction.UserId, &reaction.TargetId, &reaction.Name, &reaction.ReactionId)
 		if err != nil {
 			utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Internal Server Error"}`)
 			return

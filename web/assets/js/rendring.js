@@ -46,13 +46,38 @@ export function RenderPost(posts) {
   });
 }
 
-function addReactionButtons(post, postId) {
+async function addReactionButtons(post, postId) {
   let likeButtonClicked = false
   const reactionContainer = post.querySelector('.reaction-container');
+  let params = {
+    "user" : "true",
+    "target": "post",
+    "target_id": postId,
+  }
+  let queryString = new URLSearchParams(params).toString();
+  try{
+    const response = await fetch(`http://localhost:8080/react?${queryString}`,{
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    var currentPostReaction = await response.json()
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+  }catch(err){
+    console.log(err)
+    return
+  }
+  console.log(currentPostReaction);
+  const src = currentPostReaction.reaction_id ? "/assets/icons/" + currentPostReaction.reaction_id  + ".png" : "/assets/icons/noReaction.png";
+  const name = currentPostReaction.name ?  currentPostReaction.name : "Like";
+  likeButtonClicked = !!currentPostReaction;
   reactionContainer.innerHTML = `
    <button class="reaction-button" id="reactionButton">
-      <img id="selectedReactionImage" src="/assets/icons/noReaction.png" alt="No Reaction">
-      <span id="selectedReactionText">React</span>
+      <img id="selectedReactionImage" src=${src} alt="No Reaction">
+      <span id="selectedReactionText">${name}</span>
     </button>
     <div class="reactions" id="reactions">
       <div class="reaction-option" data-text="like">
@@ -91,6 +116,7 @@ function addReactionButtons(post, postId) {
   const selectedReactionImage = post.querySelector('#selectedReactionImage');
   const selectedReactionText = post.querySelector('#selectedReactionText');
 
+
    // Show reactions on hover
    reactionButton.addEventListener('mouseenter', () => {
     reactions.style.display = 'flex';
@@ -105,7 +131,7 @@ function addReactionButtons(post, postId) {
     }, 100);
   });
 
-  reactionButton.addEventListener('click', () => {
+  reactionButton.addEventListener('click', async () => {
     likeButtonClicked = !likeButtonClicked;
     if (likeButtonClicked) {
       selectedReactionImage.src = 'assets/icons/like.png';
@@ -116,24 +142,32 @@ function addReactionButtons(post, postId) {
         "target_id": postId,
       }
       let queryString = new URLSearchParams(params).toString();
-      fetch(`http://localhost:8080/react?${queryString}`,{
+      let response = await fetch(`http://localhost:8080/react?${queryString}`,{
         method: "PUT",
         headers: {
           'Content-Type': 'application/json'
         }
       })
+      if (!response.ok) {
+        console.log("Network response was not ok");
+        return
+      }
     }else{
       let params = {
         "target": "post",
         "target_id": postId,
       }
       let queryString = new URLSearchParams(params).toString();
-      fetch(`http://localhost:8080/react?${queryString}`,{
+      let response = await fetch(`http://localhost:8080/react?${queryString}`,{
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json'
         }
       })
+      if (!response.ok) {
+        console.log("Network response was not ok");
+        return
+      }
       selectedReactionImage.src = 'assets/icons/noReaction.png';}
       selectedReactionText.textContent = 'Like';
   })

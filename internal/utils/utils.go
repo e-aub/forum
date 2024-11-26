@@ -25,9 +25,10 @@ type Post struct {
 }
 
 type Reaction struct {
-	UserId   int    `json:"user_id"`
-	TargetId int    `json:"target_id"`
-	Name     string `json:"name"`
+	UserId     int    `json:"user_id"`
+	TargetId   int    `json:"target_id"`
+	ReactionId string `json:"reaction_id"`
+	Name       string `json:"name"`
 }
 
 type Comment struct {
