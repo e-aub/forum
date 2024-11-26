@@ -1,12 +1,11 @@
 import { RenderPost } from "./rendring.js"
-import {handleReact} from "./likes.js"
 
 export const GetData = async (postIds) => {
     let target = []
     try{
         if (postIds === false) {
             postIds = [];
-            let response = await fetch('http://localhost:8080/api/posts');
+            let response = await fetch('http://localhost:8080/posts');
             if (!response.ok) throw new Error("Network response was not ok");
             let lastPostId = await response.json();
             for (let postId = 1; postId <= lastPostId; postId++) {
@@ -14,7 +13,7 @@ export const GetData = async (postIds) => {
             }
         }
         for (let i = postIds.length - 1; i >= 0; i--) {
-            let link = `http://localhost:8080/api/posts?id=${postIds[i]}`;
+            let link = `http://localhost:8080/posts?post_id=${postIds[i]}`;
             let postResponse = await fetch(link);
             if (!postResponse.ok) throw new Error("Failed to fetch post data");
             let post = await postResponse.json();
@@ -30,7 +29,7 @@ export const GetData = async (postIds) => {
 
 export const getComment = async (post, id) => {
     try {
-        const res = await fetch(`http://localhost:8080/api/comments?post=${id}`)
+        const res = await fetch(`http://localhost:8080/comments?post=${id}`)
         if (res.ok) {
             const allComment = await res.json()
             if (allComment) {
@@ -40,31 +39,9 @@ export const getComment = async (post, id) => {
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
-                    <div class="likes">
-                    <button data-clicked="${comment.clicked}"  class="com_like" 
-                    style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
-                        Like <span class="count">${comment.like_count}</span>
-                    </button>
-                    <button data-clicked="${comment.disclicked}"  class="com_dislike" 
-                    style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
-                        Dislike <span class="count">${comment.dislike_count}</span>
-                    </button>
-                    </div>
                     `;
-
                     post.insertAdjacentElement('beforeend', com);
-
-                    // Add event listeners for like and dislike buttons
-                    const likeButton = com.querySelector('.com_like');
-                    const dislikeButton = com.querySelector('.com_dislike');
-
-                    likeButton.addEventListener('click', async () => {
-                        await handleReact(likeButton, dislikeButton,comment.comment_id, 'like', "comment");
-                    });
-
-                    dislikeButton.addEventListener('click', async () => {
-                        await handleReact(dislikeButton, likeButton, comment.comment_id, 'dislike', "comment");
-                    });
+              
                 }
             }
         }
@@ -76,7 +53,7 @@ export const getComment = async (post, id) => {
 export const logoutEvent = (log) => {
     log.addEventListener('click', async () => {
         try {
-            const response = await fetch('http://localhost:8080/api/logout', {
+            const response = await fetch('http://localhost:8080/logout', {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -92,3 +69,4 @@ export const logoutEvent = (log) => {
         }
     });
 }
+

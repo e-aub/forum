@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/post.css">
+    <link rel="stylesheet" href="/assets/css/post.css">
     <title>Home</title>
 </head>
 
@@ -20,10 +20,10 @@
         </div>
     </header>
 
-    <div class="container">
+    <div class="posts-container">
     </div>
     <script type="module">
-        import { GetData, logoutEvent } from './assets/script.js';
+        import { GetData, logoutEvent } from './assets/js/script.js';
         let postIds = JSON.parse('{{.}}')
         GetData(postIds);
         const log = document.getElementById('login-logout')

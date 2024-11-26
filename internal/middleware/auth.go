@@ -2,10 +2,12 @@ package auth
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
 	"forum/internal/database"
+	"forum/internal/utils"
 )
 
 type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
@@ -14,14 +16,15 @@ func AuthMiddleware(db *sql.DB) func(customHandler) http.Handler {
 	return func(next customHandler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userId, _ := ValidUser(r, db)
-			// if userId <= 0 || err != nil {
-			// 	if strings.HasPrefix(r.URL.Path, "/api") {
-			// 		utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
-			// 		return
-			// 	}
-			// 	http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			// 	return
-			// }
+			if userId <= 0 {
+				fmt.Println(r.Header.Get("Content-Type"))
+				if r.Header.Get("Content-Type") == "application/json" {
+					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
+					return
+				}
+				utils.RespondWithError(w, utils.Err{Message: "You are unauthorized, please log in", Unauthorized: true}, http.StatusUnauthorized)
+				return
+			}
 			next(w, r, db, userId)
 		})
 	}
@@ -54,7 +57,10 @@ func GetPasswordByUsername(db *sql.DB, username string) (string, error) {
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return 0, err
+		if err != http.ErrNoCookie {
+			return 0, err
+		}
+		return 0, nil
 	}
 	userid, err := database.Get_session(cookie.Value, db)
 	if err != nil {

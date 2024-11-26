@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/register.css">
+    <link rel="stylesheet" href="./assets/css/register.css">
     <title>Register</title>
 </head>
 
@@ -64,7 +64,7 @@
 
             // Send data to the API if validation passes
             try {
-                const response = await fetch("http://localhost:8080/api/users", {
+                const response = await fetch("http://localhost:8080/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -76,6 +76,7 @@
                 if (response.ok) {
                     messageElement.textContent = "Registration successful!";
                     messageElement.style.color = "green";
+                    window.location.href = '/';
                 } else {
                     const errorData = await response.text();  // Get error text
                     messageElement.textContent = `Error: ${errorData}`;

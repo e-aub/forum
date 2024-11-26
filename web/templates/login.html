@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/login.css">
+    <link rel="stylesheet" href="./assets/css/login.css">
     <title>Login</title>
 </head>
 
@@ -51,7 +51,7 @@
 
             // Send data to the API if validation passes
             try {
-                const response = await fetch("http://localhost:8080/api/login", {
+                const response = await fetch("http://localhost:8080/login", {
                     method: "POST",
 
                     headers: {

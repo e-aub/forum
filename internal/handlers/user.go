@@ -20,11 +20,7 @@ var requestData struct {
 	Password string `json:"password"`
 }
 
-func Register(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
-		return
-	}
+func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("web/templates/register.html")
 	if err != nil {
 		http.Error(w, "template not found", http.StatusInternalServerError)
@@ -37,11 +33,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Register_Api(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
-		return
-	}
+func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
@@ -99,15 +91,10 @@ func Register_Api(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		Expires: expiration,
 	})
 	w.WriteHeader(http.StatusOK)
-
-	http.Redirect(w, r, "/", http.StatusPermanentRedirect)
+	w.Write(nil)
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
-		return
-	}
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("web/templates/login.html")
 	if err != nil {
 		http.Error(w, "template not found", http.StatusInternalServerError)
@@ -120,11 +107,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Login_Api(db *sql.DB, w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
-		return
-	}
+func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)

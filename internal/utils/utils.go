@@ -14,18 +14,20 @@ type Err struct {
 	Message      string
 	Unauthorized bool
 }
-type Posts struct {
-	PostId       int
-	UserId       int
-	UserName     string
-	Title        string
-	Categories   []string
-	Content      string
-	LikeCount    int
-	DislikeCount int
-	Created_At   time.Time
-	Clicked      bool
-	DisClicked   bool
+type Post struct {
+	PostId     int
+	UserId     int
+	UserName   string
+	Title      string
+	Categories []string
+	Content    string
+	Created_At time.Time
+}
+
+type Reaction struct {
+	UserId   int    `json:"user_id"`
+	TargetId int    `json:"target_id"`
+	Name     string `json:"name"`
 }
 
 type Comment struct {
@@ -41,20 +43,22 @@ type Comment struct {
 	DisClicked   bool   `json:"disclicked"`
 }
 
-func Creat_New_Post() *Posts {
-	return &Posts{}
+type ContextValues struct {
+	Db     *sql.DB
+	UserId int
 }
 
 func Creat_New_Comment() *Comment {
 	return &Comment{}
 }
 
-func (p *Posts) Update_Post(title string, content string, time time.Time) {
+func (p *Post) Update_Post(title string, content string, time time.Time) {
 	p.Title = title
 	p.Content = content
 }
 
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	response, err := json.Marshal(payload)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -80,7 +84,7 @@ type Rows struct {
 	Rows *sql.Rows
 }
 
-func QueryRows(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+func QueryRows(db *sql.DB, query string, args ...any) (*sql.Rows, error) {
 	stmt, err := db.Prepare(query)
 	if err != nil {
 		return nil, err
@@ -93,9 +97,9 @@ func QueryRows(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error)
 	return rows, nil
 }
 
-func QueryRow(db *sql.DB, query string, args ...interface{}) (*sql.Row, error) {
+func QueryRow(db *sql.DB, query string, args ...any) (*sql.Row, error) {
 	stmt, err := db.Prepare(query)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 	defer stmt.Close()

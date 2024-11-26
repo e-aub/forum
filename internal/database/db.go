@@ -34,7 +34,7 @@ func CreateDatabase(dbPath string) *sql.DB {
 }
 
 func CreateTables(db *sql.DB) {
-	_, err := db.Exec(database.UsersTable + database.SessionsTable + database.LikesTable +
+	_, err := db.Exec(database.UsersTable + database.SessionsTable + database.ReactionTable + database.ReactionsTypeTable +
 		database.CommentsTable + database.PostsTable + database.CategoriesTable + database.PostCategoriesTable)
 	if err != nil {
 		log.Fatalln(err)
@@ -49,7 +49,7 @@ func CleanupExpiredSessions(db *sql.DB) {
 	}
 }
 
-func InsertPost(p *utils.Posts, db *sql.DB, categories []string) (int64, error) {
+func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
 	transaction, err := db.Begin()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error starting transaction:", err)
@@ -92,7 +92,7 @@ func InsertPost(p *utils.Posts, db *sql.DB, categories []string) (int64, error) 
 	return lastPostID, nil
 }
 
-func UpdatePost(p *utils.Posts, db *sql.DB) {
+func UpdatePost(p *utils.Post, db *sql.DB) {
 	statement, err := db.Prepare(`UPDATE posts
 	SET title=?,
 	content = ?,
@@ -108,7 +108,7 @@ func UpdatePost(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func DeletePost(p *utils.Posts, db *sql.DB) {
+func DeletePost(p *utils.Post, db *sql.DB) {
 	statement, err := db.Prepare(`DELETE FROM posts WHERE id = ?`)
 	if err != nil {
 		log.Fatal(err)
@@ -119,28 +119,23 @@ func DeletePost(p *utils.Posts, db *sql.DB) {
 	}
 }
 
-func ReadPost(db *sql.DB, userId int, postId int) (*utils.Posts, error) {
+func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row, err := utils.QueryRow(db, query, postId)
 	if err != nil {
 		return nil, err
 	}
-	Post := &utils.Posts{}
-	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.LikeCount, &Post.DislikeCount, &Post.Created_At)
+	Post := &utils.Post{}
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
 	if err != nil {
 		return nil, err
 	}
 
-	if userId <= 0 {
-		Post.Clicked = false
-		Post.DisClicked = false
-	} else {
-		Post.Clicked, Post.DisClicked = isLiked(db, userId, Post.PostId, "post")
-	}
 	Post.UserName, err = GetUserName(int(Post.UserId), db)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(Post)
 	return Post, nil
 }
 func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool) {
