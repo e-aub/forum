@@ -21,15 +21,23 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("web/templates/posts.html")
+		tmpl, err := template.ParseFiles("web/templates/base.html")
 		if err != nil {
 			log.Println("Error loading template:", err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
-		if err := tmpl.Execute(w, false); err != nil {
+		feed := struct {
+			Style string
+			Posts bool
+		}{
+			Style: "post.css",
+			Posts: false,
+		}
+		err = tmpl.ExecuteTemplate(w, "base", feed)
+		if err != nil {
 			log.Println("Error executing template:", err)
-			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		}
 		return
 	}
