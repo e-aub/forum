@@ -47,35 +47,39 @@ export function RenderPost(posts) {
 }
 
 async function addReactionButtons(post, postId) {
-  let likeButtonClicked = false
+  let likeButtonClicked = false; // Start with false until determined by the API
   const reactionContainer = post.querySelector('.reaction-container');
   let params = {
-    "user" : "true",
+    "user": "true",
     "target": "post",
     "target_id": postId,
-  }
+  };
   let queryString = new URLSearchParams(params).toString();
-  try{
-    const response = await fetch(`http://localhost:8080/react?${queryString}`,{
+  
+  try {
+    const response = await fetch(`http://localhost:8080/react?${queryString}`, {
       method: "GET",
       headers: {
         'Content-Type': 'application/json'
       }
-    })
-    var currentPostReaction = await response.json()
+    });
+    var currentPostReaction = await response.json();
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-  }catch(err){
-    console.log(err)
-    return
+    likeButtonClicked = !!currentPostReaction.reaction_id; 
+  } catch (err) {
+    console.log(err);
+    return;
   }
-  console.log(currentPostReaction);
-  const src = currentPostReaction.reaction_id ? "/assets/icons/" + currentPostReaction.reaction_id  + ".png" : "/assets/icons/noReaction.png";
-  const name = currentPostReaction.name ?  currentPostReaction.name : "Like";
-  likeButtonClicked = !!currentPostReaction;
+
+  const src = currentPostReaction.reaction_id
+    ? "/assets/icons/" + currentPostReaction.reaction_id + ".png"
+    : "/assets/icons/noReaction.png";
+  const name = currentPostReaction.name || "Like";
+
   reactionContainer.innerHTML = `
-   <button class="reaction-button" id="reactionButton">
+    <button class="reaction-button" id="reactionButton">
       <img id="selectedReactionImage" src=${src} alt="No Reaction">
       <span id="selectedReactionText">${name}</span>
     </button>
@@ -109,20 +113,19 @@ async function addReactionButtons(post, postId) {
         <span>Love</span>
       </div>
     </div>
-  `
+  `;
 
   const reactionButton = post.querySelector('#reactionButton');
   const reactions = post.querySelector('#reactions');
   const selectedReactionImage = post.querySelector('#selectedReactionImage');
   const selectedReactionText = post.querySelector('#selectedReactionText');
 
-
-   // Show reactions on hover
-   reactionButton.addEventListener('mouseenter', () => {
+  //show reactions on hover
+  reactionButton.addEventListener('mouseenter', () => {
     reactions.style.display = 'flex';
   });
 
-  // Hide reactions when leaving the reaction container
+  //hide reaction whem the mouse leace raction container
   reactionButton.addEventListener('mouseleave', () => {
     setTimeout(() => {
       if (!reactions.matches(':hover')) {
@@ -133,83 +136,85 @@ async function addReactionButtons(post, postId) {
 
   reactionButton.addEventListener('click', async () => {
     likeButtonClicked = !likeButtonClicked;
-    if (likeButtonClicked) {
-      selectedReactionImage.src = 'assets/icons/like.png';
-      selectedReactionText.textContent = 'Like';
-      let params = {
-        "type": "like",
-        "target": "post",
-        "target_id": postId,
-      }
-      let queryString = new URLSearchParams(params).toString();
-      let response = await fetch(`http://localhost:8080/react?${queryString}`,{
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) {
-        console.log("Network response was not ok");
-        return
-      }
-    }else{
+    if (!likeButtonClicked) {
+      //remove raction
       let params = {
         "target": "post",
         "target_id": postId,
-      }
+      };
       let queryString = new URLSearchParams(params).toString();
-      let response = await fetch(`http://localhost:8080/react?${queryString}`,{
+      const response = await fetch(`http://localhost:8080/react?${queryString}`, {
         method: "DELETE",
         headers: {
           'Content-Type': 'application/json'
         }
-      })
+      });
       if (!response.ok) {
         console.log("Network response was not ok");
-        return
+        return;
       }
-      selectedReactionImage.src = 'assets/icons/noReaction.png';}
+      selectedReactionImage.src = '/assets/icons/noReaction.png';
       selectedReactionText.textContent = 'Like';
-  })
+    } else {
+      // add like raacion
+      let params = {
+        "type": "like",
+        "target": "post",
+        "target_id": postId,
+      };
+      let queryString = new URLSearchParams(params).toString();
+      const response = await fetch(`http://localhost:8080/react?${queryString}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        console.log("Network response was not ok");
+        return;
+      }
+      selectedReactionImage.src = '/assets/icons/like.png';
+      selectedReactionText.textContent = 'Like';
+    }
+  });
+
   reactions.addEventListener('mouseleave', () => {
     reactions.style.display = 'none';
   });
 
   // Handle reaction selection
-  reactions.addEventListener('click', (event) => {
-    likeButtonClicked = true;
+  reactions.addEventListener('click', async (event) => {
     const reactionOption = event.target.closest('.reaction-option');
     if (reactionOption) {
       const reactionImage = reactionOption.querySelector('img').src;
-      var reactionText = reactionOption.dataset.text;
-      selectedReactionImage.src = reactionImage;
-      selectedReactionText.textContent = reactionText;
-      reactions.style.display = 'none';
-    }
-    console.log("reaction-text", reactionText)
-    let params = {
-      "type": reactionText,
-      "target": "post",
-      "target_id": postId,
-      
-    }
-    let stringParams = new URLSearchParams(params).toString()
-    fetch(`http://localhost:8080/react?${stringParams}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      const reactionText = reactionOption.dataset.text;
 
-    }).then(response => response.json())
-      .then(data => {
-        console.log(data);
-      })
-      .catch(error => {
+      let params = {
+        "type": reactionText,
+        "target": "post",
+        "target_id": postId,
+      };
+      let stringParams = new URLSearchParams(params).toString();
+      try {
+        const response = await fetch(`http://localhost:8080/react?${stringParams}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        });
+        if (!response.ok) {
+          throw new Error("error while adding reaction");
+        }
+        selectedReactionImage.src = reactionImage;
+        selectedReactionText.textContent = reactionText;
+        reactions.style.display = 'none';
+      } catch (error) {
         console.error(error);
-      });
+      }
+    }
   });
-
 }
+
 const createComment = async (post, comment_part, post_id) => {
   const comment = post.querySelector('.comment-input')
   post.querySelector('.comment-submit').addEventListener('click', async (e) => {
