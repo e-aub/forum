@@ -21,10 +21,15 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("web/templates/base.html")
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/posts.html",
+		}
+		tmpl, err := template.ParseFiles(files...)
 		if err != nil {
 			log.Println("Error loading template:", err)
-			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
 		}
 		feed := struct {

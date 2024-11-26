@@ -181,11 +181,32 @@ async function addReactionButtons(post, postId) {
     const reactionOption = event.target.closest('.reaction-option');
     if (reactionOption) {
       const reactionImage = reactionOption.querySelector('img').src;
-      const reactionText = reactionOption.dataset.text;
+      var reactionText = reactionOption.dataset.text;
       selectedReactionImage.src = reactionImage;
       selectedReactionText.textContent = reactionText;
       reactions.style.display = 'none';
     }
+    console.log("reaction-text", reactionText)
+    let params = {
+      "type": reactionText,
+      "target": "post",
+      "target_id": postId,
+      
+    }
+    let stringParams = new URLSearchParams(params).toString()
+    fetch(`http://localhost:8080/react?${stringParams}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+    }).then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   });
 
 }
