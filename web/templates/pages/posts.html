@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/post.css">
-    <title>Home</title>
-</head>
-
-<body>
+{{define "header"}}
     <header class="navbar">
         <div class="newPost">
             <button class="new-post-button" onclick="window.location.href='/New_Post'">New Post</button>
@@ -19,7 +9,10 @@
             <button id="register">Register</button>
         </div>
     </header>
+{{end}}
 
+
+{{define "main"}}
     <div class="container">
     </div>
     <script type="module">
@@ -42,6 +35,4 @@
             })
         }
     </script>
-</body>
-
-</html>
+{{end}}
