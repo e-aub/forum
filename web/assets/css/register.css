@@ -77,3 +77,11 @@ button[type="submit"]:hover {
     background-color: var(--primary-text);
     color: var(--background);
 }
+
+@media screen and (min-width: 50rem) {
+	body {
+		border-left: 4px solid var(--background) ;
+		border-right: 4px solid var(--background) ;
+		padding: 1rem 2rem;
+	}
+}

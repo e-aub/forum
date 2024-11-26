@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+{{define "header"}}
+{{end}}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/css/login.css">
-    <title>Login</title>
-</head>
-
-<body>
-    <h2>Login</h2>
+{{define "main"}}
+<h2>Login</h2>
     <form id="loginForm" action="/login" method="post">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
@@ -78,6 +71,4 @@
             }
         });
     </script>
-</body>
-
-</html>
+{{end}}
