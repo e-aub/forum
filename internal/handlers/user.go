@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,16 +22,28 @@ var requestData struct {
 }
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("web/templates/register.html")
+	path := "./web/templates/"
+	files := []string{
+		path + "base.html",
+		path + "pages/register.html",
+	}
+	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
-		http.Error(w, "template not found", http.StatusInternalServerError)
+		log.Println("Error loading template:", err)
+		http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		return
 	}
-
-	if err := t.Execute(w, nil); err != nil {
-		http.Error(w, "Error executing template", http.StatusInternalServerError)
-		return
+	feed := struct {
+		Style string
+	}{
+		Style: "register.css",
 	}
+	err = tmpl.ExecuteTemplate(w, "base", feed)
+	if err != nil {
+		log.Println("Error executing template:", err)
+		http.Error(w, "500 internal server error", http.StatusInternalServerError)
+	}
+	return
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
