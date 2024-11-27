@@ -13,21 +13,19 @@ export function RenderPost(posts) {
     post.innerHTML = `
     <article>
         <header>
-            <hgroup>
               <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
-              <p>${formattedDate}</p>
-            <hgroup>
+              <p><time>${formattedDate}</time></p>
         </header>
         <main>
-          <div class="post-content">
-              <h2>${element.Title}</h2>
-              <p> ${element.Content}</p>
-          </div>
+          <section class="post-content">
+            <h2>${element.Title}</h2>
+            <p>${element.Content}</p>
+          </section>
         </main>
         <footer>
           <nav>
             <div class="reaction-container"></div>
-            <button class="comment-button">Comments</button>
+            <button class="comment-button" aria-label="View Comments">Comments</button>
           </nav>
         </footer>
     </article> 
