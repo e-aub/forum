@@ -1,4 +1,4 @@
-import { RenderPost } from "./rendring.js"
+import { RenderPost, addReactionButtons } from "./rendring.js"
 
 export const GetData = async (postIds) => {
     let target = []
@@ -39,7 +39,11 @@ export const getComment = async (post, id) => {
                     com.innerHTML = `
                     <strong>${comment.user_name}:</strong>
                     <strong>${comment.content}:</strong>
+                    <div class="reaction-container"></div>
                     `;
+                    console.log(comment)
+                    addReactionButtons("comment", com, comment.comment_id)
+
                     post.insertAdjacentElement('beforeend', com);
               
                 }
