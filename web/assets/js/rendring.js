@@ -8,17 +8,29 @@ export function RenderPost(posts) {
     const post = document.createElement('div');
     post.classList.add('post');
     console.log(element)
+    const createdAt = new Date(element.Created_At);
+    const formattedDate = createdAt.toLocaleDateString('en-US') + ' ' + createdAt.toLocaleTimeString('en-US');
     post.innerHTML = `
-        <div class="post-header">
-            <span class="post-index"> ${element.Title}</span>
-        </div>
-        <div class="post-content">
-            <p><strong>User name:</strong> ${element.UserName}</p>
-            <p><strong>Content:</strong> ${element.Content}</p>
-            <p><strong>Time:</strong> ${element.Created_At}</p>
-            <p><strong>Category:</strong> ${element.Categories.join(', ')}</p>
+    <article>
+        <header>
+            <hgroup>
+              <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
+              <p>${formattedDate}</p>
+            <hgroup>
+        </header>
+        <main>
+          <div class="post-content">
+              <h2>${element.Title}</h2>
+              <p> ${element.Content}</p>
+          </div>
+        </main>
+        <footer>
+          <nav>
             <div class="reaction-container"></div>
             <button class="comment-button">Comments</button>
+          </nav>
+        </footer>
+    </article> 
         `;
     addReactionButtons(post, element.PostId)
     let display_comment = false
@@ -55,7 +67,7 @@ async function addReactionButtons(post, postId) {
     "target_id": postId,
   };
   let queryString = new URLSearchParams(params).toString();
-  
+
   try {
     const response = await fetch(`http://localhost:8080/react?${queryString}`, {
       method: "GET",
@@ -67,7 +79,7 @@ async function addReactionButtons(post, postId) {
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    likeButtonClicked = !!currentPostReaction.reaction_id; 
+    likeButtonClicked = !!currentPostReaction.reaction_id;
   } catch (err) {
     console.log(err);
     return;
@@ -220,7 +232,7 @@ const createComment = async (post, comment_part, post_id) => {
   post.querySelector('.comment-submit').addEventListener('click', async (e) => {
     try {
       if (comment.value) {
-        const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json'}})
+        const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json' } })
         const respons = await res.json()
         if (res.status === 401) {
           alert(respons)

@@ -4,10 +4,10 @@
 <h1>Create New Post</h1>
     <form action="/new_post" method="post">
         <h2>Title</h2>
-        <textarea name="title" placeholder="Write your title" required></textarea>
+        <textarea name="title" placeholder="Write your title" maxlength="50" required></textarea>
 
         <h2>Content</h2>
-        <textarea name="content" placeholder="Write your content here" required></textarea>
+        <textarea name="content" placeholder="Write your content here"  maxlength="150" required></textarea>
 
         <h2>Category</h2>
             {{range .Categories}}
