@@ -80,13 +80,25 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
-		template, err := template.ParseFiles("web/templates/categories.html")
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/categories.html",
+		}
+		template, err := template.ParseFiles(files...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
-		err = template.Execute(w, categories)
+		feed := struct {
+			Style      string
+			Categories []models.Category
+		}{
+			Style:      "categories.css",
+			Categories: categories,
+		}
+		err = template.ExecuteTemplate(w, "base", feed)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
