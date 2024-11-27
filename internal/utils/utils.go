@@ -14,6 +14,13 @@ type Err struct {
 	Message      string
 	Unauthorized bool
 }
+type User struct {
+	UserId   int64  `json:"id,omitempty" `
+	UserName string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Post struct {
 	PostId     int
 	UserId     int

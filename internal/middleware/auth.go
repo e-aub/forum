@@ -30,28 +30,28 @@ func AuthMiddleware(db *sql.DB) func(customHandler) http.Handler {
 	}
 }
 
-func IsUserRegistered(db *sql.DB, email, username string) (bool, error) {
+func IsUserRegistered(db *sql.DB, email, username *string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?);`
-	err := db.QueryRow(query, email, username).Scan(&exists)
+	err := db.QueryRow(query, *email, *username).Scan(&exists)
 	return exists, err
 }
 
 // Register a new user in the database
-func RegisterUser(db *sql.DB, username, email, password string) error {
+func RegisterUser(db *sql.DB, username, email, password *string) error {
 	insertQuery := `INSERT INTO users (username, email, password) VALUES (?, ?, ?);`
-	_, err := db.Exec(insertQuery, username, email, password)
+	_, err := db.Exec(insertQuery, *username, *email, *password)
 	return err
 }
 
-func GetPasswordByUsername(db *sql.DB, username string) (string, error) {
-	var password string
+func GetPasswordByUsername(db *sql.DB, userData *utils.User) error {
+	// var password string
 	query := `SELECT password FROM users WHERE username = ?;`
-	err := db.QueryRow(query, username).Scan(&password)
+	err := db.QueryRow(query, userData.UserName).Scan(userData.Password)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return password, nil
+	return nil
 }
 
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {
@@ -71,13 +71,13 @@ func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 
 func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    "",              // Clear the value
-		Expires:  time.Unix(0, 0), // Expire the cookie immediately
-		Path:     "/",             // Match original path if specified
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteStrictMode, // Match original SameSite attribute
+		Name:    "session_token",
+		Value:   "",              // Clear the value
+		Expires: time.Unix(0, 0), // Expire the cookie immediately
+		// Path:     "/",             // Match original path if specified
+		// HttpOnly: true,
+		// Secure:   true,
+		// SameSite: http.SameSiteStrictMode, // Match original SameSite attribute
 	})
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
