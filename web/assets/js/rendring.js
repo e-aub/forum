@@ -9,7 +9,7 @@ export function RenderPost(posts) {
     post.classList.add('post');
     console.log(element)
     const createdAt = new Date(element.Created_At);
-    const formattedDate = createdAt.toLocaleDateString('en-US') + ' ' + createdAt.toLocaleTimeString('en-US');
+    const formattedDate = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     post.innerHTML = `
     <article>
         <header>
