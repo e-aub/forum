@@ -70,14 +70,7 @@ time {
     color: #504f4f;
 }
 
-textarea.comment-input {
-    width: 100%;
-    border: 1px solid var(--neon-green);
-    background-color: var(--header-footer);
-    color: var(--primary-text);
-    border-radius: 5px;
-    padding: 10px;
-}
+
 
 dialog{
     border-radius: 10px;
@@ -97,8 +90,28 @@ dialog button {
 }
 
 button:focus {
-    outline: 2px solid #f90;
+    outline: 2px solid rgb(39, 241, 190);
 }
+
+.one_comment button {
+    padding: 4px 8px; 
+    font-size: 12px; 
+    border-radius: 4px;
+}
+
+.add_comment {
+    display: flex;
+    justify-content: space-between;
+}
+
+.add_comment textarea {
+    padding: 0;
+    background-color: #292929;
+    width: 90%;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
 
 @media screen and (min-width: 800px) {
     body {

@@ -50,8 +50,10 @@ export function RenderPost(args) {
                 comment.innerHTML = `
                 <div class="comments-list">
                 </div>
-                <textarea placeholder="Add a comment..." rows="4" class="comment-input"></textarea>
-                <button class="comment-submit">Submit</button>
+                <div class="add_comment" >
+                    <textarea placeholder="Add a comment..."  class="comment-input"></textarea>
+                    <button class="comment-submit">Submit</button>
+                <div>
                 `
                 post.appendChild(comment)
                 await createComment(comment, comment.querySelector('.comments-list'), element.PostId)
