@@ -1,4 +1,5 @@
 export function addLikeDislikeListeners(post, postId) {
+
     const likeButton = post.querySelector('.like');
     const dislikeButton = post.querySelector('.dislike');
 
@@ -7,8 +8,6 @@ export function addLikeDislikeListeners(post, postId) {
 }
 
 export async function handleReact(button, follow , postId, type , target_Type) {
-    // Logic to handle the "like" action
-    console.log(`Liked/disliked post/comment with ID: ${postId}`);
     // Update like count, send API request, etc.
        try {
         // Send API request
@@ -56,14 +55,10 @@ function interactiveLike(button , follow ){
         button.setAttribute("data-clicked", "false");
         button.style.backgroundColor = 'white'
     }
-    // Increment the count
 }
 
 function showRegistrationModal() {
-    // Create dialog element
     const dialog = document.createElement('dialog');
-
-
     // Create message
     const message = document.createElement('p');
     message.textContent = 'You need to be logged in to react. Please register or log in to continue.';
@@ -71,23 +66,14 @@ function showRegistrationModal() {
     // Create register button
     const registerButton = document.createElement('button');
     registerButton.textContent = 'Register Now';
-    registerButton.style.marginTop = '10px';
-    registerButton.style.padding = '10px 20px';
-    registerButton.style.fontSize = '16px';
 
     // Create login button
     const loginButton = document.createElement('button');
     loginButton.textContent = 'Login';
-    loginButton.style.marginTop = '10px';
-    loginButton.style.padding = '10px 20px';
-    loginButton.style.fontSize = '16px';
 
     // Create stay button
     const stayButton = document.createElement('button');
     stayButton.textContent = 'Stay';
-    stayButton.style.marginTop = '10px';
-    stayButton.style.padding = '10px 20px';
-    stayButton.style.fontSize = '16px';
 
     // Add event listeners
     registerButton.addEventListener('click', () => {

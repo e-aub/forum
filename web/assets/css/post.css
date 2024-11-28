@@ -81,14 +81,19 @@ textarea.comment-input {
 
 dialog{
     padding : '20px';
-    background-color : 'black';
+    background-color : rgb(43, 41, 41);
     border-radius:   '8px';
     text-align : 'center';
     max-width:  '400px';
     box-shadow:  '0 0 10px rgba(0, 0, 0, 0.1)';
-    color : 'white';
+    color : white;
 }
 
+dialog button {
+    margin-top:  10px; 
+    padding: 10px 20px ; 
+    font-size: 16px ; 
+}
 
 @media screen and (min-width: 800px) {
     body {
