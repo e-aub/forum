@@ -108,13 +108,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
 		return
 	}
-	t, err := template.ParseFiles("web/templates/login.html")
+	path := "./web/templates/"
+	files := []string{
+		path + "base.html",
+		path + "pages/login.html",
+	}
+	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
 		http.Error(w, "template not found", http.StatusInternalServerError)
 		return
 	}
-
-	if err := t.Execute(w, nil); err != nil {
+	feed := struct {
+		Style string
+	}{
+		Style: "login.css",
+	}
+	err = tmpl.ExecuteTemplate(w, "base", feed)
+	if err != nil {
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
 		return
 	}
