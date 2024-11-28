@@ -1,5 +1,5 @@
 import { getComment } from "./script.js";
-import {addLikeDislikeListeners} from "./likes.js"
+import { addLikeDislikeListeners } from "./likes.js"
 import { handleReact } from "./likes.js";
 
 export function RenderPost(args) {
@@ -9,33 +9,35 @@ export function RenderPost(args) {
     args.forEach((element, index) => {
         const post = document.createElement('div');
         post.classList.add('post');
-
+        const createdAt = new Date(element.Created_At);
+        const formattedDate = createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         post.innerHTML = `
-        <div class="post-header">
-            <span class="post-index"> ${element.Title}</span>
-        </div>
-        <div class="post-content">
-            <p><strong>User name:</strong> ${element.UserName}</p>
-            <p><strong>Content:</strong> ${element.Content}</p>
-            <p><strong>Time:</strong> ${element.Created_At}</p>
-            <p><strong>Category:</strong> ${element.Categories.join(', ')}</p>
-        </div>
-        <button class="comment-button">Comments</button>
-     <div class="likes">
-    <button 
-        data-clicked="${element.Clicked}" 
-        class="like" 
-        style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
-        Like <span class="count">${element.LikeCount}</span>
-    </button>
-    <button 
-        data-clicked="${element.DisClicked}" 
-        class="dislike" 
-        style="background-color: ${element.DisClicked ? '#15F5BA' : 'white'};">
-        Dislike <span class="count">${element.DislikeCount}</span>
-    </button>
-</div>
-        </div>
+        <article class="post">
+            <header>
+              <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
+              <p><time>${formattedDate}</time></p>
+            </header>
+            <main>
+                <section class="post-content">
+                    <h2>${element.Title}</h2>
+                    <p>${element.Content}</p>
+                </section>
+            </main>
+            <footer>
+                <div class="actions">
+                    <button class="comment-button" ><i class="fas fa-comment"></i></button>
+                    <button data-clicked="${element.Clicked}" class="like"  
+                    style="background-color: ${element.Clicked ? '#15F5BA' : 'white'};">
+                    <i class="fas fa-thumbs-up"></i> <span class="count">${element.LikeCount}</span>
+                    </button>
+                    <button 
+                    data-clicked="${element.DisClicked}" class="dislike" 
+                    style="background-color: ${element.DisClicked ? '#15F5BA' : 'white'};">
+                    <i class="fas fa-thumbs-down"></i> <span class="count">${element.DislikeCount}</span>
+                    </button>
+                </div>
+            </footer>
+        <article>
         `;
 
         addLikeDislikeListeners(post, element.PostId);
@@ -78,7 +80,7 @@ const createComment = async (post, comment_part, post_id) => {
 
                     const com = document.createElement('div');
                     com.classList.add('comment');
-com.innerHTML = `
+                    com.innerHTML = `
     <strong>${respons.user_name}:</strong>
     ${comment.value}
     <div class="likes">
@@ -105,7 +107,7 @@ com.innerHTML = `
 
                 }
                 comment.value = ''
-                
+
             }
         } catch (error) {
             console.error(error);
