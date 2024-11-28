@@ -43,11 +43,11 @@ export const getComment = async (post, id) => {
                     <div class="likes">
                     <button data-clicked="${comment.clicked}"  class="com_like" 
                     style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
-                        Like <span class="count">${comment.like_count}</span>
+                    <i class="fas fa-thumbs-up"></i> <span class="count">${comment.like_count}</span>
                     </button>
                     <button data-clicked="${comment.disclicked}"  class="com_dislike" 
                     style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
-                        Dislike <span class="count">${comment.dislike_count}</span>
+                    <i class="fas fa-thumbs-down"></i> <span class="count">${comment.dislike_count}</span>
                     </button>
                     </div>
                     `;
