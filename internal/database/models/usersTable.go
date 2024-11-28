@@ -10,7 +10,8 @@ var UsersTable = `CREATE TABLE IF NOT EXISTS users (
 `
 
 var SessionsTable = `CREATE TABLE IF NOT EXISTS sessions (
-    session_id TEXT PRIMARY KEY,      
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL UNIQUE,   
     user_id INTEGER NOT NULL,         
     expires_at DATETIME NOT NULL,    
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, 

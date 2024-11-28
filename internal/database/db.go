@@ -195,17 +195,17 @@ func Get_session(ses string, db *sql.DB) (int, error) {
 	return sessionid, nil
 }
 
-func GetUserIDByUsername(db *sql.DB, userData *utils.User) error {
-	// var userID int64
-	err := db.QueryRow("SELECT id FROM users WHERE username = ?", userData.UserName).Scan(userData.UserId)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// func GetUserIDByUsername(db *sql.DB, userData *utils.User) error {
+// 	// var userID int64
+// 	err := db.QueryRow("SELECT id FROM users WHERE username = ?", userData.UserName).Scan(&userData.UserId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func InsertSession(db *sql.DB, sessionID string, userID int64, expiration time.Time) error {
-	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", sessionID, userID, expiration)
+func InsertSession(db *sql.DB, userData *utils.User) error {
+	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", userData.SessionId, userData.UserId, userData.Expiration)
 	return err
 }
 

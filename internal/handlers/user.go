@@ -10,14 +10,13 @@ import (
 	"time"
 
 	"forum/internal/database"
+	auth "forum/internal/middleware"
 	middleware "forum/internal/middleware"
 	utils "forum/internal/utils"
 
 	"github.com/gofrs/uuid/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var userData *utils.User
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	path := "./web/templates/"
@@ -45,15 +44,16 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var userData utils.User
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(userData.UserName)
+	// fmt.Println(userData.UserName)
 
-	ok, err := middleware.IsUserRegistered(db, &userData.Email, &userData.UserName)
+	ok, err := middleware.IsUserRegistered(db, &userData)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
@@ -72,36 +72,30 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid password", http.StatusNotAcceptable)
 		return
 	}
-	err = middleware.RegisterUser(db, &userData.UserName, &userData.Email, &userData.Password)
-	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
-		return
-	}
-	err = database.GetUserIDByUsername(db, userData)
+	err = middleware.RegisterUser(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	// Create a session and set a cookie
-	sessionID, err := GenerateSessionID()
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	expiration := time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, sessionID, userData.UserId, expiration)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Path:    "/",
-		Value:   sessionID,
-		Expires: expiration,
-	})
+	// sessionID, err := GenerateSessionID()
+	// if err != nil {
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+	// expiration := time.Now().Add(1 * time.Hour)
+	// err = database.InsertSession(db, sessionID, userData.UserId, expiration)
+	// if err != nil {
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+	// http.SetCookie(w, &http.Cookie{
+	// 	Name:    "session_token",
+	// 	Path:    "/",
+	// 	Value:   sessionID,
+	// 	Expires: expiration,
+	// })
 	w.WriteHeader(http.StatusOK)
-	w.Write(nil)
 }
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -129,54 +123,59 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var userData utils.User
 	// Decode the JSON body
-	if err := json.NewDecoder(r.Body).Decode(userData); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
-	log.Fatal(userData.UserName)
-	log.Fatal("saljjj")
 
-	ok, err := middleware.IsUserRegistered(db, &userData.Email, &userData.UserName)
-	if !ok {
-		http.Error(w, "Incorect Username", http.StatusConflict)
-		return
-	}
-	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
-		return
-	}
 	password := userData.Password
-	err = middleware.GetPasswordByUsername(db, userData)
-	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
+	ok, err := middleware.ValidCredential(db, &userData)
+	// fmt.Println(userData.UserId)
+
+	if !ok {
+		http.Error(w, "Incorect Username or password", http.StatusConflict)
 		return
 	}
-	if !CheckPasswordHash(password, userData.Password) {
+
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	if !CheckPasswordHash(&password, &userData.Password) {
 		http.Error(w, "Incorrect Password", http.StatusConflict)
 		return
 	}
-	err = database.GetUserIDByUsername(db, userData)
+	ok, err = auth.GetActiveSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	// Create a session and set a cookie
-	sessionID, err := GenerateSessionID()
+	if ok {
+		err = auth.DeleteSession(db, &userData)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	userData.SessionId, err = GenerateSessionID()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, sessionID, userData.UserId, expiration)
+	userData.Expiration = time.Now().Add(1 * time.Hour)
+	err = database.InsertSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Path:  "/",
-		Value: sessionID,
+		Name:    "session_token",
+		Path:    "/",
+		Value:   userData.SessionId,
+		Expires: userData.Expiration,
 	})
 
 	w.WriteHeader(http.StatusOK)
@@ -188,6 +187,7 @@ func GenerateSessionID() (string, error) {
 		return "", err
 	}
 	return sessionID.String(), nil
+
 }
 
 func HashPassword(password *string) error {
@@ -196,7 +196,7 @@ func HashPassword(password *string) error {
 	return err
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func CheckPasswordHash(password, hash *string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(*hash), []byte(*password))
 	return err == nil
 }

@@ -30,28 +30,46 @@ func AuthMiddleware(db *sql.DB) func(customHandler) http.Handler {
 	}
 }
 
-func IsUserRegistered(db *sql.DB, email, username *string) (bool, error) {
+func IsUserRegistered(db *sql.DB, userData *utils.User) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?);`
-	err := db.QueryRow(query, *email, *username).Scan(&exists)
+	err := db.QueryRow(query, userData.Email, userData.UserName).Scan(&exists)
 	return exists, err
 }
 
-// Register a new user in the database
-func RegisterUser(db *sql.DB, username, email, password *string) error {
+func RegisterUser(db *sql.DB, userData *utils.User) error {
 	insertQuery := `INSERT INTO users (username, email, password) VALUES (?, ?, ?);`
-	_, err := db.Exec(insertQuery, *username, *email, *password)
-	return err
-}
-
-func GetPasswordByUsername(db *sql.DB, userData *utils.User) error {
-	// var password string
-	query := `SELECT password FROM users WHERE username = ?;`
-	err := db.QueryRow(query, userData.UserName).Scan(userData.Password)
+	result, err := db.Exec(insertQuery, userData.UserName, userData.Email, userData.Password)
 	if err != nil {
 		return err
 	}
-	return nil
+	userData.UserId, err = result.LastInsertId()
+	return err
+}
+
+func GetActiveSession(db *sql.DB, userData *utils.User) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM sessions WHERE user_id = ?  AND expires_at > ?);`
+	err := db.QueryRow(query, userData.UserId, userData.Expiration).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func DeleteSession(db *sql.DB, userData *utils.User) error {
+	query := `DELETE FROM sessions WHERE user_id =  ?;`
+	_, err := db.Exec(query, userData.UserId)
+	return err
+}
+
+func ValidCredential(db *sql.DB, userData *utils.User) (bool, error) {
+	query := `SELECT id, password FROM users WHERE username = ?;`
+	err := db.QueryRow(query, userData.UserName).Scan(&userData.UserId, &userData.Password)
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }
 
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {
@@ -95,7 +113,6 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return err
-
 	}
 	return nil
 }
