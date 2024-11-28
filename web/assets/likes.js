@@ -5,31 +5,24 @@ export function addLikeDislikeListeners(post, postId) {
 
     likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, postId, "like", "post"));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, postId, "dislike", "post"));
+
 }
 
 export async function handleReact(button, follow , postId, type , target_Type) {
-    // Update like count, send API request, etc.
-       try {
-        // Send API request
-        const response = await fetch(`/api/react/${postId}/${type}/${target_Type}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        });
+    // Send API request
+    const response = await fetch(`/api/react/${postId}/${type}/${target_Type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
 
-        if (!response.ok) {
-           showRegistrationModal(); 
-        }else{
-            interactiveLike(button, follow)
-        }
-    } catch (error) {
-        console.error("Error:", error);
-        // Revert the UI update if the request fails
+    if (!response.ok) {// user is not logged in
+        showRegistrationModal(); 
+    }else{ // only update the like if no error
+        interactiveLike(button, follow)
     }
 }
 
 function interactiveLike(button , follow ){
-    // Access the count within the specific elements
-    // Check if the button was already clicked
     const add = button.querySelector(".count");
     const subtract = follow.querySelector(".count");
 
@@ -37,21 +30,19 @@ function interactiveLike(button , follow ){
     let count = parseInt(add.textContent, 10);
 
     if (button.getAttribute("data-clicked") === "false") {
-        count += 1;
-        add.textContent = count; // Update the displayed count
+
+        count += 1; add.textContent = count; // Update the displayed count
         button.setAttribute("data-clicked", "true");
         button.style.backgroundColor = '#15F5BA'
         follow.style.backgroundColor = 'white'
+
         if (follow.getAttribute("data-clicked") === "true") {
-            count -= 1;
-            subtract.textContent = count; // Update the displayed count
+            count -= 1; subtract.textContent = count; // Update the displayed count
             follow.setAttribute("data-clicked", "false");
-            //button.style.backgroundColor = '#15F5BA'
             follow.style.backgroundColor = 'white'
         }
     }else if (button.getAttribute("data-clicked") === "true") {
-        count -= 1;
-        add.textContent = count; // Update the displayed count
+        count -= 1; add.textContent = count; // Update the displayed count
         button.setAttribute("data-clicked", "false");
         button.style.backgroundColor = 'white'
     }
