@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"forum/internal/database"
-	models "forum/internal/database/models"
-	"forum/internal/utils"
 	"html/template"
 	"net/http"
 	"os"
+
+	"forum/internal/database"
+	models "forum/internal/database/models"
+	"forum/internal/utils"
 )
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {

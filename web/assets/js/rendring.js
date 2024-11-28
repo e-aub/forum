@@ -30,7 +30,8 @@ export function RenderPost(posts) {
         </footer>
     </article> 
         `;
-    addReactionButtons(post, element.PostId)
+        console.log(element)
+    addReactionButtons("post", post, element.PostId)
     let display_comment = false
     post.querySelector('.comment-button').addEventListener('click', async (e) => {
       if (!display_comment) {
@@ -56,13 +57,12 @@ export function RenderPost(posts) {
   });
 }
 
-async function addReactionButtons(post, postId) {
-  let likeButtonClicked = false; // Start with false until determined by the API
-  const reactionContainer = post.querySelector('.reaction-container');
+export async function addReactionButtons(targetType, target, targetId) {
+  const reactionContainer = target.querySelector('.reaction-container');
   let params = {
     "user": "true",
-    "target": "post",
-    "target_id": postId,
+    "target": targetType,
+    "target_id": targetId,
   };
   let queryString = new URLSearchParams(params).toString();
 
@@ -77,58 +77,56 @@ async function addReactionButtons(post, postId) {
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    likeButtonClicked = !!currentPostReaction.reaction_id;
+    var likeButtonClicked = !!currentPostReaction.reaction_id; 
   } catch (err) {
     console.log(err);
     return;
   }
-
-  const src = currentPostReaction.reaction_id
+  
+  const src = likeButtonClicked
     ? "/assets/icons/" + currentPostReaction.reaction_id + ".png"
     : "/assets/icons/noReaction.png";
   const name = currentPostReaction.name || "Like";
 
-  reactionContainer.innerHTML = `
-    <button class="reaction-button" id="reactionButton">
-      <img id="selectedReactionImage" src=${src} alt="No Reaction">
-      <span id="selectedReactionText">${name}</span>
-    </button>
-    <div class="reactions" id="reactions">
-      <div class="reaction-option" data-text="like">
-        <img src="/assets/icons/like.png" alt="Like">
-        <span>Like</span>
-      </div>
-      <div class="reaction-option" data-text="dislike">
-        <img src="/assets/icons/dislike.png" alt="Dislike">
-        <span>Dislike</span>
-      </div>
-      <div class="reaction-option" data-text="angry">
-        <img src="/assets/icons/angry.png" alt="Angry">
-        <span>Angry</span>
-      </div>
-      <div class="reaction-option" data-text="sad">
-        <img src="/assets/icons/sad.png" alt="Sad">
-        <span>Sad</span>
-      </div>
-      <div class="reaction-option" data-text="haha">
-        <img src="/assets/icons/haha.png" alt="Haha">
-        <span>Haha</span>
-      </div>
-      <div class="reaction-option" data-text="wow">
-        <img src="/assets/icons/wow.png" alt="Wow">
-        <span>Wow</span>
-      </div>
-      <div class="reaction-option" data-text="love">
-        <img src="/assets/icons/love.png" alt="Love">
-        <span>Love</span>
-      </div>
-    </div>
-  `;
+  reactionContainer.innerHTML = `<button class="reaction-button" id="reactionButton">
+  <img id="selectedReactionImage" src=${src} alt="No Reaction">
+  <span id="selectedReactionText">${name}</span>
+</button>
+<div class="reactions" id="reactions">
+  <div class="reaction-option" data-text="like">
+    <img src="/assets/icons/like.png" alt="Like">
+    <span>Like</span>
+  </div>
+   <div class="reaction-option" data-text="dislike">
+    <img src="/assets/icons/dislike.png" alt="Dislike">
+    <span>Dislike</span>
+  </div>
+  <div class="reaction-option" data-text="love">
+    <img src="/assets/icons/love.png" alt="Love">
+    <span>Love</span>
+  </div>
+  <div class="reaction-option" data-text="haha">
+    <img src="/assets/icons/haha.png" alt="Haha">
+    <span>Haha</span>
+  </div>
+  <div class="reaction-option" data-text="wow">
+    <img src="/assets/icons/wow.png" alt="Wow">
+    <span>Wow</span>
+  </div>
+  <div class="reaction-option" data-text="sad">
+    <img src="/assets/icons/sad.png" alt="Sad">
+    <span>Sad</span>
+  </div>
+  <div class="reaction-option" data-text="angry">
+    <img src="/assets/icons/angry.png" alt="Angry">
+    <span>Angry</span>
+  </div>
+</div>`;
 
-  const reactionButton = post.querySelector('#reactionButton');
-  const reactions = post.querySelector('#reactions');
-  const selectedReactionImage = post.querySelector('#selectedReactionImage');
-  const selectedReactionText = post.querySelector('#selectedReactionText');
+  const reactionButton = target.querySelector('#reactionButton');
+  const reactions = target.querySelector('#reactions');
+  const selectedReactionImage = target.querySelector('#selectedReactionImage');
+  const selectedReactionText = target.querySelector('#selectedReactionText');
 
   //show reactions on hover
   reactionButton.addEventListener('mouseenter', () => {
@@ -145,12 +143,11 @@ async function addReactionButtons(post, postId) {
   });
 
   reactionButton.addEventListener('click', async () => {
-    likeButtonClicked = !likeButtonClicked;
-    if (!likeButtonClicked) {
+    if (likeButtonClicked) {
       //remove raction
       let params = {
-        "target": "post",
-        "target_id": postId,
+        "target": targetType,
+        "target_id": targetId,
       };
       let queryString = new URLSearchParams(params).toString();
       const response = await fetch(`http://localhost:8080/react?${queryString}`, {
@@ -165,12 +162,15 @@ async function addReactionButtons(post, postId) {
       }
       selectedReactionImage.src = '/assets/icons/noReaction.png';
       selectedReactionText.textContent = 'Like';
+      likeButtonClicked = !likeButtonClicked;
+      
     } else {
+      // alert("not clicked")
       // add like raacion
       let params = {
         "type": "like",
-        "target": "post",
-        "target_id": postId,
+        "target": targetType,
+        "target_id": targetId,
       };
       let queryString = new URLSearchParams(params).toString();
       const response = await fetch(`http://localhost:8080/react?${queryString}`, {
@@ -178,13 +178,15 @@ async function addReactionButtons(post, postId) {
         headers: {
           'Content-Type': 'application/json'
         }
-      });
+      })
+      
       if (!response.ok) {
         console.log("Network response was not ok");
         return;
       }
       selectedReactionImage.src = '/assets/icons/like.png';
       selectedReactionText.textContent = 'Like';
+      likeButtonClicked = !likeButtonClicked;
     }
   });
 
@@ -197,12 +199,13 @@ async function addReactionButtons(post, postId) {
     const reactionOption = event.target.closest('.reaction-option');
     if (reactionOption) {
       const reactionImage = reactionOption.querySelector('img').src;
-      const reactionText = reactionOption.dataset.text;
+      const reactionId = reactionOption.dataset.text;
+
 
       let params = {
-        "type": reactionText,
-        "target": "post",
-        "target_id": postId,
+        "type": reactionId,
+        "target": targetType,
+        "target_id": targetId,
       };
       let stringParams = new URLSearchParams(params).toString();
       try {
@@ -215,8 +218,9 @@ async function addReactionButtons(post, postId) {
         if (!response.ok) {
           throw new Error("error while adding reaction");
         }
+        likeButtonClicked = true;
         selectedReactionImage.src = reactionImage;
-        selectedReactionText.textContent = reactionText;
+        selectedReactionText.textContent = reactionId;
         reactions.style.display = 'none';
       } catch (error) {
         console.error(error);
@@ -239,14 +243,13 @@ const createComment = async (post, comment_part, post_id) => {
           const com = document.createElement('div');
           com.classList.add('comment');
           com.innerHTML = `
-    <strong>${respons.user_name}:</strong>
-    ${comment.value}
-    
+          <strong>${respons.user_name}:</strong>
+          ${comment.value}
+          <div class="reaction-container"></div>
+
 `;
-          comment_part.insertAdjacentElement('beforeend', com)
-          // Add event listeners for like and dislike buttons
-          const likeButton = com.querySelector('.com_like');
-          const dislikeButton = com.querySelector('.com_dislike');
+          addReactionButtons("comment", com, respons.comment_id)
+          comment_part.insertAdjacentElement('beforeend', com);
         }
         comment.value = ''
 
