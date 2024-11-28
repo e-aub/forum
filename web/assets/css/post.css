@@ -80,6 +80,7 @@ textarea.comment-input {
 }
 
 dialog{
+    border-radius: 10px;
     padding : '20px';
     background-color : rgb(43, 41, 41);
     border-radius:   '8px';
@@ -93,6 +94,10 @@ dialog button {
     margin-top:  10px; 
     padding: 10px 20px ; 
     font-size: 16px ; 
+}
+
+button:focus {
+    outline: 2px solid #f90;
 }
 
 @media screen and (min-width: 800px) {
