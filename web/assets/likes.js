@@ -99,6 +99,12 @@ function showRegistrationModal() {
     loginButton.style.padding = '10px 20px';
     loginButton.style.fontSize = '16px';
 
+    // Create stay button
+    const stayButton = document.createElement('button');
+    stayButton.textContent = 'stay';
+    stayButton.style.marginTop = '10px';
+    stayButton.style.padding = '10px 20px';
+    stayButton.style.fontSize = '16px';
     // Add event listener to the register button
     registerButton.addEventListener('click', () => {
         // Redirect to the registration page
@@ -108,11 +114,16 @@ function showRegistrationModal() {
         // Redirect to the login page
         window.location.href = '/login'; // Replace with your login URL
     });
+    stayButton.addEventListener('click', () => {
+        // Redirect to the registration page
+        window.location.href = '/'; // Replace with your registration URL
+    });
 
     // Append content to modal
     modalContent.appendChild(message);
     modalContent.appendChild(registerButton);
     modalContent.appendChild(loginButton);
+    modalContent.appendChild(stayButton);
 
     modal.appendChild(modalContent);
 
