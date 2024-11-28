@@ -48,7 +48,6 @@ export function RenderPost(args) {
                 const comment = document.createElement('div');
                 comment.classList.add('comments-section');
                 comment.innerHTML = `
-                <h3>Comments</h3>
                 <div class="comments-list">
                 </div>
                 <textarea placeholder="Add a comment..." rows="4" class="comment-input"></textarea>

@@ -38,18 +38,20 @@ export const getComment = async (post, id) => {
                     const com = document.createElement('div');
                     com.classList.add('comment');
                     com.innerHTML = `
-                    <strong>${comment.user_name}:</strong>
-                    <strong>${comment.content}:</strong>
-                    <div class="likes">
-                    <button data-clicked="${comment.clicked}"  class="com_like" 
-                    style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
-                    <i class="fas fa-thumbs-up"></i> <span class="count">${comment.like_count}</span>
-                    </button>
-                    <button data-clicked="${comment.disclicked}"  class="com_dislike" 
-                    style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
-                    <i class="fas fa-thumbs-down"></i> <span class="count">${comment.dislike_count}</span>
-                    </button>
-                    </div>
+                        <div class="one_comment">
+                            <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 
+                            <div class="actions">
+                                <button data-clicked="${comment.clicked}"  class="com_like" 
+                                style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
+                                    <i class="fas fa-thumbs-up"></i> <span class="count">${comment.like_count}</span>
+                                </button>
+
+                                <button data-clicked="${comment.disclicked}"  class="com_dislike" 
+                                style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
+                                    <i class="fas fa-thumbs-down"></i> <span class="count">${comment.dislike_count}</span>
+                                </button>
+                            </div>
+                        <div>
                     `;
 
                     post.insertAdjacentElement('beforeend', com);
