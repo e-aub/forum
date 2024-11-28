@@ -7,7 +7,6 @@ export function RenderPost(posts) {
   posts.forEach((element, index) => {
     const post = document.createElement('div');
     post.classList.add('post');
-    console.log(element)
     post.innerHTML = `
         <div class="post-header">
             <span class="post-index"> ${element.Title}</span>
@@ -72,48 +71,46 @@ export async function addReactionButtons(targetType, target, targetId) {
     console.log(err);
     return;
   }
-
+  
   const src = likeButtonClicked
     ? "/assets/icons/" + currentPostReaction.reaction_id + ".png"
     : "/assets/icons/noReaction.png";
   const name = currentPostReaction.name || "Like";
 
-  reactionContainer.innerHTML = `
-    <button class="reaction-button" id="reactionButton">
-      <img id="selectedReactionImage" src=${src} alt="No Reaction">
-      <span id="selectedReactionText">${name}</span>
-    </button>
-    <div class="reactions" id="reactions">
-      <div class="reaction-option" data-text="like">
-        <img src="/assets/icons/like.png" alt="Like">
-        <span>Like</span>
-      </div>
-      <div class="reaction-option" data-text="dislike">
-        <img src="/assets/icons/dislike.png" alt="Dislike">
-        <span>Dislike</span>
-      </div>
-      <div class="reaction-option" data-text="angry">
-        <img src="/assets/icons/angry.png" alt="Angry">
-        <span>Angry</span>
-      </div>
-      <div class="reaction-option" data-text="sad">
-        <img src="/assets/icons/sad.png" alt="Sad">
-        <span>Sad</span>
-      </div>
-      <div class="reaction-option" data-text="haha">
-        <img src="/assets/icons/haha.png" alt="Haha">
-        <span>Haha</span>
-      </div>
-      <div class="reaction-option" data-text="wow">
-        <img src="/assets/icons/wow.png" alt="Wow">
-        <span>Wow</span>
-      </div>
-      <div class="reaction-option" data-text="love">
-        <img src="/assets/icons/love.png" alt="Love">
-        <span>Love</span>
-      </div>
-    </div>
-  `;
+  reactionContainer.innerHTML = `<button class="reaction-button" id="reactionButton">
+  <img id="selectedReactionImage" src=${src} alt="No Reaction">
+  <span id="selectedReactionText">${name}</span>
+</button>
+<div class="reactions" id="reactions">
+  <div class="reaction-option" data-text="like">
+    <img src="/assets/icons/like.png" alt="Like">
+    <span>Like</span>
+  </div>
+   <div class="reaction-option" data-text="dislike">
+    <img src="/assets/icons/dislike.png" alt="Dislike">
+    <span>Dislike</span>
+  </div>
+  <div class="reaction-option" data-text="love">
+    <img src="/assets/icons/love.png" alt="Love">
+    <span>Love</span>
+  </div>
+  <div class="reaction-option" data-text="haha">
+    <img src="/assets/icons/haha.png" alt="Haha">
+    <span>Haha</span>
+  </div>
+  <div class="reaction-option" data-text="wow">
+    <img src="/assets/icons/wow.png" alt="Wow">
+    <span>Wow</span>
+  </div>
+  <div class="reaction-option" data-text="sad">
+    <img src="/assets/icons/sad.png" alt="Sad">
+    <span>Sad</span>
+  </div>
+  <div class="reaction-option" data-text="angry">
+    <img src="/assets/icons/angry.png" alt="Angry">
+    <span>Angry</span>
+  </div>
+</div>`;
 
   const reactionButton = target.querySelector('#reactionButton');
   const reactions = target.querySelector('#reactions');
@@ -191,10 +188,11 @@ export async function addReactionButtons(targetType, target, targetId) {
     const reactionOption = event.target.closest('.reaction-option');
     if (reactionOption) {
       const reactionImage = reactionOption.querySelector('img').src;
-      const reactionText = reactionOption.dataset.text;
+      const reactionId = reactionOption.dataset.text;
+
 
       let params = {
-        "type": reactionText,
+        "type": reactionId,
         "target": targetType,
         "target_id": targetId,
       };
@@ -211,7 +209,7 @@ export async function addReactionButtons(targetType, target, targetId) {
         }
         likeButtonClicked = true;
         selectedReactionImage.src = reactionImage;
-        selectedReactionText.textContent = reactionText;
+        selectedReactionText.textContent = reactionId;
         reactions.style.display = 'none';
       } catch (error) {
         console.error(error);
