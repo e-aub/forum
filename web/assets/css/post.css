@@ -1,5 +1,5 @@
 :root {
-    --background: #0f0f0f;
+    --background: #000000;
     --header-footer: #121212;
     --neon-green: #15f5ba;
     --primary-text: #e4e4e4;
@@ -34,21 +34,6 @@ button.comment-button{
     background-color: hsl(0, 0%, 98%);
 }
 
-header {
-    border-bottom: 1px solid #f9f9f9;
-}
-
-footer {
-    background-color: var(--header-footer);
-    padding: 20px;
-    text-align: center;
-    color: var(--primary-text);
-}
-
-h3 {
-    color: var(--neon-green);
-}
-
 .container {
     margin: 20px auto;
     padding: 20px;
@@ -58,24 +43,7 @@ h3 {
     max-width: 800px;
 }
 
-.post {
-    background-color: var(--header-footer);
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.post-header {
-    font-weight: bold;
-    color: var(--neon-green);
-    font-size: 1.2em;
-}
-
-.post-content p {
-    margin: 8px 0;
-}
-
-.navbar {
+.main_header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -84,7 +52,6 @@ h3 {
 }
 
 button {
-    background-color: var(--neon-green);
     color: var(--background);
     border: none;
     padding: 10px 15px;
@@ -97,42 +64,6 @@ button:hover {
     background-color: var(--secondary-text);
 }
 
-.comment-button,
-.like,
-.dislike,
-.comment-submit {
-    color: var(--background);
-    background-color: var(--neon-green);
-}
-
-.comments-section {
-    background-color: var(--header-footer);
-    padding: 10px;
-    border-radius: 5px;
-    color: var(--secondary-text);
-}
-
-.comments-section h3 {
-    color: var(--neon-green);
-}
-
-.comment {
-    background-color: var(--header-footer);
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-shadow: 2px 2px 2px var(--neon-green);
-}
-
-.comment strong {
-    color: var(--neon-green);
-}
-
-.likes {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
 
 textarea.comment-input {
     width: 100%;
@@ -141,15 +72,6 @@ textarea.comment-input {
     color: var(--primary-text);
     border-radius: 5px;
     padding: 10px;
-}
-
-.comment-input::placeholder {
-    color: var(--secondary-text);
-}
-
-.comment-submit {
-    background-color: var(--neon-green);
-    color: var(--background);
 }
 
 @media screen and (min-width: 800px) {
