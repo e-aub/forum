@@ -11,6 +11,7 @@ import (
 	"time"
 
 	database "forum/internal/database"
+	models "forum/internal/database/models"
 
 	util "forum/internal/utils"
 )
@@ -52,7 +53,12 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.DB) {
 	if r.Method == "GET" {
-		tmpl, err := template.ParseFiles("web/templates/creat_Post.html")
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/creat_post.html",
+		}
+		tmpl, err := template.ParseFiles(files...)
 		if err != nil {
 			log.Printf("Error parsing template: %v", err)
 			http.Error(w, "Internal Server Errorr", http.StatusInternalServerError)
@@ -64,7 +70,14 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, userId int, db *sql.
 			http.Error(w, "get categories", http.StatusInternalServerError)
 			return
 		}
-		err = tmpl.Execute(w, categories)
+		feed := struct {
+			Style      string
+			Categories []models.Category
+		}{
+			Style:      "new_post.css",
+			Categories: categories,
+		}
+		err = tmpl.ExecuteTemplate(w, "base", feed)
 		if err != nil {
 			log.Printf("Error executing template: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
