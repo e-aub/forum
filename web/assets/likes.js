@@ -71,9 +71,6 @@ function showRegistrationModal() {
     const loginButton = document.createElement('button');
     loginButton.textContent = 'Login';
 
-    // Create stay button
-    const stayButton = document.createElement('button');
-    stayButton.textContent = 'Stay';
 
     // Add event listeners
     registerButton.addEventListener('click', () => {
@@ -82,15 +79,18 @@ function showRegistrationModal() {
     loginButton.addEventListener('click', () => {
         window.location.href = '/login'; // Replace with your login URL
     });
-    stayButton.addEventListener('click', () => {
-        dialog.close(); // Close the dialog
-    });
+
+    // Close dialog when clicking outside
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) {
+            dialog.close();
+        }
+    }); 
 
     // Append content to dialog
     dialog.appendChild(message);
     dialog.appendChild(registerButton);
     dialog.appendChild(loginButton);
-    dialog.appendChild(stayButton);
 
     // Append dialog to the body
     document.body.appendChild(dialog);
