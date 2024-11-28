@@ -7,7 +7,6 @@ export function addLikeDislikeListeners(post, postId) {
 }
 
 export async function handleReact(button, follow , postId, type , target_Type) {
-    interactiveLike(button, follow)
     // Logic to handle the "like" action
     console.log(`Liked/disliked post/comment with ID: ${postId}`);
     // Update like count, send API request, etc.
@@ -20,6 +19,8 @@ export async function handleReact(button, follow , postId, type , target_Type) {
 
         if (!response.ok) {
            showRegistrationModal(); 
+        }else{
+            interactiveLike(button, follow)
         }
     } catch (error) {
         console.error("Error:", error);
@@ -59,31 +60,13 @@ function interactiveLike(button , follow ){
 }
 
 function showRegistrationModal() {
-    // Create modal container
-    const modal = document.createElement('div');
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '1000'; // Ensure it appears on top
+    // Create dialog element
+    const dialog = document.createElement('dialog');
 
-    // Create modal content
-    const modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = 'black';
-    modalContent.style.padding = '20px';
-    modalContent.style.borderRadius = '8px';
-    modalContent.style.textAlign = 'center';
-    modalContent.style.maxWidth = '400px';
-    modalContent.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
-    
+
     // Create message
     const message = document.createElement('p');
-    message.textContent = 'You need to be loged int to to react. Please register or loging to continue.';
+    message.textContent = 'You need to be logged in to react. Please register or log in to continue.';
 
     // Create register button
     const registerButton = document.createElement('button');
@@ -92,7 +75,7 @@ function showRegistrationModal() {
     registerButton.style.padding = '10px 20px';
     registerButton.style.fontSize = '16px';
 
-    // Create Login button
+    // Create login button
     const loginButton = document.createElement('button');
     loginButton.textContent = 'Login';
     loginButton.style.marginTop = '10px';
@@ -101,32 +84,31 @@ function showRegistrationModal() {
 
     // Create stay button
     const stayButton = document.createElement('button');
-    stayButton.textContent = 'stay';
+    stayButton.textContent = 'Stay';
     stayButton.style.marginTop = '10px';
     stayButton.style.padding = '10px 20px';
     stayButton.style.fontSize = '16px';
-    // Add event listener to the register button
+
+    // Add event listeners
     registerButton.addEventListener('click', () => {
-        // Redirect to the registration page
         window.location.href = '/register'; // Replace with your registration URL
     });
-        loginButton.addEventListener('click', () => {
-        // Redirect to the login page
+    loginButton.addEventListener('click', () => {
         window.location.href = '/login'; // Replace with your login URL
     });
     stayButton.addEventListener('click', () => {
-        // Redirect to the registration page
-        window.location.href = '/'; // Replace with your registration URL
+        dialog.close(); // Close the dialog
     });
 
-    // Append content to modal
-    modalContent.appendChild(message);
-    modalContent.appendChild(registerButton);
-    modalContent.appendChild(loginButton);
-    modalContent.appendChild(stayButton);
+    // Append content to dialog
+    dialog.appendChild(message);
+    dialog.appendChild(registerButton);
+    dialog.appendChild(loginButton);
+    dialog.appendChild(stayButton);
 
-    modal.appendChild(modalContent);
+    // Append dialog to the body
+    document.body.appendChild(dialog);
 
-    // Append modal to the body
-    document.body.appendChild(modal);
+    // Show the dialog
+    dialog.showModal();
 }

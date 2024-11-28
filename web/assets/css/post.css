@@ -79,6 +79,17 @@ textarea.comment-input {
     padding: 10px;
 }
 
+dialog{
+    padding : '20px';
+    background-color : 'black';
+    border-radius:   '8px';
+    text-align : 'center';
+    max-width:  '400px';
+    box-shadow:  '0 0 10px rgba(0, 0, 0, 0.1)';
+    color : 'white';
+}
+
+
 @media screen and (min-width: 800px) {
     body {
         border-left: 1px solid #f9f9f9;
