@@ -28,6 +28,13 @@ body {
 article.post {
     border-top: 1px solid #f9f9f9;
     border-bottom: 1px solid #f9f9f9;
+    padding: 2rem;
+    margin: 1.5px;
+}
+
+.post header{
+    display: flex;
+    justify-content: space-between;
 }
 
 button.comment-button{
@@ -64,6 +71,9 @@ button:hover {
     background-color: var(--secondary-text);
 }
 
+time {
+    color: #504f4f;
+}
 
 textarea.comment-input {
     width: 100%;
