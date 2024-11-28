@@ -1,6 +1,6 @@
 :root {
     --background: #000000;
-    --header-footer: #121212;
+    --header-footer: #0c0c0c;
     --neon-green: #15f5ba;
     --primary-text: #e4e4e4;
     --secondary-text: #b2b2b2;
@@ -42,12 +42,7 @@ button.comment-button{
 }
 
 .container {
-    margin: 20px auto;
-    padding: 20px;
     background-color: var(--header-footer);
-    border-radius: 8px;
-    width: 80%;
-    max-width: 800px;
 }
 
 .main_header {
