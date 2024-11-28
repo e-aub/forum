@@ -22,7 +22,12 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
-			template, err := template.ParseFiles("web/templates/posts.html")
+			path := "./web/templates/"
+			files := []string{
+				path + "base.html",
+				path + "pages/posts.html",
+			}
+			template, err := template.ParseFiles(files...)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -34,7 +39,14 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 				http.Error(w, "internal server error", http.StatusInternalServerError)
 				return
 			}
-			template.Execute(w, string(jsonIds))
+			feed := struct {
+				Style string
+				Posts string
+			}{
+				Style: "post.css",
+				Posts: string(jsonIds),
+			}
+			template.ExecuteTemplate(w, "base", feed)
 			return
 		}
 		withCreatedAndDeleted := false
@@ -47,13 +59,25 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
-		template, err := template.ParseFiles("web/templates/categories.html")
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/categories.html",
+		}
+		template, err := template.ParseFiles(files...)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
-		template.Execute(w, categories)
+		feed := struct {
+			Style      string
+			Categories []models.Category
+		}{
+			Style:      "categories.css",
+			Categories: categories,
+		}
+		template.ExecuteTemplate(w, "base", feed)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

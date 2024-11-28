@@ -23,13 +23,26 @@ func Controlle_Home(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(r.Cookies())
 
 	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("web/templates/posts.html")
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/posts.html",
+		}
+		tmpl, err := template.ParseFiles(files...)
 		if err != nil {
 			log.Println("Error loading template:", err)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
 		}
-		if err := tmpl.Execute(w, false); err != nil {
+		feed := struct {
+			Style string
+			Posts bool
+		}{
+			Style: "post.css",
+			Posts: false,
+		}
+		err = tmpl.ExecuteTemplate(w, "base", feed)
+		if err != nil {
 			log.Println("Error executing template:", err)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		}
