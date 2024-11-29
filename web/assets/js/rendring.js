@@ -12,7 +12,7 @@ export function RenderPost(posts) {
         <header>
             <hgroup>
               <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
-              <p>${formattedDate}</p>
+              <p>${element.formattedDate}</p>
             <hgroup>
         </header>
         <main>
