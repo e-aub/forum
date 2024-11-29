@@ -79,9 +79,9 @@ func main() {
 	router.HandleFunc("/new_post", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db)(handlers.NewPostPageHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.NewPostPageHandler).ServeHTTP(w, r)
 		case "POST":
-			auth.AuthMiddleware(db)(handlers.NewPostHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.NewPostHandler).ServeHTTP(w, r)
 		//We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
@@ -95,7 +95,7 @@ func main() {
 			userId, _ := auth.ValidUser(r, db)
 			handlers.GetCommentsHandler(w, r, db, userId)
 		case "POST":
-			auth.AuthMiddleware(db)(handlers.AddCommentHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.AddCommentHandler).ServeHTTP(w, r)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
@@ -107,9 +107,9 @@ func main() {
 			userId, _ := auth.ValidUser(r, db)
 			handlers.GetReactionsHandler(w, r, db, userId)
 		} else if method == "PUT" {
-			auth.AuthMiddleware(db)(handlers.InsertOrUpdateReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.InsertOrUpdateReactionHandler).ServeHTTP(w, r)
 		} else if method == "DELETE" {
-			auth.AuthMiddleware(db)(handlers.DeleteReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.DeleteReactionHandler).ServeHTTP(w, r)
 		} else {
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 			return

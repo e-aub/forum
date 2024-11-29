@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,16 +11,11 @@ import (
 
 	"forum/internal/database"
 	middleware "forum/internal/middleware"
+	utils "forum/internal/utils"
 
 	"github.com/gofrs/uuid/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var requestData struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	path := "./web/templates/"
@@ -43,20 +39,20 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error executing template:", err)
 		http.Error(w, "500 internal server error", http.StatusInternalServerError)
 	}
-	return
+	// return
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var userData utils.User
 	// Decode the JSON body
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
+		fmt.Println(err.Error())
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
+	// fmt.Println(userData.UserName)
 
-	username := requestData.Username
-	email := requestData.Email
-	password := requestData.Password
-	ok, err := middleware.IsUserRegistered(db, email, username)
+	ok, err := middleware.IsUserRegistered(db, &userData)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
@@ -65,34 +61,29 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return
 	}
-	if len(username) < 8 || len(password) < 8 || len(username) > 30 || len(password) > 64 {
+	if len(userData.UserName) < 8 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 {
 		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
 		return
 	}
 
-	hachedPassword, err := HashPassword(password)
+	err = HashPassword(&userData.Password)
 	if err != nil {
 		http.Error(w, "Invalid password", http.StatusNotAcceptable)
 		return
 	}
-	err = middleware.RegisterUser(db, username, email, hachedPassword)
-	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
-		return
-	}
-	userID, err := database.GetUserIDByUsername(db, username)
+	err = middleware.RegisterUser(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	// Create a session and set a cookie
-	sessionID, err := GenerateSessionID()
+	userData.SessionId, err = GenerateSessionID()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, sessionID, userID, expiration)
+	userData.Expiration = time.Now().Add(1 * time.Hour)
+	err = database.InsertSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -100,8 +91,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Path:    "/",
-		Value:   sessionID,
-		Expires: expiration,
+		Value:   userData.SessionId,
+		Expires: userData.Expiration,
 	})
 	w.WriteHeader(http.StatusOK)
 	w.Write(nil)
@@ -132,58 +123,63 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	var userData utils.User
 	// Decode the JSON body
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
 
-	username := requestData.Username
-	email := requestData.Email
-	password := requestData.Password
+	password := userData.Password
+	ok, err := middleware.ValidCredential(db, &userData)
+	// fmt.Println(userData.UserId)
 
-	ok, err := middleware.IsUserRegistered(db, email, username)
 	if !ok {
-		http.Error(w, "Incorect Username", http.StatusConflict)
+		http.Error(w, "Incorect Username or password", http.StatusConflict)
 		return
 	}
+
 	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	hachedPassword, err := middleware.GetPasswordByUsername(db, username)
-	if err != nil {
-		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
-		return
-	}
-	if !CheckPasswordHash(password, hachedPassword) {
+	if !CheckPasswordHash(&password, &userData.Password) {
 		http.Error(w, "Incorrect Password", http.StatusConflict)
 		return
 	}
-	userID, err := database.GetUserIDByUsername(db, username)
+	ok, err = middleware.GetActiveSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	// Create a session and set a cookie
-	sessionID, err := GenerateSessionID()
+	if ok {
+		err = middleware.DeleteSession(db, &userData)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	userData.SessionId, err = GenerateSessionID()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	expiration := time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, sessionID, userID, expiration)
+	userData.Expiration = time.Now().Add(1 * time.Hour)
+	err = database.InsertSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:  "session_token",
-		Path:  "/",
-		Value: sessionID,
+		Name:    "session_token",
+		Path:    "/",
+		Value:   userData.SessionId,
+		Expires: userData.Expiration,
 	})
 
 	w.WriteHeader(http.StatusOK)
+	w.Write(nil)
 }
 
 func GenerateSessionID() (string, error) {
@@ -192,14 +188,16 @@ func GenerateSessionID() (string, error) {
 		return "", err
 	}
 	return sessionID.String(), nil
+
 }
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+func HashPassword(password *string) error {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(*password), 14)
+	*password = string(bytes)
+	return err
 }
 
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+func CheckPasswordHash(password, hash *string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(*hash), []byte(*password))
 	return err == nil
 }
