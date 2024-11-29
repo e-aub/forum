@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"forum/internal/database"
-	auth "forum/internal/middleware"
 	middleware "forum/internal/middleware"
 	utils "forum/internal/utils"
 
@@ -148,13 +147,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Incorrect Password", http.StatusConflict)
 		return
 	}
-	ok, err = auth.GetActiveSession(db, &userData)
+	ok, err = middleware.GetActiveSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	if ok {
-		err = auth.DeleteSession(db, &userData)
+		err = middleware.DeleteSession(db, &userData)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
