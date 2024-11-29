@@ -12,6 +12,7 @@ import (
 	"time"
 
 	database "forum/internal/database"
+	models "forum/internal/database/models"
 	"forum/internal/utils"
 )
 
@@ -49,19 +50,32 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	tmpl, err := template.ParseFiles("web/templates/newPost.html")
+	path := "./web/templates/"
+	files := []string{
+		path + "base.html",
+		path + "pages/new_post.html",
+	}
+	tmpl, err := template.ParseFiles(files...)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 		return
 	}
+
 	categories, err := GetCategories(db, false)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, categories)
+	feed := struct {
+		Style      string
+		Categories []models.Category
+	}{
+		Style:      "new_post.css",
+		Categories: categories,
+	}
+	err = tmpl.ExecuteTemplate(w, "base", feed)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)

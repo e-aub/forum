@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories</title>
-    <link rel="stylesheet" href="./assets/css/categories.css">
-</head>
-<body>
+{{define "header"}}{{end}}
 
+
+{{define "main"}}
 <h1>Categories</h1>
 
 <form id="categoryForm" class="categoryForm">
-    {{range .}}
+    {{range .Categories}}
     <button type="button" class="category" onclick="submitForm('{{.Id}}')">
         <h3>{{.Name}}</h3>
         <p>{{.Description}}</p>
@@ -25,6 +19,4 @@
         window.location.href = `/categories?${params}`;
     }
 </script>
-
-</body>
-</html>
+{{end}}
