@@ -12,22 +12,20 @@ import (
 
 type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
 
-func AuthMiddleware(db *sql.DB) func(customHandler) http.Handler {
-	return func(next customHandler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userId, _ := ValidUser(r, db)
-			if userId <= 0 {
-				fmt.Println(r.Header.Get("Content-Type"))
-				if r.Header.Get("Content-Type") == "application/json" {
-					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
-					return
-				}
-				utils.RespondWithError(w, utils.Err{Message: "You are unauthorized, please log in", Unauthorized: true}, http.StatusUnauthorized)
+func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userId, _ := ValidUser(r, db)
+		if userId <= 0 {
+			fmt.Println(r.Header.Get("Content-Type"))
+			if r.Header.Get("Content-Type") == "application/json" {
+				utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
 				return
 			}
-			next(w, r, db, userId)
-		})
-	}
+			utils.RespondWithError(w, utils.Err{Message: "You are unauthorized, please log in", Unauthorized: true}, http.StatusUnauthorized)
+			return
+		}
+		next(w, r, db, userId)
+	})
 }
 
 func IsUserRegistered(db *sql.DB, userData *utils.User) (bool, error) {
