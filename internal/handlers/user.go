@@ -78,24 +78,25 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	// Create a session and set a cookie
-	// sessionID, err := GenerateSessionID()
-	// if err != nil {
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
-	// expiration := time.Now().Add(1 * time.Hour)
-	// err = database.InsertSession(db, sessionID, userData.UserId, expiration)
-	// if err != nil {
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
-	// http.SetCookie(w, &http.Cookie{
-	// 	Name:    "session_token",
-	// 	Path:    "/",
-	// 	Value:   sessionID,
-	// 	Expires: expiration,
-	// })
+	userData.SessionId, err = GenerateSessionID()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	userData.Expiration = time.Now().Add(1 * time.Hour)
+	err = database.InsertSession(db, &userData)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Path:    "/",
+		Value:   userData.SessionId,
+		Expires: userData.Expiration,
+	})
 	w.WriteHeader(http.StatusOK)
+	w.Write(nil)
 }
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
@@ -179,6 +180,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 
 	w.WriteHeader(http.StatusOK)
+	w.Write(nil)
 }
 
 func GenerateSessionID() (string, error) {
