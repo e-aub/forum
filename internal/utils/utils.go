@@ -30,7 +30,7 @@ type Post struct {
 	Title      string
 	Categories []string
 	Content    string
-	Created_At time.Time
+	CreatedAt  time.Time
 }
 
 type Reaction struct {
@@ -41,25 +41,12 @@ type Reaction struct {
 }
 
 type Comment struct {
-	Comment_id   int    `json:"comment_id"`
-	Post_id      int    `json:"post_id"`
-	User_id      int    `json:"user_id"`
-	User_name    string `json:"user_name"`
-	Content      string `json:"content"`
-	Created_at   string `json:"created_at"`
-	LikeCount    int    `json:"like_count"`
-	DislikeCount int    `json:"dislike_count"`
-	Clicked      bool   `json:"clicked"`
-	DisClicked   bool   `json:"disclicked"`
-}
-
-type ContextValues struct {
-	Db     *sql.DB
-	UserId int
-}
-
-func Creat_New_Comment() *Comment {
-	return &Comment{}
+	Comment_id int    `json:"comment_id"`
+	Post_id    int    `json:"post_id"`
+	User_id    int    `json:"user_id"`
+	User_name  string `json:"user_name"`
+	Content    string `json:"content"`
+	Created_at string `json:"created_at"`
 }
 
 func (p *Post) Update_Post(title string, content string, time time.Time) {
@@ -88,10 +75,6 @@ func RespondWithError(w http.ResponseWriter, Err Err, statuscode int) {
 	}
 	w.WriteHeader(statuscode)
 	tmpl.Execute(w, Err)
-}
-
-type Rows struct {
-	Rows *sql.Rows
 }
 
 func QueryRows(db *sql.DB, query string, args ...any) (*sql.Rows, error) {

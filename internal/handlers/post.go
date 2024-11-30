@@ -62,7 +62,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 		return
 	}
 
-	categories, err := GetCategories(db, false)
+	categories, err := GetCategories(db)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -91,10 +91,10 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	}
 
 	post := &utils.Post{
-		Title:      r.PostFormValue("title"),
-		Content:    r.PostFormValue("content"),
-		Created_At: time.Now(),
-		UserId:     userId,
+		Title:     r.PostFormValue("title"),
+		Content:   r.PostFormValue("content"),
+		CreatedAt: time.Now(),
+		UserId:    userId,
 	}
 	categories := r.Form["category"]
 	_, err := database.InsertPost(post, db, categories)
@@ -112,30 +112,35 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 	if id != "" {
 		postId, err := strconv.Atoi(id)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(nil)
 			return
 		}
 		post, err := database.ReadPost(db, userId, postId)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write(nil)
 			return
 		}
 		post.Categories, err = database.GetPostCategories(db, post.PostId, userId)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write(nil)
 			return
 		}
 		json, err := json.Marshal(post)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write(nil)
 			return
 		}
 		_, err = w.Write(json)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write(nil)
 			return
@@ -144,18 +149,21 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 	}
 	lastindex, err := database.GetLastPostId(db)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		return
 	}
 	json, err := json.Marshal(lastindex)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		return
 	}
 	_, err = w.Write(json)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		return

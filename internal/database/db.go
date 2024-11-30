@@ -76,7 +76,6 @@ func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
 		return 0, err
 	}
 
-	categories = append(categories, "2")
 	err = LinkPostWithCategory(transaction, categories, lastPostID, p.UserId)
 	if err != nil {
 		transaction.Rollback()
@@ -126,7 +125,7 @@ func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 		return nil, err
 	}
 	Post := &utils.Post{}
-	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.Created_At)
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -135,40 +134,7 @@ func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(Post)
 	return Post, nil
-}
-func isLiked(db *sql.DB, userId int, postId int, target_type string) (bool, bool) {
-	// Query to check for likes or dislikes for the given user and post.
-	var query string
-	if target_type == "post" {
-		query = `SELECT type FROM likes WHERE user_id = ? AND post_id = ? AND target_type = ? LIMIT 1`
-	} else if target_type == "comment" {
-		query = `SELECT type FROM likes WHERE user_id = ? AND comment_id = ? AND target_type = ? LIMIT 1`
-	}
-
-	var reactionType string
-	err := db.QueryRow(query, userId, postId, target_type).Scan(&reactionType)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// No interaction found.
-			fmt.Println("\033[31m", err, "\033[0m")
-			return false, false
-		}
-		// Log error if needed and handle it appropriately.
-		fmt.Println("Error   likes:", err)
-		return false, false
-	}
-
-	// Determine the type of interaction.
-	switch reactionType {
-	case "like":
-		return true, false
-	case "dislike":
-		return false, true
-	default:
-		return false, false
-	}
 }
 
 func GetLastPostId(db *sql.DB) (int, error) {
@@ -194,15 +160,6 @@ func Get_session(ses string, db *sql.DB) (int, error) {
 	}
 	return sessionid, nil
 }
-
-// func GetUserIDByUsername(db *sql.DB, userData *utils.User) error {
-// 	// var userID int64
-// 	err := db.QueryRow("SELECT id FROM users WHERE username = ?", userData.UserName).Scan(&userData.UserId)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 func InsertSession(db *sql.DB, userData *utils.User) error {
 	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", userData.SessionId, userData.UserId, userData.Expiration)
@@ -234,7 +191,7 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 
 func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 	query := `
-	SELECT comments.id, comments.content, comments.created_at, users.username, comments.like_count , comments.dislike_count FROM comments
+	SELECT comments.id, comments.content, comments.created_at, users.username  FROM comments
     INNER JOIN users ON comments.user_id = users.id
     WHERE comments.post_id = ?
 	ORDER BY comments.created_at DESC;
@@ -248,17 +205,11 @@ func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 	var comments []utils.Comment
 	for rows.Next() {
 		var comment utils.Comment
-		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name, &comment.LikeCount, &comment.DislikeCount)
+		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name)
 		if err != nil {
 			return nil, errors.New(err.Error() + "here 2")
 		}
 		comment.Post_id = postID
-		if userId <= 0 {
-			comment.Clicked, comment.DisClicked = false, false
-		} else {
-			comment.Clicked, comment.DisClicked = isLiked(db, userId, comment.Comment_id, "comment")
-		}
-
 		comments = append(comments, comment)
 	}
 	if err = rows.Err(); err != nil {
@@ -267,23 +218,7 @@ func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 	return comments, nil
 }
 
-func GetCategoryContentIds(db *sql.DB, categoryId string, userId int) ([]int, error) {
-	if categoryId == "1" || categoryId == "2" {
-		rows, err := utils.QueryRows(db, `SELECT post_id FROM post_categories WHERE category_id=? AND user_id=?`, categoryId, userId)
-		if err != nil {
-			return nil, err
-		}
-		var ids []int
-		for rows.Next() {
-			tmp := 0
-			err := rows.Scan(&tmp)
-			if err != nil {
-				return nil, err
-			}
-			ids = append(ids, tmp)
-		}
-		return ids, nil
-	}
+func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 	rows, err := utils.QueryRows(db, "SELECT post_id FROM post_categories WHERE category_id=?", categoryId)
 	if err != nil {
 		return nil, err
@@ -314,21 +249,13 @@ func GetUserName(id int, db *sql.DB) (string, error) {
 }
 
 func GetPostCategories(db *sql.DB, PostId int, userId int) ([]string, error) {
-	query := `SELECT categories.name 
-	FROM post_categories
-	JOIN categories ON categories.id = post_categories.category_id
-	WHERE (post_categories.category_id = 1 OR post_categories.category_id = 2) 
-	AND post_categories.user_id = ? 
-	AND post_categories.post_id = ?
-	UNION
+	query := `
 	SELECT categories.name 
 	FROM post_categories
 	JOIN categories ON categories.id = post_categories.category_id
-	WHERE post_categories.category_id != 1 
-	AND post_categories.category_id != 2 
 	AND post_categories.post_id = ?;
 `
-	rows, err := utils.QueryRows(db, query, userId, PostId, PostId)
+	rows, err := utils.QueryRows(db, query, PostId)
 	if err != nil {
 		return nil, err
 	}

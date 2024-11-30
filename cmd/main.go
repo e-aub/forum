@@ -119,8 +119,16 @@ func main() {
 	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			userId, _ := auth.ValidUser(r, db)
-			handlers.CategoriesHandler(w, r, db, userId)
+			handlers.CategoriesHandler(w, r, db)
+		default:
+			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
+		}
+	})
+
+	router.HandleFunc("/me/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			auth.AuthMiddleware(db, handlers.MeHandler).ServeHTTP(w, r)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}

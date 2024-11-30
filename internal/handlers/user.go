@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"forum/internal/database"
@@ -16,6 +17,111 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+	switch r.URL.Path {
+	case "/me/liked_posts":
+		query := `SELECT post_id FROM reactions WHERE user_id = ? AND type_id = 'like'`
+		rows, err := utils.QueryRows(db, query, userId)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
+			return
+		}
+		postIds := []int{}
+		for rows.Next() {
+			var postId int
+			err := rows.Scan(&postId)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
+			}
+			postIds = append(postIds, postId)
+		}
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/posts.html",
+		}
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		jsonIds, err := json.Marshal(postIds)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		feed := struct {
+			Style string
+			Posts string
+		}{
+			Style: "post.css",
+			Posts: string(jsonIds),
+		}
+		err = template.ExecuteTemplate(w, "base", feed)
+		//err = template.Execute(w, string(jsonIds))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+	case "/me/created_posts":
+		query := `SELECT id FROM posts WHERE user_id = ?`
+		rows, err := utils.QueryRows(db, query, userId)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
+			return
+		}
+		postIds := []int{}
+		for rows.Next() {
+			var postId int
+			err := rows.Scan(&postId)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
+			}
+			postIds = append(postIds, postId)
+		}
+		path := "./web/templates/"
+		files := []string{
+			path + "base.html",
+			path + "pages/posts.html",
+		}
+		template, err := template.ParseFiles(files...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		jsonIds, err := json.Marshal(postIds)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+		feed := struct {
+			Style string
+			Posts string
+		}{
+			Style: "post.css",
+			Posts: string(jsonIds),
+		}
+		err = template.ExecuteTemplate(w, "base", feed)
+		//err = template.Execute(w, string(jsonIds))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+			return
+		}
+	default:
+		utils.RespondWithError(w, utils.Err{Message: "404 Not found"}, http.StatusNotFound)
+	}
+}
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	path := "./web/templates/"
