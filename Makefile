@@ -4,20 +4,25 @@ DOCKERFILE=Dockerfile.dev
 
 CONTAINER_NAME=forum-container
 
+
+PORT=8080
+APP_ENV=local
+DB_PATH=db/data.db
+
 build:
-	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	 docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	sudo docker run --name $(CONTAINER_NAME) --network host -v $(PWD):/app $(IMAGE_NAME)
+	 docker run --name $(CONTAINER_NAME) --network host -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
-	sudo docker stop $(CONTAINER_NAME) || true
-	sudo docker rm $(CONTAINER_NAME) || true
+	 docker stop $(CONTAINER_NAME) || true
+	 docker rm $(CONTAINER_NAME) || true
 
 clean:
-	sudo rm -rf forum tmp || true
-	sudo docker rm $(CONTAINER_NAME) || true
-	sudo docker rmi $(IMAGE_NAME) || true
+	 rm -rf forum tmp || true
+	 docker rm $(CONTAINER_NAME) || true
+	 docker rmi $(IMAGE_NAME) || true
 push: clean
 	@read -p "Enter commit message: " msg; \
 	git add .; \
@@ -26,3 +31,10 @@ push: clean
 all: stop clean build run
 
 .PHONY: build run stop clean up
+
+# Define the environment variable
+test:
+
+test:
+	@echo "Running tests with DB_URL=$${DB_URL}"
+	PORT=8080 DB_PATH=db/data.db go run cmd/main.go
