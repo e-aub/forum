@@ -17,7 +17,7 @@ func main() {
 	dbPath := os.Getenv("DB_PATH")
 	port := "8080"
 	print("port:", port)
-	//Create Database file
+	// Create Database file
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
 
@@ -26,14 +26,14 @@ func main() {
 
 	database.CleanupExpiredSessions(db)
 
-	//Create a multipluxer
+	// Create a multipluxer
 	router := http.NewServeMux()
 
-	//File Server (need some improvement by rearrange css and js files by separating them)
+	// File Server (need some improvement by rearrange css and js files by separating them)
 	fs := http.FileServer(http.Dir("web/assets"))
 	router.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	//HomePage handler
+	// HomePage handler
 	router.HandleFunc("/", handlers.HomePageHandler)
 
 	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +73,6 @@ func main() {
 		}
 		userId, _ := auth.ValidUser(r, db)
 		handlers.PostsHandler(w, r, db, userId)
-
 	})
 
 	router.HandleFunc("/new_post", func(w http.ResponseWriter, r *http.Request) {
@@ -82,13 +81,13 @@ func main() {
 			auth.AuthMiddleware(db, handlers.NewPostPageHandler).ServeHTTP(w, r)
 		case "POST":
 			auth.AuthMiddleware(db, handlers.NewPostHandler).ServeHTTP(w, r)
-		//We need to add UPDATE and DELETE methods to handle theses operations on posts
+		// We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
 	})
 
-	//We need to add UPDATE and DELETE methods to handle theses operations on comments
+	// We need to add UPDATE and DELETE methods to handle theses operations on comments
 	router.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
