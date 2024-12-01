@@ -14,6 +14,7 @@ type Err struct {
 	Message      string
 	Unauthorized bool
 }
+
 type User struct {
 	UserId     int64
 	UserName   string `json:"username"`

@@ -97,10 +97,11 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		UserId:    userId,
 	}
 	categories := r.Form["category"]
-	
+
 	if len(post.Title) >= 40 || len(post.Content) >= 300 {
 		log.Printf("long format")
-		utils.RespondWithError(w, utils.Err{Message: "bad requesr", Unauthorized: false}, http.StatusBadRequest)
+		utils.RespondWithError(w, utils.Err{Message: "bad request", Unauthorized: false}, http.StatusBadRequest)
+		return
 	}
 	_, err := database.InsertPost(post, db, categories)
 	if err != nil {
