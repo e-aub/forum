@@ -25,4 +25,8 @@ push: clean
 	git push
 all: stop clean build run
 
+test:
+	DB_PATH=db/data.db go run cmd/main.go
+
+	
 .PHONY: build run stop clean up
