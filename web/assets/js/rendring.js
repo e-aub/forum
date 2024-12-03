@@ -14,7 +14,8 @@ export function RenderPost(posts) {
     <article>
         <header>
               <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
-              <p><time>${formattedDate}</time></p>
+              <p>${element.CreatedAt}</p>
+            <hgroup>
         </header>
         <main>
           <section class="post-content">
@@ -88,8 +89,9 @@ export async function addReactionButtons(targetType, target, targetId) {
     : "/assets/icons/noReaction.png";
   const name = currentPostReaction.name || "Like";
 
-  reactionContainer.innerHTML = `<button class="reaction-button" id="reactionButton">
-  <img id="selectedReactionImage" src=${src} alt="No Reaction">
+  reactionContainer.innerHTML = `
+  <button class="reaction-button" id="reactionButton">
+  <img id="selectedReactionImage" src=${src} alt="${name}">
   <span id="selectedReactionText">${name}</span>
 </button>
 <div class="reactions" id="reactions">
@@ -237,9 +239,8 @@ const createComment = async (post, comment_part, post_id) => {
         const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json' } })
         const respons = await res.json()
         if (res.status === 401) {
-          alert(respons)
+          alert("you are unautherized")
         } else if (res.ok) {
-
           const com = document.createElement('div');
           com.classList.add('comment');
           com.innerHTML = `

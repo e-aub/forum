@@ -2,19 +2,19 @@
 
 {{define "main"}}
 <h1>Create New Post</h1>
-    <form action="/new_post" method="post">
-        <h2>Title</h2>
-        <textarea name="title" placeholder="Write your title" maxlength="50" required></textarea>
+<form action="/new_post" method="post">
+    <h2>Title</h2>
+    <textarea name="title" placeholder="Write your title" maxlength="40" required></textarea>
 
-        <h2>Content</h2>
-        <textarea name="content" placeholder="Write your content here"  maxlength="150" required></textarea>
+    <h2>Content</h2>
+    <textarea name="content" placeholder="Write your content here" maxlength="300" required></textarea>
 
-        <h2>Category</h2>
-            {{range .Categories}}
-            <label>
-            <input type="checkbox" name="category" value="{{.Id}}">{{.Name}}
-            </label>
-            {{end}}
-        <button type="submit">Submit</button>
-    </form>
+    <h2>Category</h2>
+    {{range .Categories}}
+    <label>
+        <input type="checkbox" name="category" value="{{.Id}}">{{.Name}}
+    </label>
+    {{end}}
+    <button type="submit">Submit</button>
+</form>
 {{end}}

@@ -13,7 +13,7 @@ import (
 	"forum/internal/utils"
 )
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.URL.Query().Has("category") {
 		category := r.URL.Query().Get("category")
 
@@ -33,7 +33,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, http.StatusNotFound)
 			return
 		}
-		postIds, err := database.GetCategoryContentIds(db, category, userId)
+		postIds, err := database.GetCategoryContentIds(db, category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -71,11 +71,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			return
 		}
 	} else {
-		withCreatedAndDeleted := false
-		if userId != 0 {
-			withCreatedAndDeleted = true
-		}
-		categories, err := GetCategories(db, withCreatedAndDeleted)
+		categories, err := GetCategories(db)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -108,15 +104,11 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 	}
 }
 
-func GetCategories(db *sql.DB, withLikedAndCreated bool) ([]models.Category, error) {
+func GetCategories(db *sql.DB) ([]models.Category, error) {
 	var result []models.Category
 	var err error
 	var rows *sql.Rows
-	if withLikedAndCreated {
-		rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories`)
-	} else {
-		rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories WHERE id != 1 AND id != 2`)
-	}
+	rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories`)
 	if err != nil {
 		return nil, err
 	}

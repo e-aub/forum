@@ -13,8 +13,6 @@ var CategoriesTable = `
         description TEXT NOT NULL
     );
     INSERT OR IGNORE INTO categories (name, description) VALUES
-        ('Liked Posts', 'This category contains all posts you liked'), 
-        ('Created Posts', 'This category contains all posts you created'), 
         ('Music', 'Discuss everything related to music, including genres, artists, and concerts'), 
         ('Sports', 'Talk about all types of sports, games, and tournaments'), 
         ('Movies & TV Shows', 'Share recommendations and discuss your favorite films and series'), 

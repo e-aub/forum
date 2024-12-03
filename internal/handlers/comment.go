@@ -30,14 +30,14 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 		utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
 		return
 	}
-	comment := utils.Creat_New_Comment()
+	comment := utils.Comment{}
 	comment.Post_id = postID
 	comment.User_name = user_name
 	comment.User_id = userId
 	comment.Content = content
 	comment.Created_at = time.Now().Format(time.RFC3339)
 
-	if err := database.CreateComment(comment, file); err != nil {
+	if err := database.CreateComment(&comment, file); err != nil {
 		utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
 		return
 	}
