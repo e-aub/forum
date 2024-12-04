@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"forum/internal/database"
 	"forum/internal/handlers"
@@ -23,8 +24,6 @@ func main() {
 
 	// Create tables if not exist
 	connection_db.CreateTables()
-
-	// database.CleanupExpiredSessions(db)
 
 	// Create a multipluxer
 	router := http.NewServeMux()
@@ -132,6 +131,13 @@ func main() {
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
 	})
+
+	go func() {
+		for {
+			database.CleanupExpiredSessions(connection_db.Db)
+			time.Sleep(2 * time.Hour)
+		}
+	}()
 
 	log.Printf("Route server running on http://localhost:%s\n", port)
 	log.Fatalln(http.ListenAndServe(":"+port, router))

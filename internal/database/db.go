@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 
 	database "forum/internal/database/models"
 	utils "forum/internal/utils"
@@ -48,12 +49,12 @@ func (conn *Conn_db) CreateTables() {
 	fmt.Println("Created all tables succesfully")
 }
 
-// func CleanupExpiredSessions(db *sql.DB) {
-// 	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
-// 	if err != nil {
-// 		log.Printf("Error cleaning up expired sessions: %v", err)
-// 	}
-// }
+func CleanupExpiredSessions(db *sql.DB) {
+	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
+	if err != nil {
+		log.Printf("Error cleaning up expired sessions: %v", err)
+	}
+}
 
 func (conn *Conn_db) InsertPost(p *utils.Post) (int64, error) {
 	conn.Mu.Lock()
