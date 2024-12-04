@@ -5,19 +5,19 @@ DOCKERFILE=Dockerfile.dev
 CONTAINER_NAME=forum-container
 
 build:
-	 docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	 docker run --name $(CONTAINER_NAME) -p "8080:8080" -v $(PWD):/app $(IMAGE_NAME)
+	sudo docker run --name $(CONTAINER_NAME) -p "8080:8080" -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
-	 docker stop $(CONTAINER_NAME) || true
-	 docker rm $(CONTAINER_NAME) || true
+	sudo docker stop $(CONTAINER_NAME) || true
+	sudo docker rm $(CONTAINER_NAME) || true
 
 clean:
-	 rm -rf forum tmp || true
-	 docker rm -f $(CONTAINER_NAME) || true
-	 docker rmi -f $(IMAGE_NAME) || true
+	sudo rm -rf forum tmp || true
+	sudo docker rm -f $(CONTAINER_NAME) || true
+	sudo docker rmi -f $(IMAGE_NAME) || true
 push: clean
 	@read -p "Enter commit message: " msg; \
 	git add .; \

@@ -18,13 +18,13 @@ func main() {
 	port := "8080"
 	print("port:", port)
 	// Create Database file
-	db := database.CreateDatabase(dbPath)
-	defer db.Close()
+	connection_db := database.CreateDatabase(dbPath)
+	defer connection_db.Db.Close()
 
 	// Create tables if not exist
-	database.CreateTables(db)
+	connection_db.CreateTables()
 
-	database.CleanupExpiredSessions(db)
+	// database.CleanupExpiredSessions(db)
 
 	// Create a multipluxer
 	router := http.NewServeMux()
@@ -41,7 +41,7 @@ func main() {
 		case "GET":
 			handlers.RegisterPageHandler(w, r)
 		case "POST":
-			handlers.RegisterHandler(w, r, db)
+			handlers.RegisterHandler(w, r, connection_db)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
@@ -52,14 +52,14 @@ func main() {
 		case "GET":
 			handlers.LoginPageHandler(w, r)
 		case "POST":
-			handlers.LoginHandler(w, r, db)
+			handlers.LoginHandler(w, r, connection_db)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
 	})
 
 	router.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		err := auth.RemoveUser(w, r, db)
+		err := auth.RemoveUser(w, r, connection_db.Db)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
@@ -71,16 +71,16 @@ func main() {
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 			return
 		}
-		userId, _ := auth.ValidUser(r, db)
-		handlers.PostsHandler(w, r, db, userId)
+		userId, _ := auth.ValidUser(r, connection_db)
+		handlers.PostsHandler(w, r, connection_db, userId)
 	})
 
 	router.HandleFunc("/new_post", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db, handlers.NewPostPageHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.NewPostPageHandler).ServeHTTP(w, r)
 		case "POST":
-			auth.AuthMiddleware(db, handlers.NewPostHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.NewPostHandler).ServeHTTP(w, r)
 		// We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
@@ -91,10 +91,10 @@ func main() {
 	router.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			userId, _ := auth.ValidUser(r, db)
-			handlers.GetCommentsHandler(w, r, db, userId)
+			userId, _ := auth.ValidUser(r, connection_db)
+			handlers.GetCommentsHandler(w, r, connection_db, userId)
 		case "POST":
-			auth.AuthMiddleware(db, handlers.AddCommentHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.AddCommentHandler).ServeHTTP(w, r)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
@@ -103,12 +103,12 @@ func main() {
 	router.HandleFunc("/react", func(w http.ResponseWriter, r *http.Request) {
 		method := r.Method
 		if method == "GET" {
-			userId, _ := auth.ValidUser(r, db)
-			handlers.GetReactionsHandler(w, r, db, userId)
+			userId, _ := auth.ValidUser(r, connection_db)
+			handlers.GetReactionsHandler(w, r, connection_db.Db, userId)
 		} else if method == "PUT" {
-			auth.AuthMiddleware(db, handlers.InsertOrUpdateReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.InsertOrUpdateReactionHandler).ServeHTTP(w, r)
 		} else if method == "DELETE" {
-			auth.AuthMiddleware(db, handlers.DeleteReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.DeleteReactionHandler).ServeHTTP(w, r)
 		} else {
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 			return
@@ -118,7 +118,7 @@ func main() {
 	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			handlers.CategoriesHandler(w, r, db)
+			handlers.CategoriesHandler(w, r, connection_db)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}
@@ -127,7 +127,7 @@ func main() {
 	router.HandleFunc("/me/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db, handlers.MeHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(connection_db, handlers.MeHandler).ServeHTTP(w, r)
 		default:
 			utils.RespondWithError(w, utils.Err{Message: "Method not allowed", Unauthorized: false}, http.StatusMethodNotAllowed)
 		}

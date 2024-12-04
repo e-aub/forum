@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -49,7 +48,7 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+func NewPostPageHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userId int) {
 	path := "./web/templates/"
 	files := []string{
 		path + "base.html",
@@ -62,7 +61,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 		return
 	}
 
-	categories, err := GetCategories(db)
+	categories, err := GetCategories(conn.Db)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -83,7 +82,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 	}
 }
 
-func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+func NewPostHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userId int) {
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
 		utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
@@ -91,19 +90,19 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	}
 
 	post := &utils.Post{
-		Title:     r.PostFormValue("title"),
-		Content:   r.PostFormValue("content"),
-		CreatedAt: time.Now(),
-		UserId:    userId,
+		Title:      r.PostFormValue("title"),
+		Content:    r.PostFormValue("content"),
+		CreatedAt:  time.Now(),
+		UserId:     userId,
+		Categories: r.Form["category"],
 	}
-	categories := r.Form["category"]
 
 	if len(post.Title) >= 40 || len(post.Content) >= 300 {
 		log.Printf("long format")
 		utils.RespondWithError(w, utils.Err{Message: "bad request", Unauthorized: false}, http.StatusBadRequest)
 		return
 	}
-	_, err := database.InsertPost(post, db, categories)
+	_, err := conn.InsertPost(post)
 	if err != nil {
 		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 		return
@@ -111,7 +110,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+func PostsHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userId int) {
 	w.Header().Set("content-type", "application/json")
 	id := r.URL.Query().Get("post_id")
 	if id != "" {
@@ -122,14 +121,14 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 			w.Write(nil)
 			return
 		}
-		post, err := database.ReadPost(db, userId, postId)
+		post, err := conn.ReadPost(postId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write(nil)
 			return
 		}
-		post.Categories, err = database.GetPostCategories(db, post.PostId, userId)
+		post.Categories, err = conn.GetPostCategories(post.PostId, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -152,14 +151,14 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		}
 		return
 	}
-	lastindex, err := database.GetLastPostId(db)
+	post, err := conn.ReadPost()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		return
 	}
-	json, err := json.Marshal(lastindex)
+	json, err := json.Marshal(post.PostId)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)

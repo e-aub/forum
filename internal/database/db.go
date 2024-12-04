@@ -7,34 +7,40 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
+	"sync"
 
 	database "forum/internal/database/models"
 	utils "forum/internal/utils"
 )
 
-func CreateDatabase(dbPath string) *sql.DB {
-	db, err := sql.Open("sqlite3", dbPath)
+type Conn_db struct {
+	Db *sql.DB
+	Mu sync.Mutex
+}
 
+func CreateDatabase(dbPath string) *Conn_db {
+	conn := new(Conn_db)
+	var err error
+	conn.Db, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatalf("%sError opening database:%s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	}
 	// Verify the connection
-	if err = db.Ping(); err != nil {
+	if err = conn.Db.Ping(); err != nil {
 		log.Fatalf("%sError accessing database: %s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	} else {
 		fmt.Printf("%sDatabase created/opened successfully!%s\n", utils.Colors["green"], utils.Colors["reset"])
 	}
 
-	_, err = db.Exec(`PRAGMA foreign_keys=ON;`)
+	_, err = conn.Db.Exec(`PRAGMA foreign_keys=ON;`)
 	if err != nil {
 		log.Fatalf("%sError enabling foreign keys: %s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	}
-	return db
+	return conn
 }
 
-func CreateTables(db *sql.DB) {
-	_, err := db.Exec(database.UsersTable + database.SessionsTable + database.ReactionTable + database.ReactionsTypeTable +
+func (conn *Conn_db) CreateTables() {
+	_, err := conn.Db.Exec(database.UsersTable + database.SessionsTable + database.ReactionTable + database.ReactionsTypeTable +
 		database.CommentsTable + database.PostsTable + database.CategoriesTable + database.PostCategoriesTable)
 	if err != nil {
 		log.Fatalln(err)
@@ -42,22 +48,24 @@ func CreateTables(db *sql.DB) {
 	fmt.Println("Created all tables succesfully")
 }
 
-func CleanupExpiredSessions(db *sql.DB) {
-	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
-	if err != nil {
-		log.Printf("Error cleaning up expired sessions: %v", err)
-	}
-}
+// func CleanupExpiredSessions(db *sql.DB) {
+// 	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
+// 	if err != nil {
+// 		log.Printf("Error cleaning up expired sessions: %v", err)
+// 	}
+// }
 
-func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
-	transaction, err := db.Begin()
+func (conn *Conn_db) InsertPost(p *utils.Post) (int64, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
+
+	transaction, err := conn.Db.Begin()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error starting transaction:", err)
 		return 0, err
 	}
 	stmt, err := transaction.Prepare(`INSERT INTO posts(user_id ,title,content) Values (?,?,?);`)
 	if err != nil {
-		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "Error Adding post:", err)
 		return 0, err
 	}
@@ -65,117 +73,146 @@ func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
 
 	result, err := stmt.Exec(p.UserId, p.Title, p.Content)
 	if err != nil {
-		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "Error Adding post:", err)
 		return 0, err
 	}
+
 	lastPostID, err := result.LastInsertId()
 	if err != nil {
-		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "error in assigning category to post", err)
 		return 0, err
 	}
 
-	err = LinkPostWithCategory(transaction, categories, lastPostID, p.UserId)
+	err = LinkPostWithCategory(transaction, p.Categories, lastPostID, p.UserId)
 	if err != nil {
-		transaction.Rollback()
 		return 0, err
 	}
 	err = transaction.Commit()
 	if err != nil {
-		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "transaction aborted")
 		return 0, err
-
 	}
+	defer transaction.Rollback()
+
 	return lastPostID, nil
 }
 
-func UpdatePost(p *utils.Post, db *sql.DB) {
-	statement, err := db.Prepare(`UPDATE posts
-	SET title=?,
-	content = ?,
-	updated_at = ?
-	WHERE
-	id= ?`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = statement.Exec(p.Title, p.Content, p.PostId)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+func (conn *Conn_db) ReadPost(Id ...int) (*utils.Post, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
 
-func DeletePost(p *utils.Post, db *sql.DB) {
-	statement, err := db.Prepare(`DELETE FROM posts WHERE id = ?`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = statement.Exec(p.PostId)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
-	query := `SELECT * FROM posts WHERE id = ?`
-	row, err := utils.QueryRow(db, query, postId)
-	if err != nil {
-		return nil, err
-	}
 	Post := &utils.Post{}
-	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.CreatedAt)
+	var postId int
+
+	switch len(Id) {
+	case 0:
+		// Get the ID of the last post created
+		query := `SELECT MAX(id) FROM posts`
+		row, err := utils.QueryRow(conn.Db, query)
+		if err != nil {
+			return nil, err
+		}
+		err = row.Scan(&Post.PostId)
+		if err != nil {
+			return nil, err
+		}
+		return Post, nil
+
+	case 1:
+		postId = Id[0]
+	default:
+		return nil, fmt.Errorf("too many arguments")
+	}
+
+	statement, err := conn.Db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer statement.Rollback()
+	stmt, err := statement.Prepare(`
+        SELECT p.id, p.user_id, p.title, p.content, p.created_at, u.username 
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.id = ?
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(postId)
+	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.CreatedAt, &Post.UserName)
 	if err != nil {
 		return nil, err
 	}
 
-	Post.UserName, err = GetUserName(int(Post.UserId), db)
+	err = statement.Commit()
 	if err != nil {
 		return nil, err
 	}
+
 	return Post, nil
 }
 
-func GetLastPostId(db *sql.DB) (int, error) {
-	query := `SELECT MAX(id) FROM posts `
-	row, err := utils.QueryRow(db, query)
-	if err != nil {
-		return 0, err
-	}
-	result := 0
-	err = row.Scan(&result)
-	if err != nil {
-		return 0, err
-	}
-	return result, nil
-}
-
-func Get_session(ses string, db *sql.DB) (int, error) {
+func (conn *Conn_db) Get_session(ses string) (int, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
 	var sessionid int
-	query := `SELECT user_id FROM sessions WHERE session_id = ?`
-	err := db.QueryRow(query, ses).Scan(&sessionid)
+	tx, err := conn.Db.Begin()
 	if err != nil {
 		return 0, err
 	}
-	return sessionid, nil
+	statement, err := tx.Prepare(`SELECT user_id FROM sessions WHERE session_id = ?`)
+	if err != nil {
+		return 0, err
+	}
+	err = statement.QueryRow(ses).Scan(&sessionid)
+	if err != nil {
+		return 0, err
+	}
+	return sessionid, tx.Commit()
 }
 
-func InsertSession(db *sql.DB, userData *utils.User) error {
-	_, err := db.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", userData.SessionId, userData.UserId, userData.Expiration)
-	return err
+func (conn *Conn_db) InsertSession(userData *utils.User) error {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
+	tx, err := conn.Db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec("INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)", userData.SessionId, userData.UserId, userData.Expiration)
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
-func CreateComment(c *utils.Comment, db *sql.DB) error {
+func (conn *Conn_db) CreateComment(c *utils.Comment) error {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
+
 	if c.Content == "" || c.Post_id == 0 || c.User_id == 0 {
 		return errors.New("comment DATA issue")
 	}
 
-	query := `
-	INSERT INTO comments (user_id, post_id, content, created_at)
-	VALUES (?, ?, ?, ?)
-	`
-	result, err := db.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
+	tx, err := conn.Db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
+        INSERT INTO comments (user_id, post_id, content, created_at) 
+        VALUES (?, ?, ?, ?)
+    `)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(c.User_id, c.Post_id, c.Content, c.Created_at)
 	if err != nil {
 		return err
 	}
@@ -186,19 +223,34 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	}
 	c.Comment_id = int(id)
 
-	return nil
+	return tx.Commit()
 }
 
-func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
-	query := `
-	SELECT comments.id, comments.content, comments.created_at, users.username  FROM comments
-    INNER JOIN users ON comments.user_id = users.id
-    WHERE comments.post_id = ?
-	ORDER BY comments.created_at DESC;
-	`
-	rows, err := utils.QueryRows(db, query, postID)
+func (conn *Conn_db) GetComments(postID int, userId int) ([]utils.Comment, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
+
+	tx, err := conn.Db.Begin()
 	if err != nil {
-		return nil, errors.New(err.Error() + "here 1")
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`
+		SELECT comments.id, comments.content, comments.created_at, users.username
+		FROM comments
+		INNER JOIN users ON comments.user_id = users.id
+		WHERE comments.post_id = ?
+		ORDER BY comments.created_at DESC
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(postID)
+	if err != nil {
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -207,19 +259,23 @@ func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
 		var comment utils.Comment
 		err := rows.Scan(&comment.Comment_id, &comment.Content, &comment.Created_at, &comment.User_name)
 		if err != nil {
-			return nil, errors.New(err.Error() + "here 2")
+			return nil, err
 		}
 		comment.Post_id = postID
 		comments = append(comments, comment)
 	}
+
 	if err = rows.Err(); err != nil {
-		return nil, errors.New(err.Error() + "here 3")
+		return nil, err
 	}
-	return comments, nil
+
+	return comments, tx.Commit()
 }
 
-func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
-	rows, err := utils.QueryRows(db, "SELECT post_id FROM post_categories WHERE category_id=?", categoryId)
+func (conn *Conn_db) GetCategoryContentIds(categoryId string) ([]int, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
+	rows, err := utils.QueryRows(conn.Db, "SELECT post_id FROM post_categories WHERE category_id=?", categoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -235,27 +291,17 @@ func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 	return ids, nil
 }
 
-func GetUserName(id int, db *sql.DB) (string, error) {
-	var name string
-	row, err := utils.QueryRow(db, "SELECT username FROM users WHERE id = ?", id)
-	if err != nil {
-		return "", err
-	}
-	err = row.Scan(&name)
-	if err != nil {
-		return "", err
-	}
-	return name, nil
-}
+func (conn *Conn_db) GetPostCategories(PostId int, userId int) ([]string, error) {
+	conn.Mu.Lock()
+	defer conn.Mu.Unlock()
 
-func GetPostCategories(db *sql.DB, PostId int, userId int) ([]string, error) {
 	query := `
 	SELECT categories.name 
 	FROM post_categories
 	JOIN categories ON categories.id = post_categories.category_id
 	AND post_categories.post_id = ?;
 `
-	rows, err := utils.QueryRows(db, query, PostId)
+	rows, err := utils.QueryRows(conn.Db, query, PostId)
 	if err != nil {
 		return nil, err
 	}
@@ -279,6 +325,7 @@ func LinkPostWithCategory(transaction *sql.Tx, categories []string, postId int64
 		if err != nil {
 			return err
 		}
+
 		defer stmt.Close()
 		tmp, err := strconv.Atoi(category)
 		if err != nil {

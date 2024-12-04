@@ -10,11 +10,11 @@ import (
 	"forum/internal/utils"
 )
 
-type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
+type customHandler func(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userId int)
 
-func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
+func AuthMiddleware(conn *database.Conn_db, next customHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userId, _ := ValidUser(r, db)
+		userId, _ := ValidUser(r, conn)
 		if userId <= 0 {
 			fmt.Println(r.Header.Get("Content-Type"))
 			if r.Header.Get("Content-Type") == "application/json" {
@@ -24,7 +24,7 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 			utils.RespondWithError(w, utils.Err{Message: "You are unauthorized, please log in", Unauthorized: true}, http.StatusUnauthorized)
 			return
 		}
-		next(w, r, db, userId)
+		next(w, r, conn, userId)
 	})
 }
 
@@ -70,7 +70,7 @@ func ValidCredential(db *sql.DB, userData *utils.User) (bool, error) {
 	return true, err
 }
 
-func ValidUser(r *http.Request, db *sql.DB) (int, error) {
+func ValidUser(r *http.Request, conn *database.Conn_db) (int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		if err != http.ErrNoCookie {
@@ -78,7 +78,7 @@ func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 		}
 		return 0, nil
 	}
-	userid, err := database.Get_session(cookie.Value, db)
+	userid, err := conn.Get_session(cookie.Value)
 	if err != nil {
 		return 0, err
 	}

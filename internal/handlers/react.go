@@ -3,12 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"forum/internal/utils"
 	"net/http"
 	"os"
+
+	"forum/internal/database"
+	"forum/internal/utils"
 )
 
-func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
+func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userID int) {
 	r.Header.Add("content-type", "application/json")
 	reactionType := r.URL.Query().Get("type")
 	target := r.URL.Query().Get("target")
@@ -29,7 +31,7 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 			ON CONFLICT (user_id, comment_id) DO UPDATE SET type_id = EXCLUDED.type_id;
 			`
 		}
-		_, err := db.Exec(insertQuery, reactionType, userID, id)
+		_, err := conn.Db.Exec(insertQuery, reactionType, userID, id)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -42,10 +44,9 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request"}`)
 		return
 	}
-
 }
 
-func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
+func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userID int) {
 	r.Header.Add("content-type", "application/json")
 	target := r.URL.Query().Get("target")
 	id := r.URL.Query().Get("target_id")
@@ -58,7 +59,7 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 		case "comment":
 			deleteQuery = `DELETE FROM reactions WHERE user_id = ? AND comment_id = ?`
 		}
-		_, err := db.Exec(deleteQuery, userID, id)
+		_, err := conn.Db.Exec(deleteQuery, userID, id)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(nil)

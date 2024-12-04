@@ -13,11 +13,11 @@ import (
 	"forum/internal/utils"
 )
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func CategoriesHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db) {
 	if r.URL.Query().Has("category") {
 		category := r.URL.Query().Get("category")
 
-		result, err := utils.QueryRow(db, `SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)`, category)
+		result, err := utils.QueryRow(conn.Db, `SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)`, category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -33,7 +33,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			utils.RespondWithError(w, utils.Err{Message: "404 page not found", Unauthorized: false}, http.StatusNotFound)
 			return
 		}
-		postIds, err := database.GetCategoryContentIds(db, category)
+		postIds, err := conn.GetCategoryContentIds(category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -64,14 +64,14 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
 			return
 		}
 	} else {
-		categories, err := GetCategories(db)
+		categories, err := GetCategories(conn.Db)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)

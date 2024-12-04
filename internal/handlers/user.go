@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,11 +17,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+func MeHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db, userId int) {
 	switch r.URL.Path {
 	case "/me/liked_posts":
 		query := `SELECT post_id FROM reactions WHERE user_id = ? AND type_id = 'like'`
-		rows, err := utils.QueryRows(db, query, userId)
+		rows, err := utils.QueryRows(conn.Db, query, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
@@ -63,7 +62,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -71,7 +70,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		}
 	case "/me/created_posts":
 		query := `SELECT id FROM posts WHERE user_id = ?`
-		rows, err := utils.QueryRows(db, query, userId)
+		rows, err := utils.QueryRows(conn.Db, query, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "Internal server Error"}, http.StatusInternalServerError)
@@ -112,7 +111,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -148,7 +147,7 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	// return
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func RegisterHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db) {
 	var userData utils.User
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
@@ -158,7 +157,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	// fmt.Println(userData.UserName)
 
-	ok, err := middleware.IsUserRegistered(db, &userData)
+	ok, err := middleware.IsUserRegistered(conn.Db, &userData)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
@@ -177,7 +176,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid password", http.StatusNotAcceptable)
 		return
 	}
-	err = middleware.RegisterUser(db, &userData)
+	err = middleware.RegisterUser(conn.Db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -189,7 +188,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	userData.Expiration = time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, &userData)
+	err = conn.InsertSession(&userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -228,7 +227,7 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func LoginHandler(w http.ResponseWriter, r *http.Request, conn *database.Conn_db) {
 	var userData utils.User
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
@@ -237,7 +236,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	password := userData.Password
-	ok, err := middleware.ValidCredential(db, &userData)
+	ok, err := middleware.ValidCredential(conn.Db, &userData)
 	// fmt.Println(userData.UserId)
 
 	if !ok {
@@ -253,13 +252,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Incorrect Password", http.StatusConflict)
 		return
 	}
-	ok, err = middleware.GetActiveSession(db, &userData)
+	ok, err = middleware.GetActiveSession(conn.Db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	if ok {
-		err = middleware.DeleteSession(db, &userData)
+		err = middleware.DeleteSession(conn.Db, &userData)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -272,7 +271,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	userData.Expiration = time.Now().Add(1 * time.Hour)
-	err = database.InsertSession(db, &userData)
+	err = conn.InsertSession(&userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -294,7 +293,6 @@ func GenerateSessionID() (string, error) {
 		return "", err
 	}
 	return sessionID.String(), nil
-
 }
 
 func HashPassword(password *string) error {
