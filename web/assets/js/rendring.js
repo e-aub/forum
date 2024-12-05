@@ -1,10 +1,11 @@
-import { getComment } from "./script.js";
-import { makePost, getReactInfo } from "./likes.js";
+import { makePost } from "./post.js";
+import { getReactInfo } from "./likes.js";
 import { commentToggle } from "./comments.js";
 
 export function RenderPost(posts) {
-  const container = document.querySelector(".posts-container");
-  container.innerHTML = "";
+  // posts-container is insed the main element
+  const container = document.querySelector(".posts-container"); 
+  container.innerHTML = ""; //  impty the inner html if any 
 
   posts.forEach((element) => {
     const post = document.createElement('div');
@@ -13,7 +14,7 @@ export function RenderPost(posts) {
       "is_own_react": "true",
       "target": "post",
       "target_id": element.PostId,
-    }, "GET",).then(reactInfo => {
+    }, "GET",).then((reactInfo) => {
       post.innerHTML =  makePost(element, reactInfo)
     }).then(()=>{
       let display_comment = false;
@@ -21,8 +22,6 @@ export function RenderPost(posts) {
     }).then(()=> {
       container.append(post);
     });
-////////////////////////////////////////
-
   });
 }
 
@@ -197,34 +196,4 @@ export async function addReactionButtons(targetType, target, targetId) {
       }
     }
   });
-}
-
-const createComment = async (post, comment_part, post_id) => {
-  const comment = post.querySelector('.comment-input')
-  post.querySelector('.comment-submit').addEventListener('click', async (e) => {
-    try {
-      if (comment.value) {
-        const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json' } })
-        const respons = await res.json()
-        if (res.status === 401) {
-          alert("you are unautherized")
-        } else if (res.ok) {
-          const com = document.createElement('div');
-          com.classList.add('comment');
-          com.innerHTML = `
-          <strong>${respons.user_name}:</strong>
-          ${comment.value}
-          <div class="reaction-container"></div>
-
-`;
-          addReactionButtons("comment", com, respons.comment_id)
-          comment_part.insertAdjacentElement('beforeend', com);
-        }
-        comment.value = ''
-
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  })
 }

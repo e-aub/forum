@@ -27,32 +27,7 @@ export const GetData = async (postIds) => {
     }
 };
 
-export const getComment = async (post, id) => {
-    try {
-        const res = await fetch(`http://localhost:8080/comments?post=${id}`)
-        if (res.ok) {
-            const allComment = await res.json()
-            if (allComment) {
-                for (let comment of allComment) {
-                    const com = document.createElement('div');
-                    com.classList.add('comment');
-                    com.innerHTML = `
-                    <strong>${comment.user_name}:</strong>
-                    <strong>${comment.content}:</strong>
-                    <div class="reaction-container"></div>
-                    `;
-                    console.log(comment)
-                    addReactionButtons("comment", com, comment.comment_id)
 
-                    post.insertAdjacentElement('beforeend', com);
-              
-                }
-            }
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
 
 export const logoutEvent = (log) => {
     log.addEventListener('click', async () => {
