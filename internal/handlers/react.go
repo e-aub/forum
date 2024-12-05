@@ -75,7 +75,7 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	target := r.URL.Query().Get("target")
 	id := r.URL.Query().Get("target_id")
-	user := r.URL.Query().Get("user")
+	user := r.URL.Query().Get("is_own_react")
 	var query string
 	var rows *sql.Rows
 	switch target {

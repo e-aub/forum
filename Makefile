@@ -26,3 +26,6 @@ push: clean
 all: stop clean build run
 
 .PHONY: build run stop clean up
+
+test:
+	DB_PATH=db/data.db go run cmd/main.go

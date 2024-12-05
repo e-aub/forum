@@ -1,5 +1,6 @@
 import { getComment } from "./script.js";
 import { makePost, getReactInfo } from "./likes.js";
+import { commentToggle } from "./comments.js";
 
 export function RenderPost(posts) {
   const container = document.querySelector(".posts-container");
@@ -8,37 +9,20 @@ export function RenderPost(posts) {
   posts.forEach((element) => {
     const post = document.createElement('div');
     post.classList.add('post');
-    let reactInfo = getReactInfo({
-      "user": "true",
-      "target": targetType,
-      "target_id": targetId,
-    }, "GET",)
-    post.innerHTML = makePost(element, reactInfo)
+    const reactInfo = getReactInfo({
+      "is_own_react": "true",
+      "target": "post",
+      "target_id": element.PostId,
+    }, "GET",).then(reactInfo => {
+      post.innerHTML =  makePost(element, reactInfo)
+    }).then(()=>{
+      let display_comment = false;
+      commentToggle(post, element, display_comment);
+    }).then(()=> {
+      container.append(post);
+    });
 ////////////////////////////////////////
-        console.log(element)
-    addReactionButtons("post", post, element.PostId)
-    let display_comment = false
-    post.querySelector('.comment-button').addEventListener('click', async (e) => {
-      if (!display_comment) {
-        const comment = document.createElement('div');
-        comment.classList.add('comments-section');
-        comment.innerHTML = `
-                <h3>Comments</h3>
-                <div class="comments-list">
-                </div>
-                <textarea placeholder="Add a comment..." rows="4" class="comment-input"></textarea>
-                <button class="comment-submit">Submit</button>
-                `
-        post.appendChild(comment)
-        await createComment(comment, comment.querySelector('.comments-list'), element.PostId)
-        await getComment(comment.querySelector('.comments-list'), element.PostId)
-        display_comment = true
-      } else {
-        post.querySelector('.comments-section').remove()
-        display_comment = false
-      }
-    })
-    container.append(post);
+
   });
 }
 
