@@ -1,5 +1,5 @@
 import { makePost } from "./post.js";
-import { getReactInfo } from "./likes.js";
+import { getReactInfo,reactToggle } from "./likes.js";
 import { commentToggle } from "./comments.js";
 
 export function RenderPost(posts) {
@@ -19,6 +19,7 @@ export function RenderPost(posts) {
     }).then(()=>{
       let display_comment = false;
       commentToggle(post, element, display_comment);
+      reactToggle(post, element)
     }).then(()=> {
       container.append(post);
     });
@@ -69,26 +70,6 @@ export async function addReactionButtons(targetType, target, targetId) {
    <div class="reaction-option" data-text="dislike">
     <img src="/assets/icons/dislike.png" alt="Dislike">
     <span>Dislike</span>
-  </div>
-  <div class="reaction-option" data-text="love">
-    <img src="/assets/icons/love.png" alt="Love">
-    <span>Love</span>
-  </div>
-  <div class="reaction-option" data-text="haha">
-    <img src="/assets/icons/haha.png" alt="Haha">
-    <span>Haha</span>
-  </div>
-  <div class="reaction-option" data-text="wow">
-    <img src="/assets/icons/wow.png" alt="Wow">
-    <span>Wow</span>
-  </div>
-  <div class="reaction-option" data-text="sad">
-    <img src="/assets/icons/sad.png" alt="Sad">
-    <span>Sad</span>
-  </div>
-  <div class="reaction-option" data-text="angry">
-    <img src="/assets/icons/angry.png" alt="Angry">
-    <span>Angry</span>
   </div>
 </div>`;
 

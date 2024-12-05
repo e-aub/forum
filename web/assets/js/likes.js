@@ -16,3 +16,7 @@ export async function getReactInfo(params, method){
         return;
       }
 }
+
+export function reactToggle(post , element){
+  
+}
