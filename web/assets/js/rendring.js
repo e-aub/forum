@@ -1,34 +1,20 @@
 import { getComment } from "./script.js";
+import { makePost, getReactInfo } from "./likes.js";
 
 export function RenderPost(posts) {
   const container = document.querySelector(".posts-container");
   container.innerHTML = "";
 
-  posts.forEach((element, index) => {
+  posts.forEach((element) => {
     const post = document.createElement('div');
     post.classList.add('post');
-    post.innerHTML = `
-    <article>
-        <header>
-            <hgroup>
-              <h1><i class="fa fa-user"></i> ${element.UserName}</h1>
-              <p>${element.CreatedAt}</p>
-            <hgroup>
-        </header>
-        <main>
-          <div class="post-content">
-              <h2>${element.Title}</h2>
-              <p> ${element.Content}</p>
-          </div>
-        </main>
-        <footer>
-          <nav>
-            <div class="reaction-container"></div>
-            <button class="comment-button">Comments</button>
-          </nav>
-        </footer>
-    </article> 
-        `;
+    let reactInfo = getReactInfo({
+      "user": "true",
+      "target": targetType,
+      "target_id": targetId,
+    }, "GET",)
+    post.innerHTML = makePost(element, reactInfo)
+////////////////////////////////////////
         console.log(element)
     addReactionButtons("post", post, element.PostId)
     let display_comment = false
