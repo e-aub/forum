@@ -1,8 +1,10 @@
 export function makePost( element , reactInfo){
     let liked = false ;
     let disliked = false ;
-    if (!!reactInfo.reaction_id){
-      liked = reactInfo.reaction_id === "like"
+    let likeCount = reactInfo.liked_by.length 
+    let disLikeCount = reactInfo.disliked_by.length 
+    if (!!reactInfo.userReaction){
+      liked = reactInfo.userReaction === "like"
       disliked = !liked
     }else{
       liked = false 
@@ -26,12 +28,12 @@ export function makePost( element , reactInfo){
           <nav>
             <button data-clicked="${liked}" class="like"  
                 style="background-color: ${liked ? '#15F5BA' : 'white'};">
-                <i class="fas fa-thumbs-up"></i> <span class="count">${liked}</span>
+                <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
             </button>
             <button 
                 data-clicked="${liked}" class="dislike" 
                 style="background-color: ${disliked ? '#15F5BA' : 'white'};">
-                <i class="fas fa-thumbs-down"></i> <span class="count">${disliked}</span>
+                <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
             </button>
             <button class="comment-button">Comments</button>
           </nav>
