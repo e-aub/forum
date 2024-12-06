@@ -19,7 +19,7 @@ export function RenderPost(posts) {
     }).then(()=>{
       let display_comment = false;
       commentToggle(post, element, display_comment);
-      reactToggle(post, element)
+      reactToggle(post, element.PostId)
     }).then(()=> {
       container.append(post);
     });

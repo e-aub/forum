@@ -1,12 +1,20 @@
 import {showRegistrationModal} from  "./script.js"
 
+export function reactToggle(post , Id /*post or comment id*/){
+    const likeButton = post.querySelector('.like');
+    const dislikeButton = post.querySelector('.dislike');
+
+    likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", "post"));
+    dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
+}
+
 export async function handleReact(button, follow , Id, type , target_Type) {
     // Send API request
    const response = getReactInfo({
-      "is_own_react": "true",
-      "target": "post",
-      "target_id": Id,
-    }, "PUT").then((response) =>{
+        "type": type,
+        "target": target_Type ,
+        "target_id": Id,
+      }, "PUT").then((response) =>{
       if (!response.ok) {// user is not logged in
           showRegistrationModal(); 
       }else{ // only update the like if no error
@@ -31,14 +39,6 @@ export async function getReactInfo(params, method){
         console.log(err);
         return;
       }
-}
-
-export function reactToggle(post , Id /*post or comment id*/){
-    const likeButton = post.querySelector('.like');
-    const dislikeButton = post.querySelector('.dislike');
-
-    likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", "post"));
-    dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
 }
 
 
