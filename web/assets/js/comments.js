@@ -119,13 +119,13 @@ function commentTemplate(comment,reactInfo){
     <div class="one_comment">
         <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 
         <div class="actions">
-            <button data-clicked="${comment.clicked}" class="like" id="com_like" 
-            style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
+            <button data-clicked="${liked}" class="like" id="com_like" 
+            style="background-color: ${liked ? '#15F5BA' : 'white'};">
                 <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
             </button>
 
-            <button data-clicked="${comment.disclicked}" class="dislike" id="com_dislike" 
-            style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
+            <button data-clicked="${disliked}" class="dislike" id="com_dislike" 
+            style="background-color: ${disliked ? '#15F5BA' : 'white'};">
                 <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
             </button>
         </div>
