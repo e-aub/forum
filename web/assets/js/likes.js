@@ -1,13 +1,13 @@
 import {showRegistrationModal} from  "./script.js"
 
-export function reactToggle(post , Id /*post or comment id*/){
-    const likeButton = post.querySelector('.like');
-    const dislikeButton = post.querySelector('.dislike');
+export function reactToggle(element/*html element*/ , Id /*post or comment id*/, targetType/*post or comment*/){
+    const likeButton = element.querySelector('.like');
+    const dislikeButton = element.querySelector('.dislike');
 
     console.log(likeButton)
 
-    likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", "post"));
-    dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
+    likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", targetType));
+    dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", targetType));
 }
 
 

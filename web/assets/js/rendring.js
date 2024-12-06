@@ -27,7 +27,7 @@ export async function RenderPost(posts) {
       // Add toggle functionalities
       let display_comment = false;
       commentToggle(post, element, display_comment);
-      reactToggle(post, element.PostId);
+      reactToggle(post, element.PostId, "post");
 
       // Append the post to the container
       container.append(post);

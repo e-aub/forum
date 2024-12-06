@@ -53,6 +53,7 @@ const createComment = async (post, comment_part, post_id) => {
                   </button>
               </div>
           `
+          reactToggle(com, comment.comment_id, "comment")
           comment_part.insertAdjacentElement('beforeend', com);
         }
         comment.value = ''
@@ -86,7 +87,7 @@ export const getComment = async (element , id) => {
                         com.innerHTML = commentTemplate(comment, reactInfo.data)
                         //com.insertAdjacentElement('beforeend', com);
 
-                        reactToggle(com, id)
+                        reactToggle(com, id, "comment")
                         // Add event listeners for like and dislike buttons
                         element.append(com)
                     }catch (error) {
