@@ -78,6 +78,7 @@ function interactiveLike(button , follow ){
 
     // Parse the current count from the button's span text
     let count = parseInt(add.textContent, 10);
+    let disCount = parseInt(subtract.textContent, 10)
 
     if (button.getAttribute("data-clicked") === "false") {
 
@@ -87,7 +88,7 @@ function interactiveLike(button , follow ){
         follow.style.backgroundColor = 'white'
 
         if (follow.getAttribute("data-clicked") === "true") {
-            count -= 1; subtract.textContent = count; // Update the displayed count
+            disCount -= 1; subtract.textContent = disCount; // Update the displayed count
             follow.setAttribute("data-clicked", "false");
             follow.style.backgroundColor = 'white'
         }
