@@ -10,8 +10,8 @@ import (
 
 func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
 	r.Header.Add("content-type", "application/json")
-	reactionType := r.URL.Query().Get("type")
-	targetType := r.URL.Query().Get("target")
+	reactionType := r.URL.Query().Get("reaction_type")
+	targetType := r.URL.Query().Get("target_type")
 	id := r.URL.Query().Get("target_id")
 
 	fmt.Println(reactionType, targetType, id)
@@ -40,14 +40,14 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 		w.WriteHeader(200)
 		w.Write(nil)
 	} else {
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request"}`)
+		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request 1!"}`)
 		return
 	}
 }
 
 func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
 	r.Header.Add("content-type", "application/json")
-	targetType := r.URL.Query().Get("target")
+	targetType := r.URL.Query().Get("target_type")
 	id := r.URL.Query().Get("target_id")
 
 	if targetType != "" && id != "" {
@@ -75,6 +75,7 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	//target := r.URL.Query().Get("target")
 	targetID := r.URL.Query().Get("target_id")
+	targetType := r.URL.Query().Get("target_type")
 
 	// Prepare query to get likes and dislikes for the target (post or comment)
 	var likedBy, dislikedBy []int
@@ -84,22 +85,22 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 	likeQuery := `
 		SELECT user_id
 		FROM reactions
-		WHERE post_id = ? AND reaction_type = 'like';`
+		WHERE post_id = ? AND reaction_type = 'like' AND target_type = ? ;`
 
 	// Query for disliked users
 	dislikeQuery := `
 		SELECT user_id
 		FROM reactions
-		WHERE post_id = ? AND reaction_type = 'dislike';`
+		WHERE post_id = ? AND reaction_type = 'dislike' AND target_type = ? ;`
 
 	// Query for user reaction to a post
 	userReactionQuery := `
 		SELECT reaction_type
 		FROM reactions
-		WHERE user_id = ? AND post_id = ?;`
+		WHERE user_id = ? AND post_id = ? AND target_type = ? ;`
 
 	// Execute like query
-	rows, err := db.Query(likeQuery, targetID)
+	rows, err := db.Query(likeQuery, targetID, targetType)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,7 +118,7 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 	}
 
 	// Execute dislike query
-	rows, err = db.Query(dislikeQuery, targetID)
+	rows, err = db.Query(dislikeQuery, targetID, targetType)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -135,7 +136,7 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 	}
 
 	// Execute user reaction query
-	err = db.QueryRow(userReactionQuery, userId, targetID).Scan(&userReaction)
+	err = db.QueryRow(userReactionQuery, userId, targetID, targetType).Scan(&userReaction)
 	if err != nil && err != sql.ErrNoRows {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

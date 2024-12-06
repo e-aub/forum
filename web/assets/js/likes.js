@@ -8,15 +8,16 @@ export function reactToggle(post , Id /*post or comment id*/){
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
 }
 // Function to handle user interaction
-export async function handleReact(button, follow, id, type, targetType) {
+export async function handleReact(button, follow, id, reactionType, targetType) {
     // the method here can be eather put or delete
-    let method = button.getAttribute("data-clicked") ? "DELETE" : "PUT"
-
+    let method = button.getAttribute("data-clicked") === "true" ? "DELETE" : "PUT";
+    console.log(button.getAttribute("data-clicked"))
+    console.log(method)
     try {
         const result = await getReactInfo(
             {
-                type: type,
-                target: targetType,
+                reaction_type: reactionType,
+                target_type: targetType,
                 target_id: id,
             },
             method
