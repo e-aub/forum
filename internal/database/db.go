@@ -34,7 +34,7 @@ func CreateDatabase(dbPath string) *sql.DB {
 }
 
 func CreateTables(db *sql.DB) {
-	_, err := db.Exec(database.UsersTable + database.SessionsTable + database.ReactionTable + database.ReactionsTypeTable +
+	_, err := db.Exec(database.UsersTable + database.SessionsTable + database.ReactionTable +
 		database.CommentsTable + database.PostsTable + database.CategoriesTable + database.PostCategoriesTable)
 	if err != nil {
 		log.Fatalln(err)

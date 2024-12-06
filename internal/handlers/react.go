@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"forum/internal/utils"
 	"net/http"
@@ -12,25 +11,26 @@ import (
 func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
 	r.Header.Add("content-type", "application/json")
 	reactionType := r.URL.Query().Get("type")
-	target := r.URL.Query().Get("target")
+	targetType := r.URL.Query().Get("target")
 	id := r.URL.Query().Get("target_id")
-	fmt.Println(reactionType, target, id)
 
-	if target != "" && reactionType != "" {
+	fmt.Println(reactionType, targetType, id)
+
+	if targetType != "" && reactionType != "" {
 		var insertQuery string
-		switch target {
+		switch targetType {
 		case "post":
-			insertQuery = `INSERT INTO reactions (type_id, user_id, post_id) 
-			VALUES (?, ?, ?)
-			ON CONFLICT (user_id, post_id) DO UPDATE SET type_id = EXCLUDED.type_id;
+			insertQuery = `INSERT INTO reactions (reaction_type, user_id, post_id, target_type) 
+			VALUES (?, ?, ?, ?)
+			ON CONFLICT (user_id, post_id, target_type) DO UPDATE SET reaction_type = EXCLUDED.reaction_type;
 			`
 		case "comment":
-			insertQuery = `INSERT INTO reactions (type_id, user_id, comment_id) 
-			VALUES (?, ?, ?)
-			ON CONFLICT (user_id, comment_id) DO UPDATE SET type_id = EXCLUDED.type_id;
+			insertQuery = `INSERT INTO reactions (reaction_type, user_id, comment_id, target_type) 
+			VALUES (?, ?, ?, ?)
+			ON CONFLICT (user_id, comment_id,target_type) DO UPDATE SET reaction_type = EXCLUDED.reaction_type ;
 			`
 		}
-		_, err := db.Exec(insertQuery, reactionType, userID, id)
+		_, err := db.Exec(insertQuery, reactionType, userID, id, targetType)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
@@ -73,106 +73,83 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 }
 
 func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	target := r.URL.Query().Get("target")
+	//target := r.URL.Query().Get("target")
 	targetID := r.URL.Query().Get("target_id")
 
-	// Validate required parameters
-	if target == "" || targetID == "" {
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Target and target_id are required"}`)
-		return
-	}
+	// Prepare query to get likes and dislikes for the target (post or comment)
+	var likedBy, dislikedBy []int
+	var userReaction string
 
-	// Build the query based on the target
-	var query string
-	switch target {
-	case "post":
-		query = `
-        SELECT 
-            COALESCE(GROUP_CONCAT(CASE WHEN reaction_type.name = 'like' THEN reactions.user_id ELSE NULL END), '') AS liked_by,
-            COALESCE(GROUP_CONCAT(CASE WHEN reaction_type.name = 'dislike' THEN reactions.user_id ELSE NULL END), '') AS disliked_by,
-            COALESCE(CASE 
-                WHEN reactions.user_id = ? AND reaction_type.name = 'like' THEN 'liked'
-                WHEN reactions.user_id = ? AND reaction_type.name = 'dislike' THEN 'disliked'
-                ELSE NULL
-            END, '') AS user_reaction
-        FROM reactions
-        JOIN reaction_type ON reactions.type_id = reaction_type.reaction_id
-        WHERE reactions.post_id = ?
-        GROUP BY reactions.post_id;`
+	// Query for liked users
+	likeQuery := `
+		SELECT user_id
+		FROM reactions
+		WHERE post_id = ? AND reaction_type = 'like';`
 
-	case "comment":
-		query = `
-        SELECT 
-            COALESCE(GROUP_CONCAT(CASE WHEN reaction_type.name = 'like' THEN reactions.user_id ELSE NULL END), '') AS liked_by,
-            COALESCE(GROUP_CONCAT(CASE WHEN reaction_type.name = 'dislike' THEN reactions.user_id ELSE NULL END), '') AS disliked_by,
-            COALESCE(CASE 
-                WHEN reactions.user_id = ? AND reaction_type.name = 'like' THEN 'liked'
-                WHEN reactions.user_id = ? AND reaction_type.name = 'dislike' THEN 'disliked'
-                ELSE NULL
-            END, '') AS user_reaction
-        FROM reactions
-        JOIN reaction_type ON reactions.type_id = reaction_type.reaction_id
-        WHERE reactions.comment_id = ?
-        GROUP BY reactions.comment_id;`
+	// Query for disliked users
+	dislikeQuery := `
+		SELECT user_id
+		FROM reactions
+		WHERE post_id = ? AND reaction_type = 'dislike';`
 
-	default:
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Invalid target"}`)
-		return
-	}
+	// Query for user reaction to a post
+	userReactionQuery := `
+		SELECT reaction_type
+		FROM reactions
+		WHERE user_id = ? AND post_id = ?;`
 
-	// Execute the query
-	rows, err := db.Query(query, userId, userId, targetID)
+	// Execute like query
+	rows, err := db.Query(likeQuery, targetID)
 	if err != nil {
 		fmt.Println(err)
-		utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Failed to fetch reactions"}`)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
-
-	// Parse results
-	var likedBy, dislikedBy []int
-	var userReaction string
-	if rows.Next() {
-		var likedByJSON, dislikedByJSON string
-		if err := rows.Scan(&likedByJSON, &dislikedByJSON, &userReaction); err != nil {
-			utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Failed to parse reaction data"}`)
+	for rows.Next() {
+		var userId int
+		if err := rows.Scan(&userId); err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// Convert JSON arrays into slices
-		if likedByJSON != "" {
-			if err := json.Unmarshal([]byte(likedByJSON), &likedBy); err != nil {
-				fmt.Println(err)
-				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Failed to parse liked_by data"}`)
-				return
-			}
-		} else {
-			likedBy = []int{} // If the JSON is empty, initialize as an empty slice
-		}
+		likedBy = append(likedBy, userId)
+	}
 
-		if dislikedByJSON != "" {
-			if err := json.Unmarshal([]byte(dislikedByJSON), &dislikedBy); err != nil {
-				fmt.Println(err)
-				utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error": "Failed to parse disliked_by data"}`)
-				return
-			}
-		} else {
-			dislikedBy = []int{} // If the JSON is empty, initialize as an empty slice
-		}
-	} else {
-		// No reactions found
-		utils.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
-			"liked_by":      []int{},
-			"disliked_by":   []int{},
-			"user_reaction": nil,
-		})
+	// Execute dislike query
+	rows, err = db.Query(dislikeQuery, targetID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	var response utils.Reaction
-	// Prepare and send the response
-	response.LikedBy = likedBy
-	response.DislikedBy = dislikedBy
-	response.UserReaction = userReaction
+	defer rows.Close()
+	for rows.Next() {
+		var userId int
+		if err := rows.Scan(&userId); err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		dislikedBy = append(dislikedBy, userId)
+	}
 
+	// Execute user reaction query
+	err = db.QueryRow(userReactionQuery, userId, targetID).Scan(&userReaction)
+	if err != nil && err != sql.ErrNoRows {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare the response
+	response := utils.Reaction{
+		LikedBy:      likedBy,
+		DislikedBy:   dislikedBy,
+		UserReaction: userReaction,
+	}
+
+	// Send response
 	utils.RespondWithJSON(w, http.StatusOK, response)
 }
 

@@ -1,9 +1,11 @@
 export function makePost( element , reactInfo){
+  console.log(reactInfo)
     let liked = false ;
     let disliked = false ;
-    let likeCount = reactInfo.liked_by.length 
-    let disLikeCount = reactInfo.disliked_by.length 
-    if (!!reactInfo.userReaction){
+
+    let likeCount = reactInfo.liked_by? reactInfo.liked_by.length : 0 ;
+    let disLikeCount = reactInfo.disliked_by? reactInfo.disliked_by.length : 0 ; 
+    if (reactInfo.user_reaction){
       liked = reactInfo.userReaction === "like"
       disliked = !liked
     }else{

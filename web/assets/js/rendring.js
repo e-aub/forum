@@ -11,10 +11,10 @@ export function RenderPost(posts) {
     const post = document.createElement('div');
     post.classList.add('post');
     const reactInfo = getReactInfo({
-      "is_own_react": "true",
       "target": "post",
       "target_id": element.PostId,
     }, "GET",).then((reactInfo) => {
+      console.log("this is the info:", reactInfo)
       post.innerHTML =  makePost(element, reactInfo.data)
     }).then(()=>{
       let display_comment = false;
