@@ -1,4 +1,5 @@
-import { handleReact } from "./likes.js";
+import { handleReact, getReactInfo, reactToggle } from "./likes.js";
+
 
 export async function commentToggle(post, element, display_comment){
     post.querySelector('.comment-button').addEventListener('click', async (e) => {
@@ -44,10 +45,10 @@ const createComment = async (post, comment_part, post_id) => {
           <strong>${respons.user_name}:</strong>
           ${comment.value}
               <div class="likes">
-                  <button data-clicked="false" id="likeButton" class="com_like" style="background-color: white;">
+                  <button data-clicked="false" id="likeButton" class="like" id="com_like" style="background-color: white;">
                       Like <span class="count">${true}</span>
                   </button>
-                  <button data-clicked="false" id="dislikeButton" class="com_dislike" style="background-color: white;">
+                  <button data-clicked="false" id="dislikeButton" class="dislike" id="com_dislike" style="background-color: white;">
                       Dislike <span class="count">${true}</span>
                   </button>
               </div>
@@ -63,7 +64,7 @@ const createComment = async (post, comment_part, post_id) => {
 }
 
 
-export const getComment = async (post, id) => {
+export const getComment = async (element , id) => {
     try {
         const res = await fetch(`http://localhost:8080/comments?post=${id}`)
         if (res.ok) {
@@ -72,40 +73,63 @@ export const getComment = async (post, id) => {
                 for (let comment of allComment) {
                     const com = document.createElement('div');
                     com.classList.add('comment');
-                    com.innerHTML = `
-                        <div class="one_comment">
-                            <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 
-                            <div class="actions">
-                                <button data-clicked="${comment.clicked}"  class="com_like" 
-                                style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
-                                    <i class="fas fa-thumbs-up"></i> <span class="count">${comment.like_count}</span>
-                                </button>
 
-                                <button data-clicked="${comment.disclicked}"  class="com_dislike" 
-                                style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
-                                    <i class="fas fa-thumbs-down"></i> <span class="count">${comment.dislike_count}</span>
-                                </button>
-                            </div>
-                        <div>
-                    `;
+                    try{
+                        // Fetch reaction info
+                        const reactInfo = await getReactInfo({
+                            target_type: "comment",
+                            target_id: id,
+                        }, "GET");
 
-                    post.insertAdjacentElement('beforeend', com);
+                        console.log("This is the info:", reactInfo);
 
-                    // Add event listeners for like and dislike buttons
-                    const likeButton = com.querySelector('.com_like');
-                    const dislikeButton = com.querySelector('.com_dislike');
+                        com.innerHTML = commentTemplate(comment, reactInfo.data)
+                        //com.insertAdjacentElement('beforeend', com);
 
-                    likeButton.addEventListener('click', async () => {
-                        await handleReact(likeButton, dislikeButton,comment.comment_id, 'like', "comment");
-                    });
-
-                    dislikeButton.addEventListener('click', async () => {
-                        await handleReact(dislikeButton, likeButton, comment.comment_id, 'dislike', "comment");
-                    });
+                        reactToggle(com, id)
+                        // Add event listeners for like and dislike buttons
+                        element.append(com)
+                    }catch (error) {
+                        console.error("Error rendering post:", error);
+                    }
                 }
             }
         }
     } catch (error) {
         console.error(error);
     }
+}
+
+function commentTemplate(comment,reactInfo){
+    console.log(reactInfo)
+    let liked = false ;
+    let disliked = false ;
+
+    let likeCount = reactInfo.liked_by? reactInfo.liked_by.length : 0 ;
+    let disLikeCount = reactInfo.disliked_by? reactInfo.disliked_by.length : 0 ; 
+
+    if (!!reactInfo.user_reaction){
+      liked = reactInfo.user_reaction === "like"
+      disliked = !liked
+    }else{
+      liked = false 
+      disliked = false;
+    }
+    const innerHTML = `
+    <div class="one_comment">
+        <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 
+        <div class="actions">
+            <button data-clicked="${comment.clicked}" class="like" id="com_like" 
+            style="background-color: ${comment.clicked ? '#15F5BA' : 'white'};">
+                <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
+            </button>
+
+            <button data-clicked="${comment.disclicked}" class="dislike" id="com_dislike" 
+            style="background-color: ${comment.disclicked ? '#15F5BA' : 'white'};">
+                <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
+            </button>
+        </div>
+    <div>
+    `;
+    return innerHTML
 }
