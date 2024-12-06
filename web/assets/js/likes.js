@@ -7,39 +7,62 @@ export function reactToggle(post , Id /*post or comment id*/){
     likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", "post"));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
 }
+// Function to handle user interaction
+export async function handleReact(button, follow, id, type, targetType) {
+    try {
+        const result = await getReactInfo(
+            {
+                type: type,
+                target: targetType,
+                target_id: id,
+            },
+            "PUT"
+        );
 
-export async function handleReact(button, follow , Id, type , target_Type) {
-    // Send API request
-   const response = getReactInfo({
-        "type": type,
-        "target": target_Type ,
-        "target_id": Id,
-      }, "PUT").then((response) =>{
-      if (!response.ok) {// user is not logged in
-          showRegistrationModal(); 
-      }else{ // only update the like if no error
-          interactiveLike(button, follow)
-      }
+        if (!result.success) { 
+            showRegistrationModal(); 
+        } else {
+            interactiveLike(button, follow); 
+        }
+    } catch (error) {
+        console.error("Error in handleReact:", error);
     }
-  );
 }
 
-export async function getReactInfo(params, method){
-    let queryString = new URLSearchParams(params).toString();
-    const url = `http://localhost:8080/react?${queryString}`
+export async function getReactInfo(params, method) {
+    const queryString = new URLSearchParams(params).toString();
+    const url = `http://localhost:8080/react?${queryString}`;
+
     try {
         const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
-      return  await response.json();
+
+        if (!response.ok) {
+            // Handle non-OK responses
+            const errorText = await response.text(); // Use text() for error body
+            console.error("API error:", errorText);
+            return { success: false, error: errorText || "Unknown error" };
+        }
+
+        // If response has no body, return success with no data
+        const contentLength = response.headers.get("Content-Length");
+        if (!contentLength || parseInt(contentLength) === 0) {
+            return { success: true, data: null };
+        }
+
+        // Parse JSON response
+        return { success: true, data: await response.json() };
+
     } catch (err) {
-        console.log(err);
-        return;
-      }
+        console.error("Fetch error:", err);
+        return { success: false, error: err.message };
+    }
 }
+
 
 
 

@@ -15,7 +15,7 @@ export function RenderPost(posts) {
       "target": "post",
       "target_id": element.PostId,
     }, "GET",).then((reactInfo) => {
-      post.innerHTML =  makePost(element, reactInfo)
+      post.innerHTML =  makePost(element, reactInfo.data)
     }).then(()=>{
       let display_comment = false;
       commentToggle(post, element, display_comment);
