@@ -34,7 +34,7 @@ export function makePost( element , reactInfo){
                 <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
             </button>
             <button 
-                data-clicked="${liked}" class="dislike" 
+                data-clicked="${disliked}" class="dislike" 
                 style="background-color: ${disliked ? '#15F5BA' : 'white'};">
                 <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
             </button>

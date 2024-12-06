@@ -11,7 +11,7 @@ export function RenderPost(posts) {
     const post = document.createElement('div');
     post.classList.add('post');
     const reactInfo = getReactInfo({
-      "target": "post",
+      "target_type": "post",
       "target_id": element.PostId,
     }, "GET",).then((reactInfo) => {
       console.log("this is the info:", reactInfo)

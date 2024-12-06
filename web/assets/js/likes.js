@@ -10,7 +10,9 @@ export function reactToggle(post , Id /*post or comment id*/){
 // Function to handle user interaction
 export async function handleReact(button, follow, id, reactionType, targetType) {
     // the method here can be eather put or delete
+
     let method = button.getAttribute("data-clicked") === "true" ? "DELETE" : "PUT";
+
     console.log(button.getAttribute("data-clicked"))
     console.log(method)
     try {
