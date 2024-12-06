@@ -107,7 +107,7 @@ func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 	userReactionQuery := fmt.Sprintf(`
 		SELECT reaction_type
 		FROM reactions
-		WHERE %s = ? AND post_id = ? AND target_type = ? ;`, column)
+		WHERE user_id = ? AND %s = ? AND target_type = ? ;`, column)
 
 	// Execute like query
 	rows, err := db.Query(likeQuery, targetID, targetType)

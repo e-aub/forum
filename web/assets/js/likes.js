@@ -4,7 +4,6 @@ export function reactToggle(element/*html element*/ , Id /*post or comment id*/,
     const likeButton = element.querySelector('.like');
     const dislikeButton = element.querySelector('.dislike');
 
-    console.log(likeButton)
 
     likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", targetType));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", targetType));
@@ -17,8 +16,6 @@ export async function handleReact(button, follow, id, reactionType, targetType) 
 
     let method = button.getAttribute("data-clicked") === "true" ? "DELETE" : "PUT";
 
-    console.log(button.getAttribute("data-clicked"))
-    console.log(method)
     try {
         const result = await getReactInfo(
             {

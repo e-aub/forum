@@ -19,7 +19,6 @@ export async function RenderPost(posts) {
         target_id: element.PostId,
       }, "GET");
 
-      console.log("This is the info:", reactInfo);
 
       // Populate the post's HTML
       post.innerHTML = makePost(element, reactInfo.data);

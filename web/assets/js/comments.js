@@ -82,12 +82,10 @@ export const getComment = async (element , id) => {
                             target_id: id,
                         }, "GET");
 
-                        console.log("This is the info:", reactInfo);
 
                         com.innerHTML = commentTemplate(comment, reactInfo.data)
-                        //com.insertAdjacentElement('beforeend', com);
-
-                        reactToggle(com, id, "comment")
+                        reactToggle(com, comment.comment_id, "comment")
+                        
                         // Add event listeners for like and dislike buttons
                         element.append(com)
                     }catch (error) {
@@ -116,6 +114,7 @@ function commentTemplate(comment,reactInfo){
       liked = false 
       disliked = false;
     }
+
     const innerHTML = `
     <div class="one_comment">
         <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 

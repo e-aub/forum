@@ -1,5 +1,4 @@
 export function makePost( element , reactInfo){
-  console.log(reactInfo)
     let liked = false ;
     let disliked = false ;
 
