@@ -29,6 +29,7 @@ export function makePost( element , reactInfo){
         </main>
         <footer>
           <nav>
+            <button class="comment-button"><i class="fas fa-comment"></i></button>
             <button data-clicked="${liked}" class="like"  
                 style="background-color: ${liked ? '#15F5BA' : 'white'};">
                 <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
@@ -38,7 +39,6 @@ export function makePost( element , reactInfo){
                 style="background-color: ${disliked ? '#15F5BA' : 'white'};">
                 <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
             </button>
-            <button class="comment-button">Comments</button>
           </nav>
         </footer>
     </article> 
