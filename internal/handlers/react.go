@@ -47,18 +47,18 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 
 func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userID int) {
 	r.Header.Add("content-type", "application/json")
-	target := r.URL.Query().Get("target")
+	targetType := r.URL.Query().Get("target")
 	id := r.URL.Query().Get("target_id")
 
-	if target != "" && id != "" {
+	if targetType != "" && id != "" {
 		var deleteQuery string
-		switch target {
+		switch targetType {
 		case "post":
-			deleteQuery = `DELETE FROM reactions WHERE user_id = ? AND post_id = ?`
+			deleteQuery = `DELETE FROM reactions WHERE user_id = ? AND post_id = ? AND target_type = ? `
 		case "comment":
-			deleteQuery = `DELETE FROM reactions WHERE user_id = ? AND comment_id = ?`
+			deleteQuery = `DELETE FROM reactions WHERE user_id = ? AND comment_id = ? AND target_type = ? `
 		}
-		_, err := db.Exec(deleteQuery, userID, id)
+		_, err := db.Exec(deleteQuery, userID, id, targetType)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(nil)
