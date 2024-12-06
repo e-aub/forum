@@ -7,6 +7,20 @@ export function reactToggle(post , Id /*post or comment id*/){
     likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", "post"));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", "post"));
 }
+
+export function reactToggleCom(comment , Id /*post or comment id*/){
+        // Add event listeners for like and dislike buttons
+    const likeButton = com.querySelector('.com_like');
+    const dislikeButton = com.querySelector('.com_dislike');
+
+    likeButton.addEventListener('click', async () => {
+        await handleReact(likeButton, dislikeButton, respons.comment_id, 'like', "comment");
+    });
+
+    dislikeButton.addEventListener('click', async () => {
+        await handleReact(dislikeButton, likeButton, respons.comment_id, 'dislike', "comment");
+    });
+}
 // Function to handle user interaction
 export async function handleReact(button, follow, id, reactionType, targetType) {
     // the method here can be eather put or delete
