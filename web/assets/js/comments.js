@@ -37,24 +37,18 @@ const createComment = async (post, comment_part, post_id) => {
         const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json' } })
         const respons = await res.json()
         if (res.status === 401) {
-          alert("you are unautherized")
+            alert("you are unautherized")
         } else if (res.ok) {
-          const com = document.createElement('div');
-          com.classList.add('comment');
-          com.innerHTML = `
-          <strong>${respons.user_name}:</strong>
-          ${comment.value}
-              <div class="likes">
-                  <button data-clicked="false" id="likeButton" class="like" id="com_like" style="background-color: white;">
-                      Like <span class="count">${true}</span>
-                  </button>
-                  <button data-clicked="false" id="dislikeButton" class="dislike" id="com_dislike" style="background-color: white;">
-                      Dislike <span class="count">${true}</span>
-                  </button>
-              </div>
-          `
-          reactToggle(com, comment.comment_id, "comment")
-          comment_part.insertAdjacentElement('beforeend', com);
+            const com = document.createElement('div');
+            com.classList.add('comment');
+            let info = {
+                liked_by : []    ,
+                disliked_by : []  , 
+                user_reaction : "" , 
+            }
+            com.innerHTML = commentTemplate(respons, info)
+            reactToggle(com, respons.comment_id, "comment")
+            comment_part.insertAdjacentElement('beforeend', com);
         }
         comment.value = ''
       }
@@ -72,6 +66,7 @@ export const getComment = async (element , id) => {
             const allComment = await res.json()
             if (allComment) {
                 for (let comment of allComment) {
+                    console.log(comment)
                     const com = document.createElement('div');
                     com.classList.add('comment');
 
@@ -79,7 +74,7 @@ export const getComment = async (element , id) => {
                         // Fetch reaction info
                         const reactInfo = await getReactInfo({
                             target_type: "comment",
-                            target_id: id,
+                            target_id: comment.comment_id,
                         }, "GET");
 
 
