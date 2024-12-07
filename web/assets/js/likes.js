@@ -4,14 +4,13 @@ export function reactToggle(element/*html element*/ , Id /*post or comment id*/,
     const likeButton = element.querySelector('.like');
     const dislikeButton = element.querySelector('.dislike');
 
-
     likeButton.addEventListener('click', () => handleReact(likeButton,dislikeButton, Id, "like", targetType));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton,likeButton, Id, "dislike", targetType));
 }
 
 
 // Function to handle user interaction
-export async function handleReact(button, follow, id, reactionType, targetType) {
+export async function handleReact(button/*ex: like*/, follow/*ex: dislike*/, id, reactionType, targetType) {
     // the method here can be eather put or delete
 
     let method = button.getAttribute("data-clicked") === "true" ? "DELETE" : "PUT";
@@ -36,6 +35,7 @@ export async function handleReact(button, follow, id, reactionType, targetType) 
     }
 }
 
+// used to get reaction info or also set them when the method is put or delete. 
 export async function getReactInfo(params, method) {
     const queryString = new URLSearchParams(params).toString();
     const url = `http://localhost:8080/react?${queryString}`;
@@ -72,7 +72,8 @@ export async function getReactInfo(params, method) {
 
 
 
-
+// for the changes of reaction to take place on the front end instently
+// with no need for refreshing of fetching. 
 function interactiveLike(button , follow ){
     const add = button.querySelector(".count");
     const subtract = follow.querySelector(".count");

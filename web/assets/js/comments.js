@@ -1,4 +1,5 @@
-import { handleReact, getReactInfo, reactToggle } from "./likes.js";
+import {  getReactInfo, reactToggle } from "./likes.js";
+import { showRegistrationModal } from "./script.js";
 
 
 export async function commentToggle(post, element, display_comment){
@@ -34,10 +35,15 @@ const createComment = async (post, comment_part, post_id) => {
   post.querySelector('.comment-submit').addEventListener('click', async (e) => {
     try {
       if (comment.value) {
-        const res = await fetch(`http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`, { method: 'POST', headers: { "Content-Type": 'application/json' } })
+        const res = await fetch(
+            `http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`,
+            { method: 'POST', headers: { "Content-Type": 'application/json' } 
+        })
         const respons = await res.json()
+
         if (res.status === 401) {
-            alert("you are unautherized")
+            //alert("you are unautherized")
+            showRegistrationModal()
         } else if (res.ok) {
             const com = document.createElement('div');
             com.classList.add('comment');
