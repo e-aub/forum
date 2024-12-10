@@ -15,7 +15,6 @@ import (
 
 func CreateDatabase(dbPath string) *sql.DB {
 	db, err := sql.Open("sqlite3", dbPath)
-
 	if err != nil {
 		log.Fatalf("%sError opening database:%s%s\n", utils.Colors["red"], err.Error(), utils.Colors["reset"])
 	}
@@ -138,7 +137,7 @@ func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 }
 
 func GetLastPostId(db *sql.DB) (int, error) {
-	query := `SELECT MAX(id) FROM posts `
+	query := `SELECT MAX(id) FROM posts`
 	row, err := utils.QueryRow(db, query)
 	if err != nil {
 		return 0, err

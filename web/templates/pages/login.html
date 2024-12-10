@@ -1,74 +1,48 @@
-{{define "header"}}
+{{define "style"}}
+<link rel="stylesheet" href="/assets/css/login.css">
 {{end}}
 
-{{define "main"}}
-<h2>Login</h2>
-    <form id="loginForm" action="/login" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
+{{define "title"}}talk - Login{{end}}
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+{{define "header"}}
+<header>
+    <a href="/">
+        <div class="logo">
+            <img src="/assets/icons/logo.png" alt="Logo">
+        </div>
+    </a>
+    <nav class="top-bar">
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Signup</a>
+    </nav>
+</header>
+{{end}}
 
-        <button type="submit">Login</button>
-        <button type="button" onclick="window.location.href='/register'">Register</button>
-    </form>
+{{define "sidebar"}}{{end}}
 
-    <p id="responseMessage"></p>
-
-    <script>
-        // JavaScript to handle form validation and submission
-        document.getElementById("loginForm").addEventListener("submit", async function (event) {
-            event.preventDefault();  // Prevent default form submission
-
-            // Capture form data
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value;
-
-            // Client-side validation
-            const messageElement = document.getElementById("responseMessage");
-
-            // Username validation (8-30 characters)
-            if (username.length < 8 || username.length > 30) {
-                messageElement.textContent = "Username must be between 8 and 30 characters long.";
-                messageElement.style.color = "red";
-                return;
-            }
-
-            // Password validation (8-64 characters)
-            if (password.length < 8 || password.length > 64) {
-                messageElement.textContent = "Password must be between 8 and 64 characters long.";
-                messageElement.style.color = "red";
-                return;
-            }
-
-            // Send data to the API if validation passes
-            try {
-                const response = await fetch("http://localhost:8080/login", {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ username, password }),
-                    credentials: "include",
-                });
-
-                if (response.ok) {
-                    messageElement.textContent = "Login successful!";
-                    messageElement.style.color = "green";
-                    window.location.href = 'http://localhost:8080/';
-                } else {
-                    const errorData = await response.text();  // Get error text
-                    messageElement.textContent = `Error: ${errorData}`;
-                    messageElement.style.color = "red";
+{{define "body"}}
+<main>
+    <div class="container">
+        <section class="login">
+            <h2>Login</h2>
+            <form id="login-form" onsubmit="return validateLogin()">
+                <div class="form-group">
+                    <label for="login-username">Username:</label>
+                    <input type="text" id="login-username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p class="signup-link">Don't have an account? <a href="/register">Signup</a></p>
+            </form>
+        </section>
+    </div>
+</main>
+{{end}}
 
 
-                }
-            } catch (error) {
-                messageElement.textContent = "An error occurred during login.";
-                messageElement.style.color = "red";
-            }
-        });
-    </script>
+{{define "script"}}
+<script type="module" src="/assets/js/login.js"></script>
 {{end}}

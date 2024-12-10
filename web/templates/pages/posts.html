@@ -1,46 +1,45 @@
-{{ define "header"}}
-    <div class="newPost">
-        <button class="new-post-button" onclick="window.location.href='/new_post'">New Post</button>
-        <button class="new-post-button" onclick="window.location.href='/categories'">Categories</button>
-    </div>
-    <div class="registration">
-        <button id="login-logout">Logout</button>
-        <button id="register">Register</button>
-    </div>
+
+{{define "style"}} 
+<link rel="stylesheet" href="/assets/css/posts.css">
 {{end}}
 
-{{define "main"}}
-    <div class="sidebar">
-        <h3>You</h3>
-        <ul>
-            <li><a href="/me/liked_posts">Liked Posts</a></li>
-            <li><a href="/me/created_posts">Created Posts</a></li>
-        </ul>
-        <h3>Categories</h3>
-        <ul>
-            <li><a href="/categories">Categories</a></li>
-        </ul>
-    </div>
-    <div class="posts-container">
-    </div>
-    <script type="module">
-        import { GetData, logoutEvent } from '/assets/js/script.js';
-        let postIds = JSON.parse('{{.Posts}}')
-        GetData(postIds);
-        const log = document.getElementById('login-logout')
-        const register = document.getElementById('register')
-        if (document.cookie) {
-            log.textContent = 'Logout'
-            register.remove()
-            logoutEvent(log)
-        } else {
-            log.textContent = 'Login'
-            register.addEventListener('click', async () => {
-                window.location.href = '/register';
-            })
-            log.addEventListener('click', async () => {
-                window.location.href = '/login';
-            })
-        }
-    </script>
+{{define "title"}}talk - HomePage{{end}}
+
+{{define "header"}}
+<header>
+    <a href="/">
+        <div class="logo">
+            <img src="/assets/icons/logo.png" alt="Logo">
+        </div>
+    </a>
+    <nav class="top-bar">
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Signup</a>
+    </nav>
+</header>
 {{end}}
+
+{{define "sidebar"}}
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <a href="/new_post">Create Post</a>
+        <a href="/me/created_posts">Created Posts</a>
+        <a href="/me/liked_posts">Liked Posts</a>
+        <a href="/categories">Categories</a>
+    </nav>
+</aside>
+{{end}}
+
+{{define "body"}}
+<main>
+    <section class="posts">
+      
+    </section>
+</main>
+{{end}}
+
+{{define "script"}} 
+    <script type="module" src="/assets/js/script.js"></script> 
+    <script type="module" src="/assets/js/posts.js"></script> 
+{{end}}
+

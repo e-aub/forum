@@ -1,77 +1,85 @@
-:root {
-    --background: #0f0f0f;
-    --header-footer: #121212;
-    --neon-green: #15F5BA;
-    --primary-text: #e4e4e4;
-    --secondary-text: #b2b2b2;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background-color: var(--background);
-    font-family: 'Orbitron', sans-serif;
-    color: var(--primary-text);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
-}
-
-h1 {
-    color: var(--primary-text);
-    text-align: center;
-    margin-top: 20px;
-}
-
-.categoryForm {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
-    padding: 20px;
-}
-
-.category {
-    width: 100%;
-    max-width: 600px;
-    margin: 10px 0;
-    padding: 20px;
-    background-color: var(--header-footer);
-    color: var(--primary-text);
-    border: none;
+.categories {
+    background-color: white;
+    padding: 40px;
     border-radius: 8px;
-    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; 
+    width: 100%;
+    margin: 0 auto;
+    height: auto;
+    min-height: 60vh;
+}
+
+h2 {
     text-align: center;
-    transition: background-color 0.3s, transform 0.2s;
+    margin-bottom: 30px;
+    font-size: 28px; 
 }
 
-.category:hover {
-    background-color: var(--neon-green);
-    color: var(--background);
-    transform: translateY(-3px);
-}
-
-.category:hover h3,
-.category:hover p {
-    color: var(--background);
-}
-
-.category h3 {
+.category-list {
+    list-style-type: none;
+    padding: 0;
     margin: 0;
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--primary-text);
 }
 
-.category p {
-    margin: 8px 0 0;
-    font-size: 14px;
-    color: var(--secondary-text);
+.category-list li {
+    margin: 15px 0;
+}
+
+.category-list a {
+    text-decoration: none;
+    color: white;
+    font-size: 20px; 
+    padding: 15px 25px; 
+    display: block;
+    border-radius: 8px; 
+    background-color: #333; 
+    text-align: center; 
+    transition: background-color 0.3s ease, transform 0.2s ease; 
+}
+
+.category-list a:hover {
+    background-color: #ffcc00; 
+    transform: scale(1.05); 
+}
+
+.category-list a.active-category {
+    background-color: #ffcc00; 
+    color: #333; 
+}
+
+.category-list a:focus {
+    outline: none; 
+}
+
+
+@media (max-width: 768px) {
+    .categories {
+        padding: 30px;
+    }
+
+    .category-list a {
+        font-size: 18px; 
+        padding: 12px 20px; 
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .categories {
+        padding: 20px;
+    }
+
+    .category-list a {
+        font-size: 16px; 
+        padding: 10px 18px; 
+    }
+
+    h2 {
+        font-size: 22px;
+    }
 }

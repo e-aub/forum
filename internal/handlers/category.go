@@ -64,7 +64,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)

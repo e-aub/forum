@@ -1,8 +1,9 @@
-import { RenderPost} from "./rendring.js"
+import { renderPosts } from "./posts.js";
 
-export const GetData = async (postIds) => {
-    let target = []
-    try{
+// Fetch data and render posts
+export const GetData = async (postIds = false) => {
+    let target = [];
+    try {
         if (postIds === false) {
             postIds = [];
             let response = await fetch('http://localhost:8080/posts');
@@ -18,8 +19,8 @@ export const GetData = async (postIds) => {
             if (!postResponse.ok) throw new Error("Failed to fetch post data");
             let post = await postResponse.json();
             if (post.PostId !== 0) {
-                target.push(post)
-                RenderPost(target)
+                target.push(post);
+                renderPosts(target); // Render posts
             }
         }
     } catch (err) {
@@ -27,8 +28,9 @@ export const GetData = async (postIds) => {
     }
 };
 
+GetData(); // Call to get and render posts
 
-
+// Logout event
 export const logoutEvent = (log) => {
     log.addEventListener('click', async () => {
         try {
@@ -39,7 +41,7 @@ export const logoutEvent = (log) => {
 
             if (response.ok) {
                 console.log('Logged out successfully');
-                window.location.href = '/';
+                window.location.href = '/'; // Redirect after successful logout
             } else {
                 console.error('Logout failed');
             }
@@ -47,46 +49,26 @@ export const logoutEvent = (log) => {
             console.error('Error logging out:', error);
         }
     });
+};
+
+// Integrate logout event to the button
+const logoutButton = document.getElementById('logoutBtn');
+if (logoutButton) {
+    logoutEvent(logoutButton);
 }
+
 
 export function showRegistrationModal() {
     const dialog = document.createElement('dialog');
-    // Create message
     const message = document.createElement('p');
     message.textContent = 'You need to be logged in to react. Please register or log in to continue.';
-
-    // Create register button
     const registerButton = document.createElement('button');
     registerButton.textContent = 'Register Now';
-
-    // Create login button
     const loginButton = document.createElement('button');
-    loginButton.textContent = 'Login';
-
-
-    // Add event listeners
-    registerButton.addEventListener('click', () => {
-        window.location.href = '/register'; // Replace with your registration URL
-    });
-    loginButton.addEventListener('click', () => {
-        window.location.href = '/login'; // Replace with your login URL
-    });
-
-    // Close dialog when clicking outside
-    dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) {
-            dialog.close();
-        }
-    }); 
-
-    // Append content to dialog
+    loginButton.textContent = 'Log In';
     dialog.appendChild(message);
     dialog.appendChild(registerButton);
     dialog.appendChild(loginButton);
-
-    // Append dialog to the body
     document.body.appendChild(dialog);
-
-    // Show the dialog
     dialog.showModal();
 }

@@ -63,7 +63,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -112,7 +112,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			Posts: string(jsonIds),
 		}
 		err = template.ExecuteTemplate(w, "base", feed)
-		//err = template.Execute(w, string(jsonIds))
+		// err = template.Execute(w, string(jsonIds))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
@@ -135,12 +135,7 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "500 internal server error", http.StatusInternalServerError)
 		return
 	}
-	feed := struct {
-		Style string
-	}{
-		Style: "register.css",
-	}
-	err = tmpl.ExecuteTemplate(w, "base", feed)
+	err = tmpl.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		log.Println("Error executing template:", err)
 		http.Error(w, "500 internal server error", http.StatusInternalServerError)
@@ -294,7 +289,6 @@ func GenerateSessionID() (string, error) {
 		return "", err
 	}
 	return sessionID.String(), nil
-
 }
 
 func HashPassword(password *string) error {

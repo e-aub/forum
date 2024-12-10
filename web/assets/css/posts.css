@@ -1,0 +1,85 @@
+/* Styles specific to Home Page (Posts) */
+.posts {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 60%;
+    margin: 0 auto;
+}
+
+.post {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ccc; /* Border around each post */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.post-title {
+    font-size: 20px;
+    margin: 0;
+}
+
+.post-date {
+    font-size: 14px;
+    color: gray;
+}
+
+.post-content {
+    margin-bottom: 20px;
+}
+
+.post-actions {
+    margin-bottom: 10px;
+}
+
+.like-btn,
+.dislike-btn, .toggle-comments {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.like-btn:hover,
+.dislike-btn:hover, .toggle-comments:hover{
+    background-color: #f0f0f0;
+}
+
+.like-btn.highlighted,
+.dislike-btn.highlighted, .toggle-comments.highlighted {
+    background-color: #ccc;
+    border-color: #888;
+}
+
+.comments-section {
+    margin-top: 20px;
+}
+
+.comments-section .toggle-comments {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.comments-section .comments {
+    margin-top: 10px;
+}
+
+.comment {
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}

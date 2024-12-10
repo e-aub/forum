@@ -33,14 +33,8 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
 			return
 		}
-		feed := struct {
-			Style string
-			Posts bool
-		}{
-			Style: "post.css",
-			Posts: false,
-		}
-		err = tmpl.ExecuteTemplate(w, "base", feed)
+
+		err = tmpl.ExecuteTemplate(w, "base", nil)
 		if err != nil {
 			log.Println("Error executing template:", err)
 			http.Error(w, "500 internal server error", http.StatusInternalServerError)
