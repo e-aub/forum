@@ -1,50 +1,14 @@
-function validateSignup() {
+document.getElementById("signup-form").addEventListener("submit", async function (event) {
+    event.preventDefault();  
     const username = document.getElementById("signup-username").value;
     const email = document.getElementById("signup-email").value;
     const password = document.getElementById("signup-password").value;
     const confirmPassword = document.getElementById("signup-confirm-password").value;
+    const messageElement = document.getElementById("responseMessage");
 
-    if (username === "" || email === "" || password === "" || confirmPassword === "") {
-        alert("Please fill out all fields.");
-        return false;
-    }
-
-    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailPattern.test(email)) {
-        alert("Please enter a valid email address.");
-        return false;
-    }
-
-    if (password.length < 6) {
-        alert("Password must be at least 6 characters long.");
-        return false;
-    }
-
-    if (password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return false;
-    }
-
-    return true;
-}
-
-// JavaScript to handle form validation and submission
-document.getElementById("signup-form").addEventListener("submit", async function (event) {
-    event.preventDefault();  // Prevent default form submission
-
-    // First, validate form fields using validateSignup
-    if (!validateSignup()) {
-        console.log("invlaadasd")
+    if (!validateSignup(password, confirmPassword, messageElement)) {
         return;
     }
-
-    // Capture form data
-    const username = document.getElementById("signup-username").value.trim();
-    const email = document.getElementById("signup-email").value.trim();
-    const password = document.getElementById("signup-password").value;
-
-    // Display message area
-    const messageElement = document.getElementById("responseMessage");
 
     // Send data to the API if validation passes
     try {
@@ -71,3 +35,12 @@ document.getElementById("signup-form").addEventListener("submit", async function
         messageElement.style.color = "red";
     }
 });
+
+function validateSignup(password, confirmPassword, messageElement) {
+    if (password !== confirmPassword) {
+        messageElement.textContent = "Passwords do not match.";
+        messageElement.style.color = "red";
+        return false;
+    }
+    return true;
+}
