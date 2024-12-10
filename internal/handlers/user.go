@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"forum/internal/database"
@@ -147,12 +148,14 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var userData utils.User
 	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
-		fmt.Println(err.Error())
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
-	// fmt.Println(userData.UserName)
 
+	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 || !isValidEmail(&userData.Email) {
+		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
+		return
+	}
 	ok, err := middleware.IsUserRegistered(db, &userData)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
@@ -160,10 +163,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if ok {
 		http.Error(w, "User already exists", http.StatusConflict)
-		return
-	}
-	if len(userData.UserName) < 8 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 {
-		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
 		return
 	}
 
@@ -233,7 +232,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	password := userData.Password
 	ok, err := middleware.ValidCredential(db, &userData)
-	// fmt.Println(userData.UserId)
 
 	if !ok {
 		http.Error(w, "Incorect Username or password", http.StatusConflict)
@@ -300,4 +298,12 @@ func HashPassword(password *string) error {
 func CheckPasswordHash(password, hash *string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(*hash), []byte(*password))
 	return err == nil
+}
+
+func isValidEmail(email *string) bool {
+	var emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	re := regexp.MustCompile(emailRegex)
+
+	return re.MatchString(*email)
 }

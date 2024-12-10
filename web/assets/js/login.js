@@ -1,15 +1,10 @@
 document.getElementById("login-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
 
     // Capture form data
-    const username = document.getElementById("login-username").value.trim();
+    const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
-
-    // Basic validation
-    if (!username || password.length < 6) {
-        alert("Invalid username or password. Password must be at least 6 characters long.");
-        return;
-    }
+    const messageElement = document.getElementById("responseMessage");
 
     // Send data to the API
     try {
@@ -25,10 +20,12 @@ document.getElementById("login-form").addEventListener("submit", async function 
         if (response.ok) {
             window.location.href = '/'; // Redirect on success
         } else {
-            const error = await response.text();
-            alert(`Error: ${error}`);
+            const errorData = await response.text();
+            messageElement.textContent = `Error: ${errorData}`;
+            messageElement.style.color = "red";
         }
     } catch {
-        alert("An error occurred during login.");
+        messageElement.textContent = "An error occurred during registration.";
+        messageElement.style.color = "red";
     }
 });
