@@ -1,20 +1,64 @@
-{{define "header"}}{{end}}
 
-{{define "main"}}
-<h1>Create New Post</h1>
-<form action="/new_post" method="post">
-    <h2>Title</h2>
-    <textarea name="title" placeholder="Write your title" maxlength="40" required></textarea>
-
-    <h2>Content</h2>
-    <textarea name="content" placeholder="Write your content here" maxlength="300" required></textarea>
-
-    <h2>Category</h2>
-    {{range .Categories}}
-    <label>
-        <input type="checkbox" name="category" value="{{.Id}}">{{.Name}}
-    </label>
-    {{end}}
-    <button type="submit">Submit</button>
-</form>
+{{define "style"}} 
+<link rel="stylesheet" href="/assets/css/new_post.css">
 {{end}}
+
+{{define "title"}}talk - HomePage{{end}}
+
+{{define "header"}}
+<header>
+    <a href="/">
+        <div class="logo">
+            <img src="/assets/icons/logo.png" alt="Logo">
+        </div>
+    </a>
+    <nav class="top-bar">
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Signup</a>
+    </nav>
+</header>
+{{end}}
+
+{{define "sidebar"}}
+<aside class="sidebar">
+    <nav class="sidebar-nav">
+        <a href="/new_post">Create Post</a>
+        <a href="/me/created_posts">Created Posts</a>
+        <a href="/me/liked_posts">Liked Posts</a>
+        <a href="/categories">Categories</a>
+    </nav>
+</aside>
+{{end}}
+
+{{define "body"}}
+<main>
+    <section class="create-post">
+        <h2>Create a New Post</h2>
+        <form>
+            <input type="text" placeholder="Post Title" class="post-title" required>
+            <textarea placeholder="Post Content" class="post-content" required></textarea>
+
+            <div class="form-group">
+                <label for="category">Choose a Category:</label>
+                <select id="category" class="post-category" required>
+                    <option value="">--Select a Category--</option>
+                    <option value="technology">Technology</option>
+                    <option value="sports">Sports</option>
+                    <option value="health">Health</option>
+                    <option value="education">Education</option>
+                    <option value="entertainment">Entertainment</option>
+                </select>
+            </div>
+
+            <button type="submit">Create Post</button>
+        </form>
+    </section>
+</main>
+
+{{end}}
+
+{{define "script"}} 
+    <script type="module" src="/assets/js/script.js"></script> 
+    <script type="module" src="/assets/js/posts.js"></script> 
+{{end}}
+
