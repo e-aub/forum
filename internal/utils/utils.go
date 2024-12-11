@@ -3,17 +3,11 @@ package utils
 import (
 	"database/sql"
 	"encoding/json"
-	"html/template"
 	"net/http"
 	"time"
 )
 
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
-
-type Err struct {
-	Message      string
-	Unauthorized bool
-}
 
 type User struct {
 	UserId     int64
@@ -42,8 +36,8 @@ type Post struct {
 // }
 
 type Reaction struct {
-	LikedBy     []int  `json:"liked_by"`
-	DislikedBy  []int  `json:"disliked_by"`
+	LikedBy      []int  `json:"liked_by"`
+	DislikedBy   []int  `json:"disliked_by"`
 	UserReaction string `json:"user_reaction"`
 }
 
@@ -72,16 +66,6 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 	w.WriteHeader(code)
 	w.Write(response)
-}
-
-func RespondWithError(w http.ResponseWriter, Err Err, statuscode int) {
-	tmpl, err := template.ParseFiles("web/templates/error.html")
-	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(statuscode)
-	tmpl.Execute(w, Err)
 }
 
 func QueryRows(db *sql.DB, query string, args ...any) (*sql.Rows, error) {

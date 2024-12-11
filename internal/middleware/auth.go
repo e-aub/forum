@@ -8,6 +8,7 @@ import (
 
 	"forum/internal/database"
 	"forum/internal/utils"
+	tmpl "forum/web"
 )
 
 type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
@@ -21,7 +22,7 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 				utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
 				return
 			}
-			utils.RespondWithError(w, utils.Err{Message: "You are unauthorized, please log in", Unauthorized: true}, http.StatusUnauthorized)
+			tmpl.ExecuteTemplate(w, "error", http.StatusUnauthorized, tmpl.Err{Message: "You are unauthorized, please log in", Unauthorized: true})
 			return
 		}
 		next(w, r, db, userId)

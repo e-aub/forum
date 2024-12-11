@@ -1,5 +1,6 @@
 import { renderPosts } from "./posts.js";
 
+
 // Fetch data and render posts
 export const GetData = async (postIds = false) => {
     let target = [];

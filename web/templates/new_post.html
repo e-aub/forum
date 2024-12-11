@@ -1,9 +1,8 @@
-
 {{define "style"}} 
 <link rel="stylesheet" href="/assets/css/new_post.css">
 {{end}}
 
-{{define "title"}}talk - HomePage{{end}}
+{{define "title"}}talk - New Post{{end}}
 
 {{define "header"}}
 <header>
@@ -34,31 +33,22 @@
 <main>
     <section class="create-post">
         <h2>Create a New Post</h2>
-        <form>
-            <input type="text" placeholder="Post Title" class="post-title" required>
-            <textarea placeholder="Post Content" class="post-content" required></textarea>
-
+        <form action="/new_post" method="post">
+            <input name="title" type="text" placeholder="Post Title" class="post-title" maxlength="40" required>
+            <textarea name="content" placeholder="Post Content" class="post-content" required maxlength="300"></textarea>
             <div class="form-group">
-                <label for="category">Choose a Category:</label>
-                <select id="category" class="post-category" required>
-                    <option value="">--Select a Category--</option>
-                    <option value="technology">Technology</option>
-                    <option value="sports">Sports</option>
-                    <option value="health">Health</option>
-                    <option value="education">Education</option>
-                    <option value="entertainment">Entertainment</option>
-                </select>
+                <label>Choose Categories:</label>
+                <div class="categories">
+                    {{range .}}
+                    <label><input type="checkbox" name="category" value="{{.Id}}"> {{.Name}}</label>
+                    {{end}}
+                </div>
             </div>
-
             <button type="submit">Create Post</button>
         </form>
     </section>
 </main>
-
 {{end}}
 
 {{define "script"}} 
-    <script type="module" src="/assets/js/script.js"></script> 
-    <script type="module" src="/assets/js/posts.js"></script> 
 {{end}}
-

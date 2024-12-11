@@ -1,14 +1,36 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/assets/css/error.css">
-    <title>oops</title>
-</head>
-<body>
-    <h1>{{.Message}}</h1>
+{{define "style"}} 
+<link rel="stylesheet" href="/assets/css/error.css">
+{{end}}
+
+{{define "title" }}talk - Error{{end}}
+
+{{define "header"}}
+<header>
+    <a href="/">
+        <div class="logo">
+            <img src="/assets/icons/logo.png" alt="Logo">
+        </div>
+    </a>
+    <nav class="top-bar">
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Signup</a>
+    </nav>
+</header>
+{{end}}
+
+{{define "sidebar"}}{{end}}
+
+{{define "body"}}
+<main>
+    <p>{{.Message}}</p>
     {{if .Unauthorized}}
-        <button onclick="window.location.href='/login'">Login</button>
+        <button class="login" onclick="window.location.href='/login'">Login</button>
     {{end}}
-</body>
-</html>
+</main>
+{{end}}
+
+{{define "script"}} 
+    <script type="module" src="/assets/js/script.js"></script> 
+    <script type="module" src="/assets/js/posts.js"></script> 
+{{end}}
+

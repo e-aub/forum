@@ -1,5 +1,7 @@
 // import { getReactInfo, initializeLikeButtons } from "./likes.js";
 import { initializeCommentSection } from "./comments.js";
+import { getReactInfo } from "./likes.js";
+
 
 export async function renderPosts(posts) {
   const postsContainer = document.querySelector(".posts");

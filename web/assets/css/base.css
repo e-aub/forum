@@ -33,7 +33,7 @@ header {
     align-items: center;
     width: 100%;
     z-index: 100;
-    position: relative;
+    position: fixed;
 }
 
 header .logo img {
@@ -107,11 +107,12 @@ aside.sidebar {
 }
 
 main {
-    padding: 20px;
+    padding: 80px 20px 60px;
     flex-grow: 1;
     background-color: var(--light-gray);
-    transition: margin-left 0.3s ease;  
+    transition: margin-left 0.3s ease;
 }
+
 
 main.centered {
     margin-left: 0;  

@@ -14,10 +14,9 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 	postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
 	comments, err := database.GetComments(postID, file, userId)
 	if err != nil {
-		utils.RespondWithError(w, utils.Err{Message: "internal server error", Unauthorized: false}, http.StatusInternalServerError)
+		utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error":"internal server error"}`)
 		return
 	}
-
 	utils.RespondWithJSON(w, http.StatusOK, comments)
 }
 
@@ -27,7 +26,7 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 	content := r.URL.Query().Get("comment")
 	user_name, err := database.GetUserName(userId, file)
 	if err != nil {
-		utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
+		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
 		return
 	}
 	comment := utils.Comment{}
@@ -38,7 +37,7 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 	comment.Created_at = time.Now().Format(time.RFC3339)
 
 	if err := database.CreateComment(&comment, file); err != nil {
-		utils.RespondWithError(w, utils.Err{Message: "Bad request", Unauthorized: false}, http.StatusBadRequest)
+		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
 		return
 	}
 
