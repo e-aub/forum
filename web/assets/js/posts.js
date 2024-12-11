@@ -32,7 +32,6 @@ function generatePostHTML(post, reactInfo) {
   let disliked = false;
   let likeCount = reactInfo.data.liked_by ? reactInfo.data.liked_by.length : 0;
   let disLikeCount = reactInfo.data.disliked_by ? reactInfo.data.disliked_by.length : 0;
-  console.log(reactInfo.data.liked_by, reactInfo);
 
   if (!!reactInfo.data.user_reaction) {
     liked = reactInfo.data.user_reaction === "like"
@@ -41,13 +40,13 @@ function generatePostHTML(post, reactInfo) {
     liked = false
     disliked = false;
   }
-  console.log(likeCount, disLikeCount);
 
   return `
   <div class="post-header">
       <h3>${post.Title}</h3>
       <h3>${post.UserName}</h3>
       <span>${new Date(post.CreatedAt).toLocaleDateString()}</span>
+      <p>${post.Categories}<p>
   </div>
   <div class="post-body">
       <p>${post.Content}</p>

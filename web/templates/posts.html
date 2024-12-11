@@ -1,5 +1,4 @@
-
-{{define "style"}} 
+{{define "style"}}
 <link rel="stylesheet" href="/assets/css/posts.css">
 {{end}}
 
@@ -13,8 +12,8 @@
         </div>
     </a>
     <nav class="top-bar">
-        <a href="/login" class="active">Login</a>
-        <a href="/register">Signup</a>
+        <button id="login-logout">Logout</button>
+        <button id="register">Register</button>
     </nav>
 </header>
 {{end}}
@@ -33,13 +32,32 @@
 {{define "body"}}
 <main>
     <section class="posts">
-      
+
     </section>
 </main>
 {{end}}
 
-{{define "script"}} 
-    <script type="module" src="/assets/js/script.js"></script> 
-    <script type="module" src="/assets/js/posts.js"></script> 
+{{define "script"}}
+<script type="module" src="/assets/js/script.js"></script>
+<script type="module" src="/assets/js/posts.js"></script>
+<script type="module">
+    import { GetData, logoutEvent } from './assets/js/script.js';
+    GetData();
+    const log = document.getElementById('login-logout')
+    const register = document.getElementById('register')
+    if (document.cookie) {
+        log.textContent = 'Logout'
+        register.remove()
+        logoutEvent(log)
+        console.log("login")
+    } else {
+        log.textContent = 'Login'
+        register.addEventListener('click', async () => {
+            window.location.href = '/register';
+        })
+        log.addEventListener('click', async () => {
+            window.location.href = '/login';
+        })
+    }
+</script>
 {{end}}
-

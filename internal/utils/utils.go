@@ -28,13 +28,6 @@ type Post struct {
 	CreatedAt  time.Time
 }
 
-// type Reaction struct {
-// 	UserId     int    `json:"user_id"`
-// 	TargetId   int    `json:"target_id"`
-// 	ReactionId string `json:"reaction_id"`
-// 	Name       string `json:"name"`
-// }
-
 type Reaction struct {
 	LikedBy      []int  `json:"liked_by"`
 	DislikedBy   []int  `json:"disliked_by"`
