@@ -1,4 +1,4 @@
-import { showRegistrationModal }from "./script.js";
+import { showRegistrationModal } from "./script.js";
 
 export function reactToggle(element /*html element*/, Id /*post or comment id*/, targetType /*post or comment*/) {
     const likeButton = element.querySelector('.post-footer button:nth-child(1)'); // Select the first button as Like

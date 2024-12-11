@@ -1,6 +1,5 @@
 import { renderPosts } from "./posts.js";
 
-
 // Fetch data and render posts
 export const GetData = async (postIds = false) => {
     let target = [];
@@ -17,15 +16,18 @@ export const GetData = async (postIds = false) => {
         for (let i = postIds.length - 1; i >= 0; i--) {
             let link = `http://localhost:8080/posts?post_id=${postIds[i]}`;
             let postResponse = await fetch(link);
-            if (!postResponse.ok) throw new Error("Failed to fetch post data");
-            let post = await postResponse.json();
-            if (post.PostId !== 0) {
-                target.push(post);
-                renderPosts(target); // Render posts
+            if (postResponse.ok) {
+                let post = await postResponse.json();
+                if (post.PostId !== 0) {
+                    target.push(post);
+                    renderPosts(target);
+                }
+            } else {
+                console.log("error");
             }
         }
     } catch (err) {
-        console.error("Error fetching data:", err);
+        throw err
     }
 };
 

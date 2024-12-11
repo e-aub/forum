@@ -1,7 +1,5 @@
-// import { getReactInfo, initializeLikeButtons } from "./likes.js";
 import { initializeCommentSection } from "./comments.js";
-import { getReactInfo } from "./likes.js";
-
+import { getReactInfo, reactToggle } from "./likes.js";
 
 export async function renderPosts(posts) {
   const postsContainer = document.querySelector(".posts");
@@ -12,12 +10,15 @@ export async function renderPosts(posts) {
     postElement.classList.add("post");
 
     try {
-      const reactInfo = await getReactInfo(post.PostId);
+      const reactInfo = await getReactInfo({
+        target_type: "post",
+        target_id: post.PostId,
+      }, "GET");
       postElement.innerHTML = generatePostHTML(post, reactInfo);
       postsContainer.appendChild(postElement);
 
       // Initialize likes and comments
-      initializeLikeButtons(postElement, post);
+      reactToggle(postElement, post.PostId, "post");
       initializeCommentSection(postElement, post);
     } catch (error) {
       console.error("Error rendering post:", error);
@@ -25,18 +26,35 @@ export async function renderPosts(posts) {
   }
 }
 
+
 function generatePostHTML(post, reactInfo) {
+  let liked = false;
+  let disliked = false;
+  let likeCount = reactInfo.data.liked_by ? reactInfo.data.liked_by.length : 0;
+  let disLikeCount = reactInfo.data.disliked_by ? reactInfo.data.disliked_by.length : 0;
+  console.log(reactInfo.data.liked_by, reactInfo);
+
+  if (!!reactInfo.data.user_reaction) {
+    liked = reactInfo.data.user_reaction === "like"
+    disliked = !liked
+  } else {
+    liked = false
+    disliked = false;
+  }
+  console.log(likeCount, disLikeCount);
+
   return `
   <div class="post-header">
       <h3>${post.Title}</h3>
+      <h3>${post.UserName}</h3>
       <span>${new Date(post.CreatedAt).toLocaleDateString()}</span>
   </div>
   <div class="post-body">
       <p>${post.Content}</p>
   </div>
   <div class="post-footer">
-      <button class="like like-button" data-clicked="false">👍 Like (<span class="count">${reactInfo.likes || 0}</span>)</button>
-      <button class="dislike dislike-button" data-clicked="false">👎 Dislike (<span class="count">${reactInfo.dislikes || 0}</span>)</button>
+      <button class="like like-button" data-clicked="${liked}">👍 Like (<span class="count">${likeCount}</span>)</button>
+      <button class="dislike dislike-button" data-clicked="${disliked}">👎 Dislike (<span class="count">${disLikeCount}</span>)</button>
       <button class="toggle-comments">Show Comments</button>
   </div>
   <div class="comments-section" style="display: none;">

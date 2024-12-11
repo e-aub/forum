@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,19 +22,19 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 }
 
 func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	//"http://localhost:8080/comments?post=${post.id}&comment=${comment.msj}"
-	postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
-	content := r.URL.Query().Get("comment")
 	user_name, err := database.GetUserName(userId, file)
 	if err != nil {
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
 		return
 	}
 	comment := utils.Comment{}
-	comment.Post_id = postID
+	err = json.NewDecoder(r.Body).Decode(&comment)
+	if err != nil {
+		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
+		return
+	}
 	comment.User_name = user_name
 	comment.User_id = userId
-	comment.Content = content
 	comment.Created_at = time.Now().Format(time.RFC3339)
 
 	if err := database.CreateComment(&comment, file); err != nil {
