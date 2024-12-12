@@ -68,8 +68,6 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 	lastindex, err := database.GetLastPostId(db)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(nil)
 		return
 	}
 	json, err := json.Marshal(lastindex)

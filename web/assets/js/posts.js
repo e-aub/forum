@@ -8,13 +8,14 @@ export async function renderPosts(posts) {
   for (const post of posts) {
     const postElement = document.createElement("div");
     postElement.classList.add("post");
-
     try {
       const reactInfo = await getReactInfo({
         target_type: "post",
         target_id: post.PostId,
       }, "GET");
       postElement.innerHTML = generatePostHTML(post, reactInfo);
+      console.log(postElement);
+
       postsContainer.appendChild(postElement);
 
       // Initialize likes and comments

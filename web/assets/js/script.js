@@ -20,18 +20,18 @@ export const GetData = async (postIds = false) => {
                 let post = await postResponse.json();
                 if (post.PostId !== 0) {
                     target.push(post);
-                    renderPosts(target);
                 }
             } else {
                 console.log("error");
             }
         }
+        renderPosts(target);
     } catch (err) {
         throw err
     }
+    console.log(target);
 };
-
-GetData(); // Call to get and render posts
+GetData()
 
 // Logout event
 export const logoutEvent = (log) => {
