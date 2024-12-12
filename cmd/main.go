@@ -15,7 +15,7 @@ import (
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
-	port := "8080"
+	port := "8000"
 	print("port:", port)
 	// Create Database file
 	db := database.CreateDatabase(dbPath)
@@ -30,8 +30,15 @@ func main() {
 	router := http.NewServeMux()
 
 	// File Server (need some improvement by rearrange css and js files by separating them)
-	fs := http.FileServer(http.Dir("web/assets"))
-	router.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+		info, err := os.Stat("web/" + r.URL.Path)
+		if err != nil || info.IsDir() {
+			tmpl.ExecuteTemplate(w, "error", http.StatusNotFound, tmpl.Err{Message: "page not found"})
+			return
+		}
+		fs := http.FileServer(http.Dir("web/assets"))
+		http.StripPrefix("/assets/", fs).ServeHTTP(w, r)
+	})
 
 	// HomePage handler
 	router.HandleFunc("/", handlers.HomePageHandler)
