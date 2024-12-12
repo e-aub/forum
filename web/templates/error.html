@@ -1,4 +1,4 @@
-{{define "style"}} 
+{{define "style"}}
 <link rel="stylesheet" href="/assets/css/error.css">
 {{end}}
 
@@ -24,13 +24,12 @@
 <main>
     <p>{{.Message}}</p>
     {{if .Unauthorized}}
-        <button class="login" onclick="window.location.href='/login'">Login</button>
+    <button class="login" onclick="window.location.href='/login'">Login</button>
     {{end}}
 </main>
 {{end}}
 
-{{define "script"}} 
-    <script type="module" src="/assets/js/script.js"></script> 
-    <script type="module" src="/assets/js/posts.js"></script> 
+{{define "script"}}
+<script type="module" src="/assets/js/script.js"></script>
+<script type="module" src="/assets/js/posts.js"></script>
 {{end}}
-

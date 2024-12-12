@@ -1,6 +1,7 @@
 {{define "base"}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,26 +10,45 @@
     {{template "style"}}
     <title>{{template "title"}}</title>
 </head>
+
 <body>
- <header>
-    <a href="/">
-        <div class="logo">
-            <img src="/assets/icons/logo.png" alt="Logo">
-        </div>
-    </a>
-    <nav class="top-bar">
-        <!-- <a id="login-logout">Logout</button>
-        <button id="register">Register</button> -->
-        <a href="/login" class="active">Login</a>
-        <a href="/register">Signup</a>
-    </nav>
-</header>
+    <header>
+        <a href="/">
+            <div class="logo">
+                <img src="/assets/icons/logo.png" alt="Logo">
+            </div>
+        </a>
+        <nav class="top-bar">
+            <a href="/login" class="active" id="login-logout">Login</a>
+            <a href="/register" class="" id="register">Signup</a>
+        </nav>
+    </header>
     {{template "sidebar"}}
     {{template "body" .}}
     <footer>
         <p>&copy; obenali, iatlassi, yhajjaoui, ifoukahi, aelhadda</p>
     </footer>
+    <script type="module">
+        import { logoutEvent } from "/assets/js/script.js";
+        const log = document.getElementById('login-logout')
+        const register = document.getElementById('register')
+        if (document.cookie) {
+            log.textContent = 'Logout'
+            register.remove()
+            logoutEvent(log)
+            console.log("login")
+        } else {
+            log.textContent = 'Login'
+            register.addEventListener('click', async () => {
+                window.location.href = '/register';
+            })
+            log.addEventListener('click', async () => {
+                window.location.href = '/login';
+            })
+        }
+    </script>
     {{template "script"}}
 </body>
+
 </html>
 {{end}}

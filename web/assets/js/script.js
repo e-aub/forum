@@ -33,6 +33,7 @@ export const GetData = async (postIds = false) => {
 };
 GetData()
 
+
 // Logout event
 export const logoutEvent = (log) => {
     log.addEventListener('click', async () => {
@@ -54,11 +55,6 @@ export const logoutEvent = (log) => {
     });
 };
 
-// Integrate logout event to the button
-const logoutButton = document.getElementById('logoutBtn');
-if (logoutButton) {
-    logoutEvent(logoutButton);
-}
 
 
 export function showRegistrationModal() {
