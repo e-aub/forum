@@ -31,7 +31,7 @@ export const GetData = async (postIds = false) => {
     }
     console.log(target);
 };
-GetData()
+// GetData()
 
 
 // Logout event

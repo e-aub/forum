@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"forum/internal/database"
 	"forum/internal/handlers"
@@ -15,7 +16,7 @@ import (
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
-	port := "8000"
+	port := "8080"
 	print("port:", port)
 	// Create Database file
 	db := database.CreateDatabase(dbPath)
@@ -31,8 +32,8 @@ func main() {
 
 	// File Server (need some improvement by rearrange css and js files by separating them)
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
-		info, err := os.Stat("web/" + r.URL.Path)
-		if err != nil || info.IsDir() {
+
+		if strings.HasSuffix(r.URL.Path, "/") {
 			tmpl.ExecuteTemplate(w, "error", http.StatusNotFound, tmpl.Err{Message: "page not found"})
 			return
 		}

@@ -4,28 +4,16 @@
 
 {{define "title" }}talk - Error{{end}}
 
-{{define "header"}}
-<header>
-    <a href="/">
-        <div class="logo">
-            <img src="/assets/icons/logo.png" alt="Logo">
-        </div>
-    </a>
-    <nav class="top-bar">
-        <a href="/login" class="active">Login</a>
-        <a href="/register">Signup</a>
-    </nav>
-</header>
-{{end}}
-
 {{define "sidebar"}}{{end}}
 
 {{define "body"}}
 <main>
-    <p>{{.Message}}</p>
-    {{if .Unauthorized}}
-    <button class="login" onclick="window.location.href='/login'">Login</button>
-    {{end}}
+    <section class="container">
+        <h1>{{.Message}}</h1>
+        <!-- {{if .Unauthorized}}
+        <button class="login" onclick="window.location.href='/login'">Login</button>
+        {{end}} -->
+    </section>
 </main>
 {{end}}
 
