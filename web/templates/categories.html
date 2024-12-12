@@ -1,64 +1,40 @@
-<!-- j{{define "header"}}{{end}}
-
-
-{{define "main"}}
-<h1>Categories</h1>
-
-<form id="categoryForm" class="categoryForm">
-    {{range .Categories}}
-    <button type="button" class="category" onclick="submitForm('{{.Id}}')">
-        <h3>{{.Name}}</h3>
-        <p>{{.Description}}</p>
-    </button>
-    {{end}}
-</form>
-
-<script>
-    function submitForm(category) {
-        const params = new URLSearchParams({ category: category });
-        window.location.href = `/categories?${params}`;
-    }
-</script>
-{{end}} -->
-
-
 {{define "style"}} 
 <link rel="stylesheet" href="/assets/css/categories.css">
 {{end}}
 
 {{define "title"}}talk - Categories{{end}}
 
-{{define "sidebar"}}
-<aside class="sidebar">
-    <nav class="sidebar-nav">
-        <a href="/new_post">Create Post</a>
-        <a href="/me/created_posts">Created Posts</a>
-        <a href="/me/liked_posts">Liked Posts</a>
-        <a href="/categories">Categories</a>
-    </nav>
-</aside>
-{{end}}
+
 
 {{define "body"}}
 <main>
+    {{block "sidebar" .}}{{end}}
     <section class="categories">
         <h2>Select a Category</h2>
         <ul class="category-list">
-            <li><a href="#">Technology</a></li>
-            <li><a href="#">Sports</a></li>
-            <li><a href="#">Health</a></li>
-            <li><a href="#">Entertainment</a></li>
-            <li><a href="#">Education</a></li>
-            <li><a href="#">Business</a></li>
-            <li><a href="#">Science</a></li>
-            <li><a href="#">Lifestyle</a></li>
+            {{range .}}
+            <li onclick="SubmitForm('{{.Id}}', event)">
+                <a>
+                    <span class="category-name">{{.Name}}:</span>
+                    <span class="category-description">{{.Description}}</span>
+                </a>
+            </li>
+            {{end}}
         </ul>
     </section>
 </main>
 {{end}}
 
+
 {{define "script"}} 
     <script type="module" src="/assets/js/script.js"></script> 
-    <script type="module" src="/assets/js/posts.js"></script> 
+    <script type="module" src="/assets/js/categories.js"></script>
+    <script>
+    function SubmitForm(category, event) {
+        event.preventDefault()
+        const params = new URLSearchParams({ category: category });
+        window.location.href = `/categories?${params}`;
+    }
+</script>
  {{end}}
 

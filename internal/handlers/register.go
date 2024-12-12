@@ -13,7 +13,7 @@ import (
 )
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "register", http.StatusOK, nil)
+	tmpl.ExecuteTemplate(w, []string{"register"}, http.StatusOK, nil)
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {

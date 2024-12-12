@@ -22,7 +22,7 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 				utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
 				return
 			}
-			tmpl.ExecuteTemplate(w, "error", http.StatusUnauthorized, tmpl.Err{Message: "You are unauthorized, please log in", Unauthorized: true})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Message: "You are unauthorized, please log in", Unauthorized: true})
 			return
 		}
 		next(w, r, db, userId)

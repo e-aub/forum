@@ -13,14 +13,15 @@ type Err struct {
 	Unauthorized bool
 }
 
-func ExecuteTemplate(w http.ResponseWriter, templateName string, statusCode int, data any) {
+func ExecuteTemplate(w http.ResponseWriter, templatesNames []string, statusCode int, data any) {
 	basePath := "./web/templates/"
 
 	templateFiles := []string{
 		filepath.Join(basePath, "base.html"),
-		filepath.Join(basePath, templateName+".html"),
 	}
-
+	for _, name := range templatesNames {
+		templateFiles = append(templateFiles, filepath.Join(basePath, name+".html"))
+	}
 	tmpl, err := template.ParseFiles(templateFiles...)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

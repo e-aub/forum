@@ -90,33 +90,6 @@ func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
 	return lastPostID, nil
 }
 
-func UpdatePost(p *utils.Post, db *sql.DB) {
-	statement, err := db.Prepare(`UPDATE posts
-	SET title=?,
-	content = ?,
-	updated_at = ?
-	WHERE
-	id= ?`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = statement.Exec(p.Title, p.Content, p.PostId)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func DeletePost(p *utils.Post, db *sql.DB) {
-	statement, err := db.Prepare(`DELETE FROM posts WHERE id = ?`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = statement.Exec(p.PostId)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 	query := `SELECT * FROM posts WHERE id = ?`
 	row, err := utils.QueryRow(db, query, postId)

@@ -13,7 +13,7 @@ import (
 )
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl.ExecuteTemplate(w, "login", http.StatusOK, nil)
+	tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusOK, nil)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {

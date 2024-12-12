@@ -23,11 +23,7 @@
             <a href="/register" class="" id="register">Signup</a>
         </nav>
     </header>
-    {{template "sidebar"}}
     {{template "body" .}}
-    <footer>
-        <p>&copy; obenali, iatlassi, yhajjaoui, ifoukahi, aelhadda</p>
-    </footer>
     <script type="module">
         import { logoutEvent } from "/assets/js/script.js";
         const log = document.getElementById('login-logout')
@@ -47,7 +43,7 @@
             })
         }
     </script>
-    {{template "script"}}
+    {{template "script" .}}
 </body>
 
 </html>

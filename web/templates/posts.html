@@ -5,33 +5,25 @@
 {{define "title"}}talk - HomePage{{end}}
 
 
-{{define "sidebar"}}
-<aside class="sidebar">
-    <nav class="sidebar-nav">
-        <a href="/new_post">Create Post</a>
-        <a href="/me/created_posts">Created Posts</a>
-        <a href="/me/liked_posts">Liked Posts</a>
-        <a href="/categories">Categories</a>
-    </nav>
-</aside>
-{{end}}
+
 
 {{define "body"}}
 <main>
+    {{block "sidebar" .}}{{end}}
     <section class="posts">
-
-
     </section>
 </main>
 {{end}}
 
 {{define "script"}}
-<script type="module" >
+<script type="module">
     import { GetData } from "/assets/js/script.js";
-    if (window.location.pathname === "/"){
+    if (window.location.pathname != "/") {
+        let postIds = JSON.parse('{{.}}')
+        GetData(postIds);
+    } else {
         GetData()
-    }
-
+    }        
 </script>
 
 <script type="module" src="/assets/js/posts.js"></script>
