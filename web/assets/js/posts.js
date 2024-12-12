@@ -47,9 +47,9 @@ function generatePostHTML(post, reactInfo) {
   <div class="post-header">
     <h1 class="post-title">${post.Title}</h1>
     <div class="post-meta">
-      <span class="author">${post.UserName}</span>
+      <span class="author">👤  ${post.UserName}</span>
       <span class="categories">${post.Categories || "Not categorized"}</span>
-      <span class="date">${new Date(post.CreatedAt).toLocaleDateString()}</span>
+      <span class="date">${new Date(post.CreatedAt).toLocaleString()}</span>
     </div>
   </div>
 

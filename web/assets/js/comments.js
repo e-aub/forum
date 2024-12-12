@@ -57,7 +57,7 @@ function createCommentElement(comment) {
   const commentElement = document.createElement("div");
   commentElement.classList.add("comment");
   commentElement.innerHTML = `
-      <p><strong>${comment.user_name}:</strong> ${comment.content}</p>
+      <p><strong>👤 ${comment.user_name}:</strong> ${comment.content}</p>
     `;
   return commentElement;
 }

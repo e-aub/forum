@@ -20,12 +20,20 @@
 <main>
     <section class="posts">
 
+
     </section>
 </main>
 {{end}}
 
 {{define "script"}}
-<script type="module" src="/assets/js/script.js"></script>
+<script type="module" >
+    import { GetData } from "/assets/js/script.js";
+    if (window.location.pathname === "/"){
+        GetData()
+    }
+
+</script>
+
 <script type="module" src="/assets/js/posts.js"></script>
 
 
