@@ -15,7 +15,7 @@ import (
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
-	port := "8000"
+	port := "8080"
 	print("port:", port)
 	// Create Database file
 	db := database.CreateDatabase(dbPath)

@@ -43,24 +43,45 @@ function generatePostHTML(post, reactInfo) {
   }
 
   return `
+<div class="post-container">
   <div class="post-header">
-      <h3>${post.Title}</h3>
-      <h3>${post.UserName}</h3>
-      <span>${new Date(post.CreatedAt).toLocaleDateString()}</span>
-      <p>${post.Categories}<p>
+    <h1 class="post-title">${post.Title}</h1>
+    <div class="post-meta">
+      <span class="author">${post.UserName}</span>
+      <span class="categories">${post.Categories || "Not categorized"}</span>
+      <span class="date">${new Date(post.CreatedAt).toLocaleDateString()}</span>
+    </div>
   </div>
+
   <div class="post-body">
-      <p>${post.Content}</p>
+    <p class="content">${post.Content}</p>
   </div>
+
   <div class="post-footer">
-      <button class="like like-button" data-clicked="${liked}">👍 Like (<span class="count">${likeCount}</span>)</button>
-      <button class="dislike dislike-button" data-clicked="${disliked}">👎 Dislike (<span class="count">${disLikeCount}</span>)</button>
-      <button class="toggle-comments">Show Comments</button>
+    <div class="reaction-buttons">
+      <button class="like like-button" data-clicked="${liked}">
+        <span class="emoji">👍</span> Like (<span class="count">${likeCount}</span>)
+      </button>
+      <button class="dislike dislike-button" data-clicked="${disliked}">
+        <span class="emoji">👎</span> Dislike (<span class="count">${disLikeCount}</span>)
+      </button>
+    </div>
+    <button class="toggle-comments">💬 Show Comments</button>
   </div>
+
   <div class="comments-section" style="display: none;">
+      <div class="comments">
+      </div>  
+      <div class="comment-input-wrapper">
       <textarea placeholder="Add a comment..." class="comment-input"></textarea>
       <button class="comment-submit">Submit</button>
-      <div class="comments"></div>
+    </div>
   </div>
+</div>
 `;
+  // <div class="comments-section" style="display: none;">
+  // <textarea placeholder="Add a comment..." class="comment-input"></textarea>
+  // <button class="comment-submit">Submit</button>
+  // <div class="comments"></div>
+  // </div>
 }
