@@ -1,9 +1,8 @@
 import { initializeCommentSection } from "./comments.js";
 import { getReactInfo, reactToggle } from "./likes.js";
 
-export async function renderPosts(posts) {
-  const postsContainer = document.querySelector(".posts");
-  postsContainer.innerHTML = "";
+export async function renderPosts(postsContainer, posts) {
+
 
   for (const post of posts) {
     const postElement = document.createElement("div");
@@ -14,8 +13,6 @@ export async function renderPosts(posts) {
         target_id: post.PostId,
       }, "GET");
       postElement.innerHTML = generatePostHTML(post, reactInfo);
-      console.log(postElement);
-
       postsContainer.appendChild(postElement);
 
       // Initialize likes and comments

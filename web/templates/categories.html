@@ -1,4 +1,4 @@
-{{define "style"}} 
+{{define "style"}}
 <link rel="stylesheet" href="/assets/css/categories.css">
 {{end}}
 
@@ -13,7 +13,7 @@
         <h2>Select a Category</h2>
         <ul class="category-list">
             {{range .}}
-            <li onclick="SubmitForm('{{.Id}}', event)">
+            <li categoryId="{{.Id}}">
                 <a>
                     <span class="category-name">{{.Name}}:</span>
                     <span class="category-description">{{.Description}}</span>
@@ -26,15 +26,7 @@
 {{end}}
 
 
-{{define "script"}} 
-    <script type="module" src="/assets/js/script.js"></script> 
-    <script type="module" src="/assets/js/categories.js"></script>
-    <script>
-    function SubmitForm(category, event) {
-        event.preventDefault()
-        const params = new URLSearchParams({ category: category });
-        window.location.href = `/categories?${params}`;
-    }
-</script>
- {{end}}
-
+{{define "script"}}
+<script type="module" src="/assets/js/script.js"></script>
+<script type="module" src="/assets/js/categories.js"></script>
+{{end}}

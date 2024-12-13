@@ -2,7 +2,12 @@ import { renderPosts } from "./posts.js";
 
 // Fetch data and render posts
 export const GetData = async (postIds = false) => {
-    let target = [];
+    if (postIds == null) {
+        return;
+    }
+
+    const postsContainer = document.querySelector(".posts");
+    postsContainer.innerHTML = "";
     try {
         if (postIds === false) {
             postIds = [];
@@ -13,24 +18,47 @@ export const GetData = async (postIds = false) => {
                 postIds.push(postId);
             }
         }
-        for (let i = postIds.length - 1; i >= 0; i--) {
-            let link = `http://localhost:8080/posts?post_id=${postIds[i]}`;
-            let postResponse = await fetch(link);
-            if (postResponse.ok) {
-                let post = await postResponse.json();
-                if (post.PostId !== 0) {
-                    target.push(post);
-                }
-            } else {
-                console.log("error");
+
+        console.log(postIds);
+        renderPage(postIds, postsContainer);
+
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY;
+            const documentHeight = document.documentElement.scrollHeight;
+            const windowHeight = window.innerHeight;
+            if (scrollPosition + windowHeight >= documentHeight - 10) {
+                renderPage(postIds, postsContainer);
+            }
+        });
+
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+async function renderPage(postIds, postsContainer) {
+    let target = [];
+    for (let i = 0; i < Math.min(10, postIds.length); i++) {
+        let link = `http://localhost:8080/posts?post_id=${postIds.pop()}`;
+        let postResponse = await fetch(link);
+
+        if (postResponse.ok) {
+            let post = await postResponse.json();
+            target.push(post);
+        } else {
+            if (postResponse.status !== 404) {
+                throw new Error("Response not ok");
             }
         }
-        renderPosts(target);
-    } catch (err) {
-        throw err
     }
-    console.log(target);
-};
+
+    console.log(target);  // Debug: Verify that target has the posts
+
+    if (target.length > 0) {
+        await renderPosts(postsContainer, target);
+    }
+}
+
 // GetData()
 
 
@@ -98,3 +126,10 @@ export function showRegistrationModal() {
     // Show the dialog
     dialog.showModal();
 }
+
+export function SubmitForm(category, event) {
+    event.preventDefault()
+    const params = new URLSearchParams({ category: category });
+    window.location.href = `/categories?${parfalseams}`;
+}
+

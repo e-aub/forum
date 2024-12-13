@@ -37,9 +37,12 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		}
 		post, err := database.ReadPost(db, userId, postId)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			if err == sql.ErrNoRows {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(nil)
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 		post.Categories, err = database.GetPostCategories(db, post.PostId, userId)
