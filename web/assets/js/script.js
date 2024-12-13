@@ -96,28 +96,31 @@ export const logoutEvent = (log) => {
 };
 
 
-
 export function showRegistrationModal() {
     const dialog = document.createElement('dialog');
-    // Create message
-    const message = document.createElement('p');
-    message.textContent = 'You need to be logged in to react. Please register or log in to continue.';
 
-    // Create register button
-    const registerButton = document.createElement('button');
-    registerButton.textContent = 'Register Now';
+    dialog.innerHTML = `
+        <h2 id="dialogTitle">Access Restricted</h2>
+        <p id="dialogMessage">You need to be logged in to react. Please register or log in to continue.</p>
+        <button class="modal-button register-btn">Register Now</button>
+        <button class="modal-button login-btn">Login</button>
+        <button class="modal-button close-btn" aria-label="Close dialog">X</button>
+    `;
 
-    // Create login button
-    const loginButton = document.createElement('button');
-    loginButton.textContent = 'Login';
+    const registerButton = dialog.querySelector('.register-btn');
+    const loginButton = dialog.querySelector('.login-btn');
+    const closeButton = dialog.querySelector('.close-btn');
 
-
-    // Add event listeners
     registerButton.addEventListener('click', () => {
         window.location.href = '/register'; // Replace with your registration URL
     });
+
     loginButton.addEventListener('click', () => {
         window.location.href = '/login'; // Replace with your login URL
+    });
+
+    closeButton.addEventListener('click', () => {
+        dialog.close();
     });
 
     // Close dialog when clicking outside
@@ -126,11 +129,6 @@ export function showRegistrationModal() {
             dialog.close();
         }
     });
-
-    // Append content to dialog
-    dialog.appendChild(message);
-    dialog.appendChild(registerButton);
-    dialog.appendChild(loginButton);
 
     // Append dialog to the body
     document.body.appendChild(dialog);
