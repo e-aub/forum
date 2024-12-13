@@ -59,15 +59,42 @@ export const logoutEvent = (log) => {
 
 export function showRegistrationModal() {
     const dialog = document.createElement('dialog');
+    // Create message
     const message = document.createElement('p');
     message.textContent = 'You need to be logged in to react. Please register or log in to continue.';
+
+    // Create register button
     const registerButton = document.createElement('button');
     registerButton.textContent = 'Register Now';
+
+    // Create login button
     const loginButton = document.createElement('button');
-    loginButton.textContent = 'Log In';
+    loginButton.textContent = 'Login';
+
+
+    // Add event listeners
+    registerButton.addEventListener('click', () => {
+        window.location.href = '/register'; // Replace with your registration URL
+    });
+    loginButton.addEventListener('click', () => {
+        window.location.href = '/login'; // Replace with your login URL
+    });
+
+    // Close dialog when clicking outside
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) {
+            dialog.close();
+        }
+    });
+
+    // Append content to dialog
     dialog.appendChild(message);
     dialog.appendChild(registerButton);
     dialog.appendChild(loginButton);
+
+    // Append dialog to the body
     document.body.appendChild(dialog);
+
+    // Show the dialog
     dialog.showModal();
 }
