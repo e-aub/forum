@@ -28,7 +28,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	ok, err := middleware.ValidCredential(db, &userData)
 
 	if !ok {
-		http.Error(w, "Incorect Username or password", http.StatusConflict)
+		http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
 		return
 	}
 
@@ -37,7 +37,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	if !CheckPasswordHash(&password, &userData.Password) {
-		http.Error(w, "Incorrect Password", http.StatusConflict)
+		http.Error(w, "Incorrect Password", http.StatusUnauthorized)
 		return
 	}
 	ok, err = middleware.GetActiveSession(db, &userData)

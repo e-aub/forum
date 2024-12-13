@@ -18,30 +18,29 @@
                 <img src="/assets/icons/logo.png" alt="Logo">
             </div>
         </a>
-        <nav class="top-bar">
-            <a href="/login" class="active" id="login-logout">Login</a>
+        <nav class="top-bar " id="login">
+            <a href="/login" class="active" >Login</a>
             <a href="/register" class="" id="register">Signup</a>
+        </nav>
+        <nav class="top-bar"  id="logout" >
+            <a href="/" class="active" >Logout</a>
         </nav>
     </header>
     {{template "body" .}}
     <script type="module">
-        import { logoutEvent } from "/assets/js/script.js";
-        const log = document.getElementById('login-logout')
-        const register = document.getElementById('register')
-        if (document.cookie) {
-            log.textContent = 'Logout'
-            register.remove()
-            logoutEvent(log)
-            console.log("login")
+    import { logoutEvent } from "/assets/js/script.js";
+
+        const loginNav = document.getElementById('login');
+        const logoutNav = document.getElementById('logout');
+
+        if (document.cookie.includes('session_token')) {
+            loginNav.style.display = "none";
+            logoutNav.style.display = "block";
+            logoutEvent(logoutNav);
         } else {
-            log.textContent = 'Login'
-            register.addEventListener('click', async () => {
-                window.location.href = '/register';
-            })
-            log.addEventListener('click', async () => {
-                window.location.href = '/login';
-            })
-        }
+            loginNav.style.display = "block";
+            logoutNav.style.display = "none";
+        } 
     </script>
     {{template "script" .}}
 </body>

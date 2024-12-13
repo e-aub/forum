@@ -80,10 +80,12 @@ export const logoutEvent = (log) => {
                 method: 'POST',
                 credentials: 'include'
             });
+            console.log("test");
+            
 
             if (response.ok) {
                 console.log('Logged out successfully');
-                window.location.href = '/'; // Redirect after successful logout
+                // window.location.href = '/'; // Redirect after successful logout
             } else {
                 console.error('Logout failed');
             }
