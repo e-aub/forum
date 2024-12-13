@@ -2,8 +2,6 @@ import { initializeCommentSection } from "./comments.js";
 import { getReactInfo, reactToggle } from "./likes.js";
 
 export async function renderPosts(postsContainer, posts) {
-
-
   for (const post of posts) {
     const postElement = document.createElement("div");
     postElement.classList.add("post");
@@ -67,18 +65,14 @@ function generatePostHTML(post, reactInfo) {
   </div>
 
   <div class="comments-section" style="display: none;">
-      <div class="comments">
-      </div>  
-      <div class="comment-input-wrapper">
-      <textarea placeholder="Add a comment..." class="comment-input"></textarea>
+    <div class="comments">
+    </div>  
+    <div class="comment-input-wrapper">
+      <textarea maxlength=150 required placeholder="Add a comment..." class="comment-input"></textarea>
       <button class="comment-submit">Submit</button>
     </div>
+    <p class="error-comment"></p>
   </div>
 </div>
 `;
-  // <div class="comments-section" style="display: none;">
-  // <textarea placeholder="Add a comment..." class="comment-input"></textarea>
-  // <button class="comment-submit">Submit</button>
-  // <div class="comments"></div>
-  // </div>
 }

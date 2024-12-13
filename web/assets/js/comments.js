@@ -17,14 +17,25 @@ export function initializeCommentSection(postElement, post) {
   commentSubmitButton.addEventListener("click", async () => {
     const commentInput = postElement.querySelector(".comment-input");
     if (commentInput.value.trim()) {
-      await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"));
-      commentInput.value = "";
+      const succes = await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"),commentsSection);
+      succes ? commentInput.value = "" : alert('do not play in wrong place')
     }
   });
+
+  const commentInput = postElement.querySelector(".comment-input");
+  commentInput.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+      const commentInput = postElement.querySelector(".comment-input");
+      if (commentInput.value.trim()) {
+        await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"),commentsSection);
+        commentInput.value = ""
+      }
+    }
+  })
 }
 
 async function loadComments(postId, commentsContainer) {
-  commentsContainer.innerHTML = ""; // Clear container
+  commentsContainer.innerHTML = ""
   try {
     const response = await fetch(`/comments?post=${postId}`);
     if (!response.ok) throw new Error("Failed to load comments.");
@@ -35,7 +46,7 @@ async function loadComments(postId, commentsContainer) {
   }
 }
 
-async function addComment(postId, content, commentsContainer) {
+async function addComment(postId, content, commentsContainer,commentsection) {
   try {
     const response = await fetch(`/comments`, {
       method: "POST",
@@ -45,7 +56,12 @@ async function addComment(postId, content, commentsContainer) {
         content: content
       }),
     });
-    if (!response.ok) throw new Error("Failed to add comment.");
+    if (response.status == 400) {
+      const error = commentsection.querySelector('.error-comment')
+      console.log(error);
+      error.textContent = 'comment must be only 150 character'
+      return      
+    }
     const newComment = await response.json();
     commentsContainer.appendChild(createCommentElement(newComment));
   } catch (error) {
@@ -58,6 +74,10 @@ function createCommentElement(comment) {
   commentElement.classList.add("comment");
   commentElement.innerHTML = `
       <p><strong>👤 ${comment.user_name}:</strong> ${comment.content}</p>
+      <div class="comment-likes">
+        <button class="like-button">👍 Like (<span class="count">${0}</span>)</button>
+        <button class="dislike-button">👎 Dislike (<span class="count">${0}</span>)</button>
+      </div>
     `;
   return commentElement;
 }

@@ -33,6 +33,10 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
 		return
 	}
+	if len(comment.Content) > 150 {
+		http.Error(w, "length of comment over 150 character", http.StatusBadRequest)
+		return
+	}
 	comment.User_name = user_name
 	comment.User_id = userId
 	comment.Created_at = time.Now().Format(time.RFC3339)
