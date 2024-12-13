@@ -9,7 +9,7 @@ export function initializeCommentSection(postElement, post) {
       await loadComments(post.PostId, commentsSection.querySelector(".comments"));
     } else {
       commentsSection.style.display = "none";
-      toggleCommentsButton.textContent = "Show Comments";
+      toggleCommentsButton.textContent = "💬 Show Comments";
     }
   });
 

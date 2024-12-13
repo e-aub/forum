@@ -21,13 +21,15 @@ export const GetData = async (postIds = false) => {
 
         console.log(postIds);
         renderPage(postIds, postsContainer);
-
+        const debouncedRenderPage = debounce(renderPage, 1000)
         window.addEventListener('scroll', () => {
             const scrollPosition = window.scrollY;
             const documentHeight = document.documentElement.scrollHeight;
             const windowHeight = window.innerHeight;
             if (scrollPosition + windowHeight >= documentHeight - 10) {
-                renderPage(postIds, postsContainer);
+                debouncedRenderPage(postIds, postsContainer)
+                // renderPage(postIds, postsContainer);
+
             }
         });
 
@@ -35,6 +37,15 @@ export const GetData = async (postIds = false) => {
         console.log(err);
     }
 };
+
+function debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
 
 async function renderPage(postIds, postsContainer) {
     let target = [];
@@ -52,8 +63,7 @@ async function renderPage(postIds, postsContainer) {
         }
     }
 
-    console.log(target);  // Debug: Verify that target has the posts
-
+    console.log(target);
     if (target.length > 0) {
         await renderPosts(postsContainer, target);
     }
