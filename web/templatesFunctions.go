@@ -9,8 +9,7 @@ import (
 )
 
 type Err struct {
-	Message      string
-	Unauthorized bool
+	Status int
 }
 
 func ExecuteTemplate(w http.ResponseWriter, templatesNames []string, statusCode int, data any) {

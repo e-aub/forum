@@ -17,7 +17,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 	categories, err := GetCategories(db)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "internal server error"})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 		return
 	}
 	tmpl.ExecuteTemplate(w, []string{"new_post", "sideBar"}, http.StatusOK, categories)
@@ -26,7 +26,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if err := r.ParseForm(); err != nil {
 		log.Printf("Error parsing form: %v", err)
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Message: "Bad request"})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Status: http.StatusBadRequest})
 		return
 	}
 
@@ -40,12 +40,12 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 
 	if len(post.Title) >= 40 || len(post.Content) >= 300 {
 		log.Printf("long format")
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Message: "bad request"})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Status: http.StatusBadRequest})
 		return
 	}
 	_, err := database.InsertPost(post, db, categories)
 	if err != nil {
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "internal server error"})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)

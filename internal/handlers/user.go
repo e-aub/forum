@@ -22,7 +22,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		rows, err := utils.QueryRows(db, query, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "Internal server Error"})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
 		}
 		postIds := []int{}
@@ -31,7 +31,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			err := rows.Scan(&postId)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
-				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "Internal server Error"})
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			}
 
 			postIds = append(postIds, postId)
@@ -39,7 +39,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "internal server error"})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
 		}
 		tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, string(jsonIds))
@@ -48,7 +48,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		rows, err := utils.QueryRows(db, query, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "Internal server Error"})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
 		}
 		postIds := []int{}
@@ -57,7 +57,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			err := rows.Scan(&postId)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
-				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "Internal server Error"})
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			}
 
 			postIds = append(postIds, postId)
@@ -65,12 +65,12 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Message: "internal server error"})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
 		}
 		tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, string(jsonIds))
 	default:
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Message: "Page not found"})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
 
 	}
 }
