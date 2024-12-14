@@ -40,6 +40,7 @@ async function loadComments(postId, commentsContainer) {
     const response = await fetch(`/comments?post=${postId}`);
     if (!response.ok) throw new Error("Failed to load comments.");
     const comments = await response.json();
+    if (!comments)return
     comments.forEach(async comment => {
       const reaction = await getReactInfo({
         target_type: "comment",
@@ -81,7 +82,7 @@ async function addComment(postId, content, commentsContainer, commentsection) {
         }, "GET")
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
-        commentsContainer.appendChild(commentSection)
+        commentsContainer.prepend(commentSection)
         break
     }
   } catch (error) {
