@@ -23,7 +23,7 @@ export async function renderPosts(postsContainer, posts) {
 }
 
 
-function generatePostHTML(post, reactInfo) {
+function generatePostHTML(post, reactInfo) {  
   let liked = false;
   let disliked = false;
   let likeCount = reactInfo.data.liked_by ? reactInfo.data.liked_by.length : 0;
@@ -36,7 +36,6 @@ function generatePostHTML(post, reactInfo) {
     liked = false
     disliked = false;
   }
-  console.log(liked, disliked, likeCount, disLikeCount);
   return `
 <div class="post-container">
   <div class="post-header">
@@ -52,7 +51,7 @@ function generatePostHTML(post, reactInfo) {
     <p class="content">${post.Content}</p>
   </div>
 
-  <div class="post-footer">
+  <div class="reaction-section">
     <div class="reaction-buttons">
       <button class="like like-button ${liked ? "clicked" : ""}" data-clicked=${liked}>
         <span class="emoji">👍</span> Like (<span class="count">${likeCount}</span>)

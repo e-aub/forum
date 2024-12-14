@@ -56,7 +56,7 @@
     hyphens: auto;
 }
 
-.post-footer {
+.reaction-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -222,7 +222,7 @@
     }
 
     .reaction-buttons,
-    .post-footer {
+    .reaction-section {
         flex-direction: column; /* Stack buttons */
         gap: 8px;
     }
