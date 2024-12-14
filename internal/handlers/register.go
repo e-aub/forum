@@ -67,5 +67,5 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		Expires: userData.Expiration,
 	})
 	w.WriteHeader(http.StatusOK)
-	w.Write(nil)
+	
 }

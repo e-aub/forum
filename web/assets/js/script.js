@@ -80,12 +80,10 @@ export const logoutEvent = (log) => {
                 method: 'POST',
                 credentials: 'include'
             });
-            console.log("test");
             
-
             if (response.ok) {
                 console.log('Logged out successfully');
-                // window.location.href = '/'; // Redirect after successful logout
+                window.location.href = '/';
             } else {
                 console.error('Logout failed');
             }
@@ -143,3 +141,65 @@ export function SubmitForm(category, event) {
     window.location.href = `/categories?${parfalseams}`;
 }
 
+
+    const authNav = document.getElementById('auth-nav');
+
+    const hasSession = document.cookie.includes('session_token');
+
+
+    if (hasSession) {
+        authNav.innerHTML = `
+        <a href="/" class="active">Logout</a>
+    `;
+        const logoutLink = authNav.querySelector('a');
+        logoutEvent(logoutLink); 
+    } else {
+        authNav.innerHTML = `
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Signup</a>
+    `;
+    }
+    function handleResize() {
+        const menuButton = document.querySelector('.menu-button');
+        const sideBar = document.querySelector('.sidebar');
+        const postContainer = document.querySelector('.posts');
+        const createPost = document.querySelector('.create-post'); 
+
+        if (menuButton) {
+            if (window.innerWidth <= 1200) {
+                menuButton.style.display = 'block';
+                if (sideBar) {
+                    sideBar.classList.add('hide');
+                }
+                if (postContainer) {
+                    postContainer.style.marginLeft = '0';
+                }
+                if (createPost) {
+                    createPost.style.marginLeft = '0';
+                }
+            } else {
+                menuButton.style.display = 'none';
+                if (sideBar) {
+                    sideBar.classList.remove('hide');
+                }
+                if (postContainer) {
+                    postContainer.style.marginLeft = '250px';
+                }
+                if (createPost) {
+                    createPost.style.marginLeft = '250px';
+                }
+            }
+        }
+    }
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    const menuButton = document.querySelector('.menu-button');
+    const sideBar = document.querySelector('.sidebar');
+    if (menuButton && sideBar) {
+        menuButton.addEventListener('click', () => {
+            sideBar.classList.toggle('hide');
+        });
+    }

@@ -19,8 +19,8 @@ body {
     font-family: Arial, sans-serif;
     background-color: #fafafa;
     color: var(--gray);
-    /* display: flex; */
-    /* flex-direction: column; */
+    display: flex;
+    flex-direction: column;
     height: 100vh;
 }
 
@@ -55,6 +55,16 @@ header .top-bar a:hover {
 
 header .top-bar a.active {
     color: var(--yellow);
+}
+
+.menu-button {
+    display: none;
+    cursor: pointer;
+    font-size: 30px;
+    color: var(--yellow);
+    margin-right: 50px;
+    background: none;
+    border: none;
 }
 
 aside.sidebar {
@@ -217,4 +227,10 @@ p {
 
 .close-btn:hover {
     background-color: var(--smoke-white);
+}
+
+
+
+.sidebar.hide {
+    display: none;
 }

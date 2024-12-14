@@ -35,11 +35,11 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write(nil)
+			
 			return
 		}
 		w.WriteHeader(200)
-		w.Write(nil)
+		
 	} else {
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request 1!"}`)
 		return
@@ -62,11 +62,11 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 		_, err := db.Exec(deleteQuery, userID, id, targetType)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write(nil)
+			
 			return
 		}
 		w.WriteHeader(200)
-		w.Write(nil)
+		
 	} else {
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request1"}`)
 		return

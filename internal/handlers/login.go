@@ -72,5 +72,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(nil)
+	
 }

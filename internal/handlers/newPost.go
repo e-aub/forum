@@ -37,6 +37,10 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		UserId:    userId,
 	}
 	categories := r.Form["category"]
+	if len(categories) == 0 {
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Status: http.StatusBadRequest})
+		return
+	}
 
 	if len(post.Title) >= 40 || len(post.Content) >= 300 {
 		log.Printf("long format")
