@@ -48,7 +48,7 @@ async function loadComments(postId, commentsContainer) {
       }, "GET")
       const commentSection = createCommentElement(comment, reaction)
       reactToggle(commentSection, comment.comment_id, 'comment')
-      commentsContainer.appendChild(commentSection)
+      commentsContainer.prepend(commentSection)
     });
   } catch (error) {
     console.error("Error loading comments:", error);
@@ -82,7 +82,7 @@ async function addComment(postId, content, commentsContainer, commentsection) {
         }, "GET")
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
-        commentsContainer.prepend(commentSection)
+        commentsContainer.appendChild(commentSection)
         break
     }
   } catch (error) {

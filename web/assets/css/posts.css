@@ -103,9 +103,6 @@
     transition: background-color 0.3s;
 }
 
-.toggle-comments:hover {
-    background-color: var(--light-gray);
-}
 
 /* Comment section */
 .comments-section {
