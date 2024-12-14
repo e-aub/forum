@@ -1,3 +1,5 @@
+import { reactToggle } from "/assets/js/likes.js";
+
 export function initializeCommentSection(postElement, post) {
   const toggleCommentsButton = postElement.querySelector(".toggle-comments");
   const commentsSection = postElement.querySelector(".comments-section");
@@ -63,7 +65,10 @@ async function addComment(postId, content, commentsContainer,commentsection) {
       return      
     }
     const newComment = await response.json();
-    commentsContainer.appendChild(createCommentElement(newComment));
+    console.log(newComment)
+    const comment = createCommentElement(newComment);
+    reactToggle(comment, newComment.comment_id, "comment");
+    commentsContainer.appendChild(comment);
   } catch (error) {
     console.error("Error adding comment:", error);
   }
