@@ -92,20 +92,24 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 		Path:    "/",
 		Value:   "",
 		Expires: time.Unix(0, 0),
-		MaxAge:  0,
 	})
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return err
 	}
 	stmt, err := db.Prepare("DELETE FROM sessions WHERE session_id = ?")
 	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(cookie.Value)
 	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+
 		return err
 	}
 	return nil

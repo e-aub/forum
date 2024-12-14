@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -49,7 +50,6 @@ func main() {
 		case "POST":
 			handlers.RegisterHandler(w, r, db)
 		default:
-
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 		}
 	})
@@ -62,16 +62,18 @@ func main() {
 				handlers.LoginPageHandler(w, r)
 				return
 			}
-			sessionId, err := database.Get_session(session.Value, db)
+			_, err = database.Get_session(session.Value, db)
 			if err != nil {
-				http.Error(w, "internal server error", http.StatusInternalServerError)
-				return
-			}
-			if sessionId <= 0 {
-				err := auth.RemoveUser(w, r, db)
-				if err != nil {
+				if err == sql.ErrNoRows {
+					err := auth.RemoveUser(w, r, db)
+					if err != nil {
+						return
+					}
+					handlers.LoginPageHandler(w, r)
 					return
 				}
+				http.Error(w, "internal server error", http.StatusInternalServerError)
+				return
 			}
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 		case "POST":
@@ -86,14 +88,8 @@ func main() {
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 			return
 		}
-		err := auth.RemoveUser(w, r, db)
-		if err != nil {
-			if err == http.ErrNoCookie {
-				http.Error(w, "Bad request", http.StatusBadRequest)
-				return
-			}
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
+		auth.RemoveUser(w, r, db)
+
 	})
 
 	router.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
