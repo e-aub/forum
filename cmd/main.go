@@ -57,7 +57,23 @@ func main() {
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			handlers.LoginPageHandler(w, r)
+			session, err := r.Cookie("session_token")
+			if err == http.ErrNoCookie {
+				handlers.LoginPageHandler(w, r)
+				return
+			}
+			sessionId, err := database.Get_session(session.Value, db)
+			if err != nil {
+				http.Error(w, "internal server error", http.StatusInternalServerError)
+				return
+			}
+			if sessionId <= 0 {
+				err := auth.RemoveUser(w, r, db)
+				if err != nil {
+					return
+				}
+			}
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 		case "POST":
 			handlers.LoginHandler(w, r, db)
 		default:
