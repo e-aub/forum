@@ -29,32 +29,3 @@ document.getElementById("login-form").addEventListener("submit", async function 
         messageElement.style.color = "red";
     }
 });
-
-// // Logout event
-// export const logoutEvent = (log) => {
-//     log.addEventListener('click', async () => {
-//         try {
-//             const response = await fetch('http://localhost:8080/logout', {
-//                 method: 'POST',
-//                 credentials: 'include'
-//             });
-
-//             if (response.ok) {
-//                 console.log('Logged out successfully');
-//                 window.location.href = '/'; // Redirect after successful logout
-//             } else {
-//                 console.error('Logout failed');
-//             }
-//         } catch (error) {
-//             console.error('Error logging out:', error);
-//         }
-//     });
-// };
-
-// Integrate logout event to the button
-// const logoutButton = document.getElementById('logoutBtn');
-// if (logoutButton) {
-//     logoutEvent(logoutButton);
-// }
-
-

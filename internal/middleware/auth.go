@@ -89,8 +89,10 @@ func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
+		Path:    "/",
 		Value:   "",
 		Expires: time.Unix(0, 0),
+		MaxAge:  0,
 	})
 	cookie, err := r.Cookie("session_token")
 	if err != nil {

@@ -18,12 +18,10 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var userData utils.User
-	// Decode the JSON body
 	if err := json.NewDecoder(r.Body).Decode(&userData); err != nil {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
-
 	password := userData.Password
 	ok, err := middleware.ValidCredential(db, &userData)
 
@@ -72,5 +70,5 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-	
+
 }
