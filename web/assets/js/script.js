@@ -150,7 +150,7 @@ if (hasSession) {
         <a href="/" class="active">Logout</a>
     `;
     const logoutLink = authNav.querySelector('a');
-    
+
     logoutEvent(logoutLink);
 } else {
     authNav.innerHTML = `

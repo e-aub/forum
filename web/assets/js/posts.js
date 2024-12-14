@@ -23,7 +23,7 @@ export async function renderPosts(postsContainer, posts) {
 }
 
 
-function generatePostHTML(post, reactInfo) {  
+function generatePostHTML(post, reactInfo) {
   let liked = false;
   let disliked = false;
   let likeCount = reactInfo.data.liked_by ? reactInfo.data.liked_by.length : 0;
@@ -74,4 +74,19 @@ function generatePostHTML(post, reactInfo) {
   </div>
 </div>
 `;
+}
+
+export const isValidPost = (event) => {
+  event.preventDefault()
+  const checkbox = document.querySelectorAll('[name="category"]')
+  let test = false
+  checkbox.forEach((box) => {
+    if (box.checked) test = true
+  })
+  if (!test) {
+    document.getElementById('responseMessage').textContent = 'Oops! It looks like every post needs to have at least one category.'
+    return
+  }
+  document.querySelector('#submition-button').disabled = true;
+  event.target.submit()
 }
