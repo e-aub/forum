@@ -167,9 +167,10 @@ export function SubmitForm(category, event) {
 
         if (menuButton) {
             if (window.innerWidth <= 1200) {
-                if (!(window.location.pathname !== '/login' || window.location.pathname !== '/register')) {
-                    menuButton.style.display = 'block';
+                if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+                    return
                 }
+                menuButton.style.display = 'block';
                 if (sideBar) {
                     sideBar.classList.add('hide');
                 }
