@@ -1,8 +1,8 @@
 import { showRegistrationModal } from "./script.js";
 
 export function reactToggle(element /*html element*/, Id /*post or comment id*/, targetType /*post or comment*/) {
-    const likeButton = element.querySelector('.post-footer button:nth-child(1)'); // Select the first button as Like
-    const dislikeButton = element.querySelector('.post-footer button:nth-child(2)'); // Select the second button as Dislike
+    const likeButton = element.querySelector('.reaction-section button:nth-child(1)'); // Select the first button as Like
+    const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)'); // Select the second button as Dislike
 
     likeButton.addEventListener('click', () => handleReact(likeButton, dislikeButton, Id, "like", targetType));
     dislikeButton.addEventListener('click', () => handleReact(dislikeButton, likeButton, Id, "dislike", targetType));
