@@ -1,4 +1,4 @@
-{{define "style"}} 
+{{define "style"}}
 <link rel="stylesheet" href="/assets/css/new_post.css">
 {{end}}
 
@@ -11,9 +11,10 @@
     {{block "sidebar" .}}{{end}}
     <section class="create-post">
         <h2>Create a New Post</h2>
-        <form action="/new_post" method="post">
+        <form id="createPostForm" action="/new_post" method="post">
             <input name="title" type="text" placeholder="Post Title" class="post-title" maxlength="40" required>
-            <textarea name="content" placeholder="Post Content" class="post-content" required maxlength="300"></textarea>
+            <textarea name="content" placeholder="Post Content" class="post-content" required
+                maxlength="300"></textarea>
             <div class="form-group">
                 <label>Choose Categories:</label>
                 <div class="categories">
@@ -22,12 +23,17 @@
                     {{end}}
                 </div>
             </div>
-            <button type="submit">Create Post</button>
+            <button id="submition-button" type="submit">Create Post</button>
+            <p id="responseMessage"></p>
         </form>
+        <script type="module">
+            import { isValidPost } from "/assets/js/posts.js";
+            document.getElementById('createPostForm').addEventListener('submit', (e) => isValidPost(e))
+        </script>
     </section>
 </main>
 {{end}}
 
-{{define "script"}} 
- 
+{{define "script"}}
+
 {{end}}
