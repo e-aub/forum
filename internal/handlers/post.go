@@ -32,7 +32,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
-			
+
 			return
 		}
 		post, err := database.ReadPost(db, userId, postId)
@@ -49,42 +49,39 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
-			
 			return
 		}
 		json, err := json.Marshal(post)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
-			
 			return
 		}
 		_, err = w.Write(json)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
-			
 			return
 		}
 		return
 	}
 	lastindex, err := database.GetLastPostId(db)
+	fmt.Fprintln(os.Stderr, err)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	json, err := json.Marshal(lastindex)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
-		
+
 		return
 	}
 	_, err = w.Write(json)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
-		
 		return
 	}
 }

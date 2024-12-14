@@ -45,6 +45,16 @@ main {
     box-sizing: border-box;
 }
 
+.create-post .post-content{
+   height: 62px; 
+}
+
+.create-post .post-content {
+    overflow: hidden;   /* Hide the scrollbar */
+    resize: none;       /* Prevent manual resizing */
+    box-sizing: border-box;
+}
+
 .create-post .post-title:focus,
 .create-post .post-content:focus,
 .create-post .post-category:focus {
@@ -130,4 +140,9 @@ main {
         font-size: 14px;
         padding: 8px;
     }
+}
+
+textarea {
+    padding: 0px;
+    margin: 0px;
 }

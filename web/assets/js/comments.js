@@ -16,18 +16,9 @@ export function initializeCommentSection(postElement, post) {
     }
   });
 
-  const commentSubmitButton = postElement.querySelector(".comment-submit");
-  commentSubmitButton.addEventListener("click", async () => {
-    const commentInput = postElement.querySelector(".comment-input");
-    if (commentInput.value.trim()) {
-      await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
-      commentInput.value = ""
-    }
-  });
-
   const commentInput = postElement.querySelector(".comment-input");
   commentInput.addEventListener("keydown", async (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && !event.shiftKey) {
       const commentInput = postElement.querySelector(".comment-input");
       if (commentInput.value.trim()) {
         await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
@@ -35,6 +26,12 @@ export function initializeCommentSection(postElement, post) {
       }
     }
   })
+  commentInput.addEventListener('input', () => {
+    console.log(commentInput.scrollHeight);
+    
+    commentInput.style.height = 'auto'
+    commentInput.style.height = commentInput.scrollHeight + "px"
+  });
 }
 
 async function loadComments(postId, commentsContainer) {

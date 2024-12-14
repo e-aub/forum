@@ -28,6 +28,11 @@
         </form>
         <script type="module">
             import { isValidPost } from "/assets/js/posts.js";
+            const textarea = document.querySelector('.post-content')
+            textarea.addEventListener('input', (event) => {
+                textarea.style.height = 'auto'
+                textarea.style.height = textarea.scrollHeight+ "px"
+            });
             document.getElementById('createPostForm').addEventListener('submit', (e) => isValidPost(e))
         </script>
     </section>

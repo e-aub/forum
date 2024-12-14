@@ -110,7 +110,7 @@ func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 }
 
 func GetLastPostId(db *sql.DB) (int, error) {
-	query := `SELECT MAX(id) FROM posts`
+	query := `SELECT COALESCE(MAX(id), 0) FROM posts`
 	row, err := utils.QueryRow(db, query)
 	if err != nil {
 		return 0, err

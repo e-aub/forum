@@ -49,10 +49,12 @@ function debounce(func, delay) {
 
 async function renderPage(postIds, postsContainer) {
     let target = [];
-    for (let i = 0; i < Math.min(10, postIds.length); i++) {
+    let i = 0
+    while(postIds.length > 0 && i < 10) {
+        console.log(postIds.length, "dd");
+        
         let link = `http://localhost:8080/posts?post_id=${postIds.pop()}`;
         let postResponse = await fetch(link);
-
         if (postResponse.ok) {
             let post = await postResponse.json();
             target.push(post);
@@ -61,12 +63,11 @@ async function renderPage(postIds, postsContainer) {
                 throw new Error("Response not ok");
             }
         }
+        i++
     }
 
     console.log(target);
-    if (target.length > 0) {
         await renderPosts(postsContainer, target);
-    }
 }
 
 // Logout event

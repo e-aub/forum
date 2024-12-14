@@ -18,7 +18,7 @@ import (
 func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	switch r.URL.Path {
 	case "/me/liked_posts":
-		query := `SELECT post_id FROM reactions WHERE user_id = ? AND reaction_type = 'like'`
+		query := `SELECT post_id FROM reactions WHERE user_id = ? AND reaction_type = 'like' AND post_id NOT NULL`
 		rows, err := utils.QueryRows(db, query, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -32,6 +32,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+				return
 			}
 
 			postIds = append(postIds, postId)
