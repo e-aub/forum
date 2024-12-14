@@ -13,7 +13,7 @@
         <div class="error-message">
             <h1>Oops! Page Not Found (404)</h1>
             <p>We couldn't find the page you're looking for. It might have been moved or deleted.</p>
-            <button onclick="window.location.href='/'">Go to Home</button>
+            <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
         </div>
         {{end}}
     
@@ -21,15 +21,15 @@
         <div class="error-message">
             <h1>Bad Request (400)</h1>
             <p>The request could not be understood by the server. Please check the URL or your input.</p>
-            <button onclick="window.location.href='/'">Go to Home</button>
+            <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
         {{end}}
     
         {{if eq .Status 401}}
         <div class="error-message">
             <h1>Unauthorized (401)</h1>
             <p>You need to be logged in to access this page. Please log in to continue.</p>
-            <button onclick="window.location.href='/login'">Login</button>
-            <button onclick="window.location.href='/'">Go to Home</button>
+            <button class="err-button" onclick="window.location.href='/login'">Login</button>
+            <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
         </div>
         {{end}}
     
@@ -37,7 +37,7 @@
         <div class="error-message">
             <h1>Internal Server Error (500)</h1>
             <p>Something went wrong on our end. We're working on it. Please try again later.</p>
-            <button onclick="window.location.href='/'">Go to Home</button>
+            <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
         </div>
         {{end}}
     </section>
@@ -46,5 +46,4 @@
 
 {{define "script"}}
 <script type="module" src="/assets/js/script.js"></script>
-<script type="module" src="/assets/js/posts.js"></script>
 {{end}}

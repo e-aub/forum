@@ -167,7 +167,9 @@ export function SubmitForm(category, event) {
 
         if (menuButton) {
             if (window.innerWidth <= 1200) {
-                menuButton.style.display = 'block';
+                if (!(window.location.pathname !== '/login' || window.location.pathname !== '/register')) {
+                    menuButton.style.display = 'block';
+                }
                 if (sideBar) {
                     sideBar.classList.add('hide');
                 }
@@ -194,7 +196,8 @@ export function SubmitForm(category, event) {
 
     handleResize();
 
-    window.addEventListener('resize', handleResize);
+    let debouncedHandleResize = debounce(handleResize, 100);
+    window.addEventListener('resize', debouncedHandleResize);
 
     const menuButton = document.querySelector('.menu-button');
     const sideBar = document.querySelector('.sidebar');

@@ -39,8 +39,7 @@ header {
 header .logo img {
     max-height: 40px;
     display: block;
-    margin-left: 50px;
-}
+    }
 
 header .top-bar a {
     color: var(--white);
@@ -147,10 +146,7 @@ footer {
 
 /* Style the dialog modal */
 dialog {
-    /* display: flex;
-    align-items: center;
-    justify-content: center; */
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%);

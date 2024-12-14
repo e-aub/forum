@@ -69,32 +69,33 @@ export async function getReactInfo(params, method) {
 }
 
 // For the changes of reaction to take place on the front end instantly
-// with no need for refreshing or fetching
 function interactiveLike(button, follow) {
     const add = button.querySelector(".count");
     const subtract = follow.querySelector(".count");
 
-    // Parse the current count from the button's span text
-    let count = parseInt(add.textContent, 10);
-    let disCount = parseInt(subtract.textContent, 10);
+    let count = parseInt(add.textContent, 10) || 0;
+    let disCount = parseInt(subtract.textContent, 10) || 0;
 
-    if (button.getAttribute("data-clicked") === "false") {
-        count += 1;
-        add.textContent = count; // Update the displayed count
+    const buttonClicked = button.getAttribute("data-clicked") === "true";
+    const followClicked = follow.getAttribute("data-clicked") === "true";
+
+    if (!buttonClicked) {
+        // If the main button wasn't clicked, like/dislike it
+        add.textContent = count + 1;
         button.setAttribute("data-clicked", "true");
-        button.style.backgroundColor = '#15F5BA';
-        follow.style.backgroundColor = 'white';
+        button.classList.add("clicked");
 
-        if (follow.getAttribute("data-clicked") === "true") {
-            disCount -= 1;
-            subtract.textContent = disCount; // Update the displayed count
+        // If the other button was clicked, undo its action
+        if (followClicked) {
+            subtract.textContent = disCount - 1;
             follow.setAttribute("data-clicked", "false");
-            follow.style.backgroundColor = 'white';
+            follow.classList.remove("clicked");
         }
-    } else if (button.getAttribute("data-clicked") === "true") {
-        count -= 1;
-        add.textContent = count; // Update the displayed count
+    } else {
+        // If the main button was clicked, undo its action
+        add.textContent = count - 1;
         button.setAttribute("data-clicked", "false");
-        button.style.backgroundColor = 'white';
+        button.classList.remove("clicked");
     }
 }
+

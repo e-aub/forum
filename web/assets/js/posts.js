@@ -36,7 +36,7 @@ function generatePostHTML(post, reactInfo) {
     liked = false
     disliked = false;
   }
-
+  console.log(liked, disliked, likeCount, disLikeCount);
   return `
 <div class="post-container">
   <div class="post-header">
@@ -54,10 +54,10 @@ function generatePostHTML(post, reactInfo) {
 
   <div class="post-footer">
     <div class="reaction-buttons">
-      <button class="like like-button" data-clicked="${liked}">
+      <button class="like like-button" class=${liked ? "clicked" : ""} data-clicked=${liked}>
         <span class="emoji">👍</span> Like (<span class="count">${likeCount}</span>)
       </button>
-      <button class="dislike dislike-button" data-clicked="${disliked}">
+      <button class="dislike dislike-button" class=${disliked ? "clicked" : ""} data-clicked=${disliked}>
         <span class="emoji">👎</span> Dislike (<span class="count">${disLikeCount}</span>)
       </button>
     </div>
