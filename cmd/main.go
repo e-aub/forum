@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -47,12 +46,25 @@ func main() {
 	})
 
 	// HomePage handler
-	router.HandleFunc("/", handlers.HomePageHandler)
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		handlers.HomePageHandler(w, r, db, 0)
+		// auth.AuthMiddleware(db, handlers.HomePageHandler)
+	})
 
 	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			handlers.RegisterPageHandler(w, r)
+			auth.HandleSession(
+				w, r, db,
+				func(w http.ResponseWriter, r *http.Request) { // On no session
+					handlers.RegisterPageHandler(w, r)
+				},
+				func(w http.ResponseWriter, r *http.Request) { // On invalid session
+					handlers.RegisterPageHandler(w, r)
+				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
+					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+				},
+				false)
 		case "POST":
 			handlers.RegisterHandler(w, r, db)
 		default:
@@ -63,25 +75,18 @@ func main() {
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			session, err := r.Cookie("session_token")
-			if err == http.ErrNoCookie {
-				handlers.LoginPageHandler(w, r)
-				return
-			}
-			_, err = database.Get_session(session.Value, db)
-			if err != nil {
-				if err == sql.ErrNoRows {
-					err := auth.RemoveUser(w, r, db)
-					if err != nil {
-						return
-					}
+			auth.HandleSession(
+				w, r, db,
+				func(w http.ResponseWriter, r *http.Request) { // On no session
 					handlers.LoginPageHandler(w, r)
-					return
-				}
-				http.Error(w, "internal server error", http.StatusInternalServerError)
-				return
-			}
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+				},
+				func(w http.ResponseWriter, r *http.Request) { // On invalid session
+					handlers.LoginPageHandler(w, r)
+				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
+					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+
+				},
+				true)
 		case "POST":
 			handlers.LoginHandler(w, r, db)
 		default:
@@ -149,7 +154,17 @@ func main() {
 	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			handlers.CategoriesHandler(w, r, db)
+			auth.HandleSession(
+				w, r, db,
+				func(w http.ResponseWriter, r *http.Request) { // On no session
+					handlers.CategoriesHandler(w, r, db)
+				},
+				func(w http.ResponseWriter, r *http.Request) {
+					handlers.CategoriesHandler(w, r, db) // On invalid session
+				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
+					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+				},
+				false)
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 		}

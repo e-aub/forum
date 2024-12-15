@@ -13,7 +13,7 @@ import (
 	database "forum/internal/database"
 )
 
-func HomePageHandler(w http.ResponseWriter, r *http.Request) {
+func HomePageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if r.URL.Path != "/" {
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
 		return
@@ -21,7 +21,8 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
 		return
 	}
-	tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, nil)
+	tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusUnauthorized, nil)
+
 }
 
 func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
@@ -32,7 +33,6 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusBadRequest)
-
 			return
 		}
 		post, err := database.ReadPost(db, userId, postId)

@@ -25,13 +25,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	password := userData.Password
 	ok, err := middleware.ValidCredential(db, &userData)
 
-	if !ok {
-		http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
-		return
-	}
-
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
 		return
 	}
 	if !CheckPasswordHash(&password, &userData.Password) {

@@ -15,18 +15,69 @@ type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 
 func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userId, _ := ValidUser(r, db)
-		if userId <= 0 {
-			fmt.Println(r.Header.Get("Content-Type"))
-			if r.Header.Get("Content-Type") == "application/json" {
-				utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
+		isConstentJson := r.Header.Get("Content-Type") == "application/json"
+		userId, err := ValidUser(r, db)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				fmt.Println(r.Header.Get("Content-Type"))
+				if isConstentJson {
+					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
+					return
+				}
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
 				return
 			}
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
+			if err == sql.ErrNoRows {
+				http.SetCookie(w, &http.Cookie{
+					Name:    "session_token",
+					Path:    "/",
+					Value:   "",
+					Expires: time.Unix(0, 0),
+				})
+				next(w, r, db, userId)
+				return
+
+				// tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
+				// return
+			}
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
+
 		}
 		next(w, r, db, userId)
 	})
+}
+
+func HandleSession(
+	w http.ResponseWriter,
+	r *http.Request,
+	db *sql.DB,
+	onValidOrNoSession func(http.ResponseWriter, *http.Request),
+	onInvalidSession func(http.ResponseWriter, *http.Request),
+	onInternalErr func(http.ResponseWriter, *http.Request), login bool) {
+	session, err := r.Cookie("session_token")
+	if err == http.ErrNoCookie {
+		onValidOrNoSession(w, r)
+		return
+	}
+	_, err = database.Get_session(session.Value, db)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			if err := RemoveUser(w, r, db); err != nil {
+				onInternalErr(w, r)
+				return
+			}
+			onInvalidSession(w, r)
+			return
+		}
+		onInternalErr(w, r)
+		return
+	}
+	if login {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	onValidOrNoSession(w, r)
 }
 
 func IsUserRegistered(db *sql.DB, userData *utils.User) (bool, error) {
@@ -74,13 +125,12 @@ func ValidCredential(db *sql.DB, userData *utils.User) (bool, error) {
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		if err != http.ErrNoCookie {
-			return 0, err
-		}
-		return 0, nil
+
+		return 0, err
 	}
 	userid, err := database.Get_session(cookie.Value, db)
 	if err != nil {
+
 		return 0, err
 	}
 	return userid, nil
@@ -95,20 +145,16 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	})
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
 		return err
 	}
 	stmt, err := db.Prepare("DELETE FROM sessions WHERE session_id = ?")
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(cookie.Value)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 
 		return err
 	}
