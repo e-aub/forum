@@ -13,8 +13,11 @@ import (
 
 type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
 
-func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
+func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// if login {
+
+		// }
 		isConstentJson := r.Header.Get("Content-Type") == "application/json"
 		userId, err := ValidUser(r, db)
 		if err != nil {
@@ -24,7 +27,14 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
 					return
 				}
+				fmt.Println("hklhh")
+				if login {
+
+					next(w, r, db, userId)
+					return
+				}
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
+
 				return
 			}
 			if err == sql.ErrNoRows {
@@ -36,10 +46,8 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 				})
 				next(w, r, db, userId)
 				return
-
-				// tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
-				// return
 			}
+			fmt.Println("hklhh")
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
 
@@ -113,13 +121,13 @@ func DeleteSession(db *sql.DB, userData *utils.User) error {
 	return err
 }
 
-func ValidCredential(db *sql.DB, userData *utils.User) (bool, error) {
+func ValidCredential(db *sql.DB, userData *utils.User) error {
 	query := `SELECT id, password FROM users WHERE username = ?;`
 	err := db.QueryRow(query, userData.UserName).Scan(&userData.UserId, &userData.Password)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, err
+	return err
 }
 
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {

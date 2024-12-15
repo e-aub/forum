@@ -12,7 +12,7 @@ import (
 	tmpl "forum/web"
 )
 
-func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
+func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusOK, nil)
 }
 
@@ -23,21 +23,22 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	password := userData.Password
-	ok, err := middleware.ValidCredential(db, &userData)
+	err := middleware.ValidCredential(db, &userData)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
+			return
+		}
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	if !ok {
-		http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
-		return
-	}
+
 	if !CheckPasswordHash(&password, &userData.Password) {
 		http.Error(w, "Incorrect Password", http.StatusUnauthorized)
 		return
 	}
-	ok, err = middleware.GetActiveSession(db, &userData)
+	ok, err := middleware.GetActiveSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

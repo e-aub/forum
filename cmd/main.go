@@ -47,8 +47,9 @@ func main() {
 
 	// HomePage handler
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		handlers.HomePageHandler(w, r, db, 0)
-		// auth.AuthMiddleware(db, handlers.HomePageHandler)
+		// handlers.HomePageHandler(w, r, db, 0)
+		auth.AuthMiddleware(db, handlers.HomePageHandler, true).ServeHTTP(w, r)
+
 	})
 
 	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
@@ -75,18 +76,9 @@ func main() {
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.HandleSession(
-				w, r, db,
-				func(w http.ResponseWriter, r *http.Request) { // On no session
-					handlers.LoginPageHandler(w, r)
-				},
-				func(w http.ResponseWriter, r *http.Request) { // On invalid session
-					handlers.LoginPageHandler(w, r)
-				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
-					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 
-				},
-				true)
+			auth.AuthMiddleware(db, handlers.LoginPageHandler, true).ServeHTTP(w, r)
+
 		case "POST":
 			handlers.LoginHandler(w, r, db)
 		default:
@@ -114,9 +106,9 @@ func main() {
 	router.HandleFunc("/new_post", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db, handlers.NewPostPageHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.NewPostPageHandler, false).ServeHTTP(w, r)
 		case "POST":
-			auth.AuthMiddleware(db, handlers.NewPostHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.NewPostHandler, false).ServeHTTP(w, r)
 		// We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
@@ -130,7 +122,7 @@ func main() {
 			userId, _ := auth.ValidUser(r, db)
 			handlers.GetCommentsHandler(w, r, db, userId)
 		case "POST":
-			auth.AuthMiddleware(db, handlers.AddCommentHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.AddCommentHandler, false).ServeHTTP(w, r)
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 		}
@@ -142,9 +134,9 @@ func main() {
 			userId, _ := auth.ValidUser(r, db)
 			handlers.GetReactionsHandler(w, r, db, userId)
 		} else if method == "PUT" {
-			auth.AuthMiddleware(db, handlers.InsertOrUpdateReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.InsertOrUpdateReactionHandler, false).ServeHTTP(w, r)
 		} else if method == "DELETE" {
-			auth.AuthMiddleware(db, handlers.DeleteReactionHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.DeleteReactionHandler, false).ServeHTTP(w, r)
 		} else {
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 			return
@@ -173,7 +165,7 @@ func main() {
 	router.HandleFunc("/me/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db, handlers.MeHandler).ServeHTTP(w, r)
+			auth.AuthMiddleware(db, handlers.MeHandler, false).ServeHTTP(w, r)
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 		}
