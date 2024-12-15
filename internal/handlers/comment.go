@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"html"
 	"net/http"
 	"strconv"
 	"time"
@@ -37,6 +38,7 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 		http.Error(w, "length of comment over 150 character", http.StatusBadRequest)
 		return
 	}
+	comment.Content = html.EscapeString(comment.Content)
 	comment.User_name = user_name
 	comment.User_id = userId
 	comment.Created_at = time.Now().Format(time.RFC3339)

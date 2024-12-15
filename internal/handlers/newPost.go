@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"html"
 	"log"
 	"net/http"
 	"os"
@@ -31,8 +32,8 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 	}
 
 	post := &utils.Post{
-		Title:     r.PostFormValue("title"),
-		Content:   r.PostFormValue("content"),
+		Title:     html.EscapeString(r.PostFormValue("title")),
+		Content:   html.EscapeString(r.PostFormValue("content")),
 		CreatedAt: time.Now(),
 		UserId:    userId,
 	}

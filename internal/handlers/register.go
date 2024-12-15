@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"html"
 	"net/http"
 	"time"
 
@@ -43,6 +44,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid password", http.StatusNotAcceptable)
 		return
 	}
+	userData.UserName = html.EscapeString(userData.UserName)
 	err = middleware.RegisterUser(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -67,5 +69,4 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		Expires: userData.Expiration,
 	})
 	w.WriteHeader(http.StatusOK)
-	
 }
