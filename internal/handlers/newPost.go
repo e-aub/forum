@@ -42,7 +42,7 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		return
 	}
 
-	if len(post.Title) >= 40 || len(post.Content) >= 300 {
+	if len(post.Title) >= 40 || len(post.Content) >= 10000 {
 		log.Printf("long format")
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, tmpl.Err{Status: http.StatusBadRequest})
 		return
