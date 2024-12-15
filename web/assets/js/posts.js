@@ -13,7 +13,6 @@ export async function renderPosts(postsContainer, posts) {
       postElement.innerHTML = generatePostHTML(post, reactInfo);
       postsContainer.appendChild(postElement);
 
-      // Initialize likes and comments
       reactToggle(postElement, post.PostId, "post");
       initializeCommentSection(postElement, post);
     } catch (error) {
@@ -66,9 +65,9 @@ function generatePostHTML(post, reactInfo) {
 
   <div class="comments-section" style="display: none;">
     <div class="comments">
-    </div>  
+    </div>
     <div class="comment-input-wrapper">
-      <textarea maxlength=150 required placeholder="Add a comment..." class="comment-input"></textarea>
+      <textarea maxlength=2000 required placeholder="Add a comment..." class="comment-input"></textarea>
     </div>
     <p class="error-comment"></p>
   </div>

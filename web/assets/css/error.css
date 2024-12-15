@@ -43,7 +43,6 @@ p {
     background-color: var(--light-gray);
 }
 
-/* Responsive Design */
 @media screen and (max-width: 768px) {
     h1 {
         font-size: 1.8em;

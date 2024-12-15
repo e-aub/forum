@@ -13,12 +13,18 @@ import (
 )
 
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	postID, _ := strconv.Atoi(r.URL.Query().Get("post"))
+	postID, err := strconv.Atoi(r.URL.Query().Get("post"))
+	if err != nil {
+		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"status bad request"}`)
+		return
+	}
+
 	comments, err := database.GetComments(postID, file, userId)
 	if err != nil {
 		utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error":"internal server error"}`)
 		return
 	}
+
 	utils.RespondWithJSON(w, http.StatusOK, comments)
 }
 
@@ -28,16 +34,19 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
 		return
 	}
+
 	comment := utils.Comment{}
+
 	err = json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
 		return
 	}
-	if len(comment.Content) > 150 {
-		http.Error(w, "length of comment over 150 character", http.StatusBadRequest)
+	if len(comment.Content) > 2000 {
+		http.Error(w, "length of comment over 2000 character", http.StatusBadRequest)
 		return
 	}
+
 	comment.Content = html.EscapeString(comment.Content)
 	comment.User_name = user_name
 	comment.User_id = userId
