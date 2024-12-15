@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"forum/internal/database"
 	"forum/internal/handlers"
@@ -25,7 +26,12 @@ func main() {
 	// Create tables if not exist
 	database.CreateTables(db)
 
-	database.CleanupExpiredSessions(db)
+	go func() {
+		for {
+			database.CleanupExpiredSessions(db)
+			time.Sleep(2 * time.Hour)
+		}
+	}()
 
 	// Create a multipluxer
 	router := http.NewServeMux()
@@ -89,7 +95,6 @@ func main() {
 			return
 		}
 		auth.RemoveUser(w, r, db)
-
 	})
 
 	router.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
