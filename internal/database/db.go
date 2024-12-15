@@ -156,8 +156,8 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	c.Comment_id = int(id)
 
+	c.Comment_id = int(id)
 	return nil
 }
 

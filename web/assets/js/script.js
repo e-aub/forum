@@ -50,9 +50,9 @@ function debounce(func, delay) {
 async function renderPage(postIds, postsContainer) {
     let target = [];
     let i = 0
-    while(postIds.length > 0 && i < 10) {
+    while (postIds.length > 0 && i < 10) {
         console.log(postIds.length, "dd");
-        
+
         let link = `http://localhost:8080/posts?post_id=${postIds.pop()}`;
         let postResponse = await fetch(link);
         if (postResponse.ok) {
@@ -67,7 +67,7 @@ async function renderPage(postIds, postsContainer) {
     }
 
     console.log(target);
-        await renderPosts(postsContainer, target);
+    await renderPosts(postsContainer, target);
 }
 
 // Logout event

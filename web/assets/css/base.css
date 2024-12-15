@@ -39,7 +39,7 @@ header {
 header .logo img {
     max-height: 40px;
     display: block;
-    }
+}
 
 header .top-bar a {
     color: var(--white);
@@ -72,7 +72,6 @@ aside.sidebar {
     color: var(--black);
     position: fixed;
     top: 60px;
-    /* Moves the sidebar below the header */
     left: 0;
     bottom: 0;
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
@@ -143,14 +142,11 @@ footer {
     z-index: 10;
 }
 
-
-/* Style the dialog modal */
 dialog {
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
- 
+    transform: translate(-50%, -50%);
     text-align: center;
     width: 400px;
     max-width: 90%;
@@ -166,21 +162,18 @@ dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* Title style */
 h2 {
     font-size: 1.5em;
     color: #333;
     margin-bottom: 15px;
 }
 
-/* Message style */
 p {
     font-size: 1.1em;
     color: #555;
     margin-bottom: 20px;
 }
 
-/* Button styles */
 .modal-button {
     font-size: 1.1em;
     padding: 10px 20px;
@@ -191,8 +184,8 @@ p {
     transition: background-color 0.3s;
 }
 
-.register-btn ,
-.login-btn{
+.register-btn,
+.login-btn {
     background: var(--yellow);
     color: rgb(0, 0, 0);
     border: none;
@@ -203,7 +196,8 @@ p {
     transition: background-color 0.3s;
 }
 
-.register-btn:hover,.login-btn:hover  {
+.register-btn:hover,
+.login-btn:hover {
     background-color: var(--light-gray);
 }
 
@@ -224,8 +218,6 @@ p {
 .close-btn:hover {
     background-color: var(--smoke-white);
 }
-
-
 
 .sidebar.hide {
     display: none;

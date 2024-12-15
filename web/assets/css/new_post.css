@@ -45,13 +45,13 @@ main {
     box-sizing: border-box;
 }
 
-.create-post .post-content{
-   height: 62px; 
+.create-post .post-content {
+    height: 62px;
 }
 
 .create-post .post-content {
-    overflow: hidden;   /* Hide the scrollbar */
-    resize: none;       /* Prevent manual resizing */
+    overflow: hidden;
+    resize: none;
     box-sizing: border-box;
 }
 
@@ -96,7 +96,6 @@ main {
     color: red;
 }
 
-/* Responsive Design */
 @media screen and (max-width: 768px) {
     .create-post {
         padding: 20px;
