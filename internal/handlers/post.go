@@ -21,7 +21,8 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId 
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
 		return
 	}
-	tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusUnauthorized, nil)
+
+	tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, nil)
 
 }
 

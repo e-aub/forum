@@ -13,7 +13,7 @@ import (
 
 type customHandler func(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int)
 
-func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
+func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		isConstentJson := r.Header.Get("Content-Type") == "application/json"
 		userId, err := ValidUser(r, db)
@@ -22,6 +22,10 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 				fmt.Println(r.Header.Get("Content-Type"))
 				if isConstentJson {
 					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
+					return
+				}
+				if login {
+					next(w, r, db, userId)
 					return
 				}
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
@@ -34,11 +38,16 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 					Value:   "",
 					Expires: time.Unix(0, 0),
 				})
-				next(w, r, db, userId)
+				if isConstentJson {
+					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
+					return
+				}
+				if login {
+					next(w, r, db, userId)
+					return
+				}
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
 				return
-
-				// tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
-				// return
 			}
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 			return
@@ -46,38 +55,6 @@ func AuthMiddleware(db *sql.DB, next customHandler) http.Handler {
 		}
 		next(w, r, db, userId)
 	})
-}
-
-func HandleSession(
-	w http.ResponseWriter,
-	r *http.Request,
-	db *sql.DB,
-	onValidOrNoSession func(http.ResponseWriter, *http.Request),
-	onInvalidSession func(http.ResponseWriter, *http.Request),
-	onInternalErr func(http.ResponseWriter, *http.Request), login bool) {
-	session, err := r.Cookie("session_token")
-	if err == http.ErrNoCookie {
-		onValidOrNoSession(w, r)
-		return
-	}
-	_, err = database.Get_session(session.Value, db)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			if err := RemoveUser(w, r, db); err != nil {
-				onInternalErr(w, r)
-				return
-			}
-			onInvalidSession(w, r)
-			return
-		}
-		onInternalErr(w, r)
-		return
-	}
-	if login {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	onValidOrNoSession(w, r)
 }
 
 func IsUserRegistered(db *sql.DB, userData *utils.User) (bool, error) {
@@ -113,13 +90,13 @@ func DeleteSession(db *sql.DB, userData *utils.User) error {
 	return err
 }
 
-func ValidCredential(db *sql.DB, userData *utils.User) (bool, error) {
+func ValidCredential(db *sql.DB, userData *utils.User) error {
 	query := `SELECT id, password FROM users WHERE username = ?;`
 	err := db.QueryRow(query, userData.UserName).Scan(&userData.UserId, &userData.Password)
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, err
+	return err
 }
 
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {

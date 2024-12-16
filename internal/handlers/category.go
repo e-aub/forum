@@ -13,7 +13,7 @@ import (
 	tmpl "forum/web"
 )
 
-func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if r.URL.Query().Has("category") {
 		category := r.URL.Query().Get("category")
 
