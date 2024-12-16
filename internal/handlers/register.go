@@ -25,7 +25,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 || !isValidEmail(&userData.Email) {
-		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
+		// fmt.Println(isValidEmail(&userData.Email))
+		http.Error(w, "invalid username/password/email", http.StatusNotAcceptable)
 		return
 	}
 	ok, err := middleware.IsUserRegistered(db, &userData)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	utils "forum/internal/utils"
 	tmpl "forum/web"
@@ -96,6 +97,7 @@ func CheckPasswordHash(password, hash *string) bool {
 }
 
 func isValidEmail(email *string) bool {
+	*email = strings.ToLower(*email)
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 
 	re := regexp.MustCompile(emailRegex)
