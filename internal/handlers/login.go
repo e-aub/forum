@@ -13,6 +13,11 @@ import (
 )
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+	_, err := r.Cookie("session_token")
+	if err != http.ErrNoCookie {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 	tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusOK, nil)
 }
 
