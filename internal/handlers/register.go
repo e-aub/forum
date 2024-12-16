@@ -13,7 +13,7 @@ import (
 	tmpl "forum/web"
 )
 
-func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
+func RegisterPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	tmpl.ExecuteTemplate(w, []string{"register"}, http.StatusOK, nil)
 }
 
@@ -24,7 +24,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
-
 	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 || !isValidEmail(&userData.Email) {
 		http.Error(w, "invalid username/password", http.StatusNotAcceptable)
 		return

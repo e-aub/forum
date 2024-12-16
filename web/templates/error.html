@@ -28,6 +28,13 @@
             <button class="err-button" onclick="window.location.href='/login'">Login</button>
             <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
         </div>
+        {{else if eq .Status 405}}
+        <div class="error-message">
+            <h1>Method Not Allowed (401)</h1>
+            <p>Please Go to home.</p>
+            <button class="err-button" onclick="window.location.href='/login'">Login</button>
+            <button class="err-button" onclick="window.location.href='/'">Go to Home</button>
+        </div>
         {{else if eq .Status 500}}
         <div class="error-message">
             <h1>Internal Server Error (500)</h1>

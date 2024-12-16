@@ -55,17 +55,7 @@ func main() {
 	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.HandleSession(
-				w, r, db,
-				func(w http.ResponseWriter, r *http.Request) { // On no session
-					handlers.RegisterPageHandler(w, r)
-				},
-				func(w http.ResponseWriter, r *http.Request) { // On invalid session
-					handlers.RegisterPageHandler(w, r)
-				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
-					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
-				},
-				false)
+			auth.AuthMiddleware(db, handlers.RegisterPageHandler, true).ServeHTTP(w, r)
 		case "POST":
 			handlers.RegisterHandler(w, r, db)
 		default:
@@ -76,7 +66,6 @@ func main() {
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-
 			auth.AuthMiddleware(db, handlers.LoginPageHandler, true).ServeHTTP(w, r)
 
 		case "POST":
@@ -146,17 +135,8 @@ func main() {
 	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.HandleSession(
-				w, r, db,
-				func(w http.ResponseWriter, r *http.Request) { // On no session
-					handlers.CategoriesHandler(w, r, db)
-				},
-				func(w http.ResponseWriter, r *http.Request) {
-					handlers.CategoriesHandler(w, r, db) // On invalid session
-				}, func(w http.ResponseWriter, r *http.Request) { // On internal server errror
-					tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
-				},
-				false)
+			// auth.AuthMiddleware(db, handlers.CategoriesHandler, true).ServeHTTP(w, r)
+			handlers.CategoriesHandler(w, r, db, 0)
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
 		}
