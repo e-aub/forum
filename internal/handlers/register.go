@@ -14,7 +14,28 @@ import (
 )
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	tmpl.ExecuteTemplate(w, []string{"register"}, http.StatusOK, nil)
+	_, err := middleware.ValidUser(r, db)
+	if err != nil {
+		if err == http.ErrNoCookie {
+			tmpl.ExecuteTemplate(w, []string{"register"}, http.StatusOK, nil)
+			return
+		}
+		if err == sql.ErrNoRows {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "session_token",
+				Path:    "/",
+				Value:   "",
+				Expires: time.Unix(0, 0),
+			})
+			tmpl.ExecuteTemplate(w, []string{"register"}, http.StatusUnauthorized, nil)
+
+			return
+		}
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+		return
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -26,7 +47,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 || !isValidEmail(&userData.Email) {
 		// fmt.Println(isValidEmail(&userData.Email))
-		http.Error(w, "invalid username/password/email", http.StatusNotAcceptable)
+		http.Error(w, "invalid username/password/email", http.StatusBadRequest)
 		return
 	}
 	ok, err := middleware.IsUserRegistered(db, &userData)

@@ -42,6 +42,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
+	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 {
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
 	password := userData.Password
 	err := middleware.ValidCredential(db, &userData)
 
