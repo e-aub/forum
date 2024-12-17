@@ -66,7 +66,7 @@ func main() {
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			auth.AuthMiddleware(db, handlers.LoginPageHandler, true).ServeHTTP(w, r)
+			handlers.LoginPageHandler(w, r, db)
 
 		case "POST":
 			handlers.LoginHandler(w, r, db)

@@ -12,13 +12,28 @@ import (
 	tmpl "forum/web"
 )
 
-func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	_, err := r.Cookie("session_token")
-	if err != http.ErrNoCookie {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	_, err := middleware.ValidUser(r, db)
+	if err != nil {
+		if err == http.ErrNoCookie {
+			tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusOK, nil)
+			return
+		}
+		if err == sql.ErrNoRows {
+			http.SetCookie(w, &http.Cookie{
+				Name:    "session_token",
+				Path:    "/",
+				Value:   "",
+				Expires: time.Unix(0, 0),
+			})
+			tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusUnauthorized, nil)
+			return
+		}
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
 		return
 	}
-	tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusOK, nil)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
