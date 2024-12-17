@@ -10,14 +10,13 @@ document.getElementById("signup-form").addEventListener("submit", async function
         return;
     }
 
-    // Send data to the API if validation passes
     try {
         const response = await fetch("http://localhost:8080/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({ username, email, password, confirmPassword}),
             credentials: "include",
         });
 

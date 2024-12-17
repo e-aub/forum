@@ -1,6 +1,6 @@
 IMAGE_NAME=forum-image
 
-DOCKERFILE=Dockerfile.dev
+DOCKERFILE=Dockerfile
 
 CONTAINER_NAME=forum-container
 
@@ -8,7 +8,7 @@ build:
 	  docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 run:
-	  docker run --name $(CONTAINER_NAME) -p "8080:8080" -v $(PWD):/app $(IMAGE_NAME)
+	  docker run --name $(CONTAINER_NAME) -v $(PWD):/app $(IMAGE_NAME)
 
 stop:
 	  docker stop $(CONTAINER_NAME) || true
@@ -28,4 +28,4 @@ all: stop clean build run
 .PHONY: build run stop clean up
 
 test:
-	DB_PATH=db/data.db go run cmd/main.go
+	PORT=8080 DB_PATH=db/data.db go run cmd/main.go

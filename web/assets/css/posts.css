@@ -84,6 +84,7 @@
 .toggle-comments {
     background: var(--yellow);
     color: rgb(0, 0, 0);
+    width: 200px;
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
@@ -209,14 +210,13 @@
     }
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 560px) {
     .post-title {
         font-size: 18px;
     }
 
     .reaction-buttons,
     .reaction-section {
-        flex-direction: column;
         gap: 8px;
     }
 }

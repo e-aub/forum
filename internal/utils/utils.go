@@ -10,12 +10,13 @@ import (
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
 type User struct {
-	UserId     int64
-	UserName   string `json:"username"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	SessionId  string
-	Expiration time.Time
+	UserId               int64
+	UserName             string `json:"username"`
+	Email                string `json:"email"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"confirmPassword"`
+	SessionId            string
+	Expiration           time.Time
 }
 
 type Post struct {

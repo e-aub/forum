@@ -17,7 +17,7 @@ import (
 
 func main() {
 	dbPath := os.Getenv("DB_PATH")
-	port := "8080"
+	port := os.Getenv("PORT")
 	// Create Database file
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
@@ -49,7 +49,6 @@ func main() {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// handlers.HomePageHandler(w, r, db, 0)
 		auth.AuthMiddleware(db, handlers.HomePageHandler, true).ServeHTTP(w, r)
-
 	})
 
 	router.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {

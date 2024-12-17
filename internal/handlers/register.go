@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"html"
 	"net/http"
 	"time"
@@ -35,7 +36,6 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, use
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -45,16 +45,24 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Invalid input data", http.StatusBadRequest)
 		return
 	}
+	fmt.Println(userData)
 	if len(userData.UserName) < 5 || len(userData.Password) < 8 || len(userData.UserName) > 30 || len(userData.Password) > 64 || !isValidEmail(&userData.Email) {
 		// fmt.Println(isValidEmail(&userData.Email))
 		http.Error(w, "invalid username/password/email", http.StatusBadRequest)
 		return
 	}
+
+	if userData.Password != userData.PasswordConfirmation {
+		http.Error(w, "Passwords do not match.", http.StatusBadRequest)
+		return
+	}
+
 	ok, err := middleware.IsUserRegistered(db, &userData)
 	if err != nil {
 		http.Error(w, "internaInternal Server Error", http.StatusInternalServerError)
 		return
 	}
+
 	if ok {
 		http.Error(w, "User already exists", http.StatusConflict)
 		return

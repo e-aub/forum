@@ -3,7 +3,14 @@ FROM golang:1.23.1 AS builder
 WORKDIR /app
 
 COPY go.mod go.sum ./
+
+RUN go get github.com/mattn/go-sqlite3
+RUN go get github.com/gofrs/uuid/v5
+RUN go get golang.org/x/crypto v0.28.0
+
 RUN go mod download
+
+RUN go mod tidy
 
 COPY . .
 
