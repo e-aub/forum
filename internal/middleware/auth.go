@@ -28,7 +28,7 @@ func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 					next(w, r, db, userId)
 					return
 				}
-				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, http.StatusUnauthorized)
 				return
 			}
 			if err == sql.ErrNoRows {
@@ -46,10 +46,10 @@ func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 					next(w, r, db, userId)
 					return
 				}
-				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, tmpl.Err{Status: http.StatusUnauthorized})
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, http.StatusUnauthorized)
 				return
 			}
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 
 		}
@@ -102,12 +102,10 @@ func ValidCredential(db *sql.DB, userData *utils.User) error {
 func ValidUser(r *http.Request, db *sql.DB) (int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-
 		return 0, err
 	}
 	userid, err := database.Get_session(cookie.Value, db)
 	if err != nil {
-
 		return 0, err
 	}
 	return userid, nil
@@ -132,7 +130,6 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 
 	_, err = stmt.Exec(cookie.Value)
 	if err != nil {
-
 		return err
 	}
 	return nil

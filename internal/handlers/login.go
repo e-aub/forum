@@ -29,7 +29,7 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 			tmpl.ExecuteTemplate(w, []string{"login"}, http.StatusUnauthorized, nil)
 			return
 		}
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)

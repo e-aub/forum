@@ -15,10 +15,10 @@ import (
 
 func HomePageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if r.URL.Path != "/" {
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
 		return
 	} else if r.Method != "GET" {
-		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
+		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
 		return
 	}
 

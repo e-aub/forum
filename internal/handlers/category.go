@@ -20,29 +20,29 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 		result, err := utils.QueryRow(db, `SELECT EXISTS(SELECT 1 FROM categories WHERE id = ?)`, category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		var exists bool
 		if err := result.Scan(&exists); err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		if !exists {
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
 			return
 		}
 		postIds, err := database.GetCategoryContentIds(db, category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, string(jsonIds))
@@ -50,7 +50,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 		categories, err := GetCategories(db)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, tmpl.Err{Status: http.StatusInternalServerError})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
 		tmpl.ExecuteTemplate(w, []string{"categories", "sideBar"}, http.StatusOK, categories)

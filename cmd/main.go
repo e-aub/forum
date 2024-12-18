@@ -38,7 +38,7 @@ func main() {
 	// File Server (need some improvement by rearrange css and js files by separating them)
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, tmpl.Err{Status: http.StatusNotFound})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
 			return
 		}
 		fs := http.FileServer(http.Dir("web/assets"))
@@ -58,7 +58,7 @@ func main() {
 		case "POST":
 			handlers.RegisterHandler(w, r, db)
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
@@ -70,13 +70,13 @@ func main() {
 		case "POST":
 			handlers.LoginHandler(w, r, db)
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
 	router.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 			return
 		}
 		auth.RemoveUser(w, r, db)
@@ -84,7 +84,7 @@ func main() {
 
 	router.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 			return
 		}
 		userId, _ := auth.ValidUser(r, db)
@@ -99,7 +99,7 @@ func main() {
 			auth.AuthMiddleware(db, handlers.NewPostHandler, false).ServeHTTP(w, r)
 		// We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
@@ -112,7 +112,7 @@ func main() {
 		case "POST":
 			auth.AuthMiddleware(db, handlers.AddCommentHandler, false).ServeHTTP(w, r)
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
@@ -126,7 +126,7 @@ func main() {
 		} else if method == "DELETE" {
 			auth.AuthMiddleware(db, handlers.DeleteReactionHandler, false).ServeHTTP(w, r)
 		} else {
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 			return
 		}
 	})
@@ -137,7 +137,7 @@ func main() {
 			// auth.AuthMiddleware(db, handlers.CategoriesHandler, true).ServeHTTP(w, r)
 			handlers.CategoriesHandler(w, r, db, 0)
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
@@ -146,7 +146,7 @@ func main() {
 		case "GET":
 			auth.AuthMiddleware(db, handlers.MeHandler, false).ServeHTTP(w, r)
 		default:
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, tmpl.Err{Status: http.StatusMethodNotAllowed})
+			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 

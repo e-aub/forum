@@ -8,10 +8,6 @@ import (
 	"path/filepath"
 )
 
-type Err struct {
-	Status int
-}
-
 func ExecuteTemplate(w http.ResponseWriter, templatesNames []string, statusCode int, data any) {
 	basePath := "./web/templates/"
 
