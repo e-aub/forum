@@ -44,12 +44,16 @@ type Comment struct {
 	Created_at string `json:"created_at"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func (p *Post) Update_Post(title string, content string, time time.Time) {
 	p.Title = title
 	p.Content = content
 }
 
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func RespondWithJSON(w http.ResponseWriter, code int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	response, err := json.Marshal(payload)
 	if err != nil {

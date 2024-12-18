@@ -22,7 +22,6 @@ export const initializeCommentSection = (postElement, post) => {
       const commentInput = postElement.querySelector(".comment-input");
       if (commentInput.value.trim()) {
         await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
-        commentInput.value = ""
       }
     }
   })
@@ -64,24 +63,27 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
         content: content
       }),
     })
-
+    let commentInput = commentsection.querySelector(".comment-input");
+    const error = commentsection.querySelector('.error-comment')
+    const JsonResponse = await response.json();
     switch (response.status) {
       case 400:
-        const error = commentsection.querySelector('.error-comment')
-        error.textContent = 'comment must be only 150 character'
+        error.textContent = JsonResponse.error;
+        commentInput.value = content;
         break
       case 401:
         showRegistrationModal()
         break
       case 201:
-        const newComment = await response.json()
         const reaction = await getReactInfo({
           target_type: "comment",
-          target_id: newComment.comment_id,
+          target_id: JsonResponse.comment_id,
         }, "GET")
-
-        const commentSection = createCommentElement(newComment, reaction)
-        reactToggle(commentSection, newComment.comment_id, 'comment')
+        commentInput.value = ""
+        commentInput.style.height = '38px';
+        error.textContent = "";
+        const commentSection = createCommentElement(JsonResponse, reaction)
+        reactToggle(commentSection, JsonResponse.comment_id, 'comment')
         commentsContainer.appendChild(commentSection)
         break
     }
