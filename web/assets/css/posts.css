@@ -93,10 +93,24 @@
     transition: background-color 0.3s;
 }
 
+.more-comment {
+    background: linear-gradient(to bottom, var(--yellow), var(--light-gray)); /* Yellow at the top, white at the bottom */
+    color: rgb(0, 0, 0);
+    width: 200px;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .comments-section {
     padding: 15px;
     margin-top: 20px;
-    background: #cccccc3f;
+    background: var(--light-gray);
     border-radius: 20px;
 }
 

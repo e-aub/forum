@@ -3,6 +3,8 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"html"
 	"net/http"
 	"strconv"
@@ -12,14 +14,21 @@ import (
 	"forum/internal/utils"
 )
 
+type querys struct {
+	postid int
+	limit  int
+	from   int
+}
+
 func GetCommentsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	postID, err := strconv.Atoi(r.URL.Query().Get("post"))
+	var data querys
+	err := getDataQuery(&data, r)
 	if err != nil {
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"status bad request"}`)
+		utils.RespondWithJSON(w, http.StatusBadRequest, fmt.Sprintf(`{"error":"status bad request %v"}`, err))
 		return
 	}
 
-	comments, err := database.GetComments(postID, file, userId)
+	comments, err := database.GetComments(data.postid, file, userId, data.limit, data.from)
 	if err != nil {
 		utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error":"internal server error"}`)
 		return
@@ -58,4 +67,23 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 	}
 
 	utils.RespondWithJSON(w, http.StatusCreated, comment)
+}
+
+func getDataQuery(field *querys, r *http.Request) error {
+	allKeys := []string{"post", "from", "limit"}
+	for _, key := range allKeys {
+		data, err := strconv.Atoi(r.URL.Query().Get(key))
+		if err != nil {
+			return errors.New("faild to get " + key + " value")
+		}
+		switch key {
+		case "post":
+			field.postid = data
+		case "from":
+			field.from = data
+		case "limit":
+			field.limit = data
+		}
+	}
+	return nil
 }

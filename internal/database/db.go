@@ -161,14 +161,15 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	return nil
 }
 
-func GetComments(postID int, db *sql.DB, userId int) ([]utils.Comment, error) {
+func GetComments(postID int, db *sql.DB, userId, limit, from int) ([]utils.Comment, error) {
 	query := `
 	SELECT comments.id, comments.content, comments.created_at, users.username  FROM comments
-    INNER JOIN users ON comments.user_id = users.id
-    WHERE comments.post_id = ?
-	ORDER BY comments.created_at DESC;
+	INNER JOIN users ON comments.user_id = users.id
+	WHERE comments.post_id = ?
+	ORDER BY comments.created_at ASC
+	LIMIT ? OFFSET ?;
 	`
-	rows, err := utils.QueryRows(db, query, postID)
+	rows, err := utils.QueryRows(db, query, postID, limit, from)
 	if err != nil {
 		return nil, errors.New(err.Error() + "here 1")
 	}

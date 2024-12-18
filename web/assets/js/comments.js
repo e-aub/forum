@@ -1,15 +1,20 @@
 import { getReactInfo, reactToggle } from "./likes.js";
 import { showRegistrationModal } from "./script.js";
 
+const commentSize = 3
+const comentIndex = {}, commentHistory = {}
+
 export const initializeCommentSection = (postElement, post) => {
   const toggleCommentsButton = postElement.querySelector(".toggle-comments")
   const commentsSection = postElement.querySelector(".comments-section")
+  const showMore = postElement.querySelector(".more-comment")
 
   toggleCommentsButton.addEventListener("click", async () => {
     if (commentsSection.style.display === "none") {
       commentsSection.style.display = "block"
       toggleCommentsButton.textContent = "Hide Comments"
-      await loadComments(post.PostId, commentsSection.querySelector(".comments"))
+      comentIndex[post.PostId] = 0
+      await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
     } else {
       commentsSection.style.display = "none"
       toggleCommentsButton.textContent = "💬 Show Comments"
@@ -23,32 +28,46 @@ export const initializeCommentSection = (postElement, post) => {
       if (commentInput.value.trim()) {
         await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
         commentInput.value = ""
+        commentInput.style.height = "38px"
       }
     }
   })
+
+  showMore.addEventListener('click', async () => {
+    await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
+  })
+
   commentInput.addEventListener('input', () => {
     commentInput.style.height = 'auto'
     commentInput.style.height = commentInput.scrollHeight + "px"
   });
+
 }
 
-const loadComments = async (postId, commentsContainer) => {
-  commentsContainer.innerHTML = ""
+const loadComments = async (postId, limit, commentsContainer) => {
   try {
-    const response = await fetch(`/comments?post=${postId}`)
+    const response = await fetch(`/comments?post=${postId}&limit=${limit}&from=${comentIndex[postId]}`)
     if (!response.ok) throw new Error("Failed to load comments.")
-    const comments = await response.json()
-    if (!comments) return
 
-    comments.forEach(async comment => {
+    const comments = await response.json()
+    if (!comments || comments.length === 0) return
+
+    let count = 0
+    for (const comment of comments) {
+      if (commentHistory[postId] && commentHistory[postId].includes(comment.comment_id)) continue
       const reaction = await getReactInfo({
         target_type: "comment",
         target_id: comment.comment_id,
       }, "GET")
       const commentSection = createCommentElement(comment, reaction)
       reactToggle(commentSection, comment.comment_id, 'comment')
-      commentsContainer.prepend(commentSection)
-    })
+      commentsContainer.appendChild(commentSection)
+      count++
+    }
+    comentIndex[postId] += count
+
+    if (count < limit) return
+    await loadComments(postId, commentSize - count, commentsContainer)
   } catch (error) {
     console.error("Error loading comments:", error);
   }
@@ -82,7 +101,9 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
 
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
-        commentsContainer.appendChild(commentSection)
+        commentsContainer.prepend(commentSection)
+        if (!commentHistory[postId]) commentHistory[postId] = []
+        commentHistory[postId].push(newComment.comment_id)
         break
     }
   } catch (error) {
