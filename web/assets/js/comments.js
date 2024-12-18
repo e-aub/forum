@@ -83,20 +83,21 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
         content: content
       }),
     })
-
+    let commentInput = commentsection.querySelector(".comment-input");
+    const error = commentsection.querySelector('.error-comment')
+    const JsonResponse = await response.json();
     switch (response.status) {
       case 400:
-        const error = commentsection.querySelector('.error-comment')
-        error.textContent = 'comment must be only 150 character'
+        error.textContent = JsonResponse.error;
+        commentInput.value = content;
         break
       case 401:
         showRegistrationModal()
         break
       case 201:
-        const newComment = await response.json()
         const reaction = await getReactInfo({
           target_type: "comment",
-          target_id: newComment.comment_id,
+          target_id: JsonResponse.comment_id,
         }, "GET")
 
         const commentSection = createCommentElement(newComment, reaction)

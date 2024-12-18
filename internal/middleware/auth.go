@@ -2,7 +2,6 @@ package auth
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,7 +18,6 @@ func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 		userId, err := ValidUser(r, db)
 		if err != nil {
 			if err == http.ErrNoCookie {
-				fmt.Println(r.Header.Get("Content-Type"))
 				if isConstentJson {
 					utils.RespondWithJSON(w, http.StatusUnauthorized, `{"error":"Unauthorized"}`)
 					return
@@ -30,8 +28,7 @@ func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 				}
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, http.StatusUnauthorized)
 				return
-			}
-			if err == sql.ErrNoRows {
+			} else if err == sql.ErrNoRows {
 				http.SetCookie(w, &http.Cookie{
 					Name:    "session_token",
 					Path:    "/",
@@ -48,10 +45,10 @@ func AuthMiddleware(db *sql.DB, next customHandler, login bool) http.Handler {
 				}
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusUnauthorized, http.StatusUnauthorized)
 				return
+			} else {
+				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
+				return
 			}
-			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
-			return
-
 		}
 		next(w, r, db, userId)
 	})

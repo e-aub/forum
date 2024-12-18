@@ -68,7 +68,7 @@ function generatePostHTML(post, reactInfo) {
     </div>
     <button class="more-comment">Show more</button>
     <div class="comment-input-wrapper">
-      <textarea maxlength=2000 required placeholder="Add a comment..." class="comment-input"></textarea>
+      <textarea required placeholder="Add a comment..." class="comment-input"></textarea>
     </div>
     <p class="error-comment"></p>
   </div>

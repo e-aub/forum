@@ -139,10 +139,6 @@ func InsertSession(db *sql.DB, userData *utils.User) error {
 }
 
 func CreateComment(c *utils.Comment, db *sql.DB) error {
-	if c.Content == "" || c.Post_id == 0 || c.User_id == 0 {
-		return errors.New("comment DATA issue")
-	}
-
 	query := `
 	INSERT INTO comments (user_id, post_id, content, created_at)
 	VALUES (?, ?, ?, ?)

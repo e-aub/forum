@@ -17,7 +17,6 @@ document.getElementById("signup-form").addEventListener("submit", async function
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ username, email, password, confirmPassword}),
-            credentials: "include",
         });
 
         if (response.ok) {

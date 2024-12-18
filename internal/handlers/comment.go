@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"forum/internal/database"
@@ -24,23 +24,23 @@ func GetCommentsHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, us
 	var data querys
 	err := getDataQuery(&data, r)
 	if err != nil {
-		utils.RespondWithJSON(w, http.StatusBadRequest, fmt.Sprintf(`{"error":"status bad request %v"}`, err))
+		utils.RespondWithJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: fmt.Sprintf(`{"error":"status bad request %v"}`, err)})
 		return
 	}
 
 	comments, err := database.GetComments(data.postid, file, userId, data.limit, data.from)
 	if err != nil {
-		utils.RespondWithJSON(w, http.StatusInternalServerError, `{"error":"internal server error"}`)
+		utils.RespondWithJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Internal Server Error"})
 		return
 	}
 
 	utils.RespondWithJSON(w, http.StatusOK, comments)
 }
 
-func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, userId int) {
-	user_name, err := database.GetUserName(userId, file)
+func AddCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
+	userName, err := database.GetUserName(userId, db)
 	if err != nil {
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
+		utils.RespondWithJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Internal Server Error"})
 		return
 	}
 
@@ -51,18 +51,18 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, file *sql.DB, use
 		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
 		return
 	}
-	if len(comment.Content) > 2000 {
-		http.Error(w, "length of comment over 2000 character", http.StatusBadRequest)
+	comment.Content = strings.TrimSpace(comment.Content)
+	if len(comment.Content) < 1 || len(comment.Content) > 2000 {
+		utils.RespondWithJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: "Comment must be between 3 and 2000 characters"})
 		return
 	}
 
-	comment.Content = html.EscapeString(comment.Content)
-	comment.User_name = user_name
+	comment.User_name = userName
 	comment.User_id = userId
 	comment.Created_at = time.Now().Format(time.RFC3339)
 
-	if err := database.CreateComment(&comment, file); err != nil {
-		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error":"Bad request"}`)
+	if err := database.CreateComment(&comment, db); err != nil {
+		utils.RespondWithJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Internal Server Error"})
 		return
 	}
 
