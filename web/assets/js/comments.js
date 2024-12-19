@@ -45,6 +45,7 @@ export const initializeCommentSection = (postElement, post) => {
 }
 
 const loadComments = async (postId, limit, commentsContainer) => {
+  console.log(comentIndex)
   try {
     const response = await fetch(`/comments?post=${postId}&limit=${limit}&from=${comentIndex[postId]}`)
     if (!response.ok) throw new Error("Failed to load comments.")
@@ -99,7 +100,11 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
           target_type: "comment",
           target_id: JsonResponse.comment_id,
         }, "GET")
-
+        
+        const newComment = {
+          post_id: postId,
+          content: content,
+        }
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
         commentsContainer.prepend(commentSection)

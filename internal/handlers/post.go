@@ -23,7 +23,6 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId 
 	}
 
 	tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, nil)
-
 }
 
 func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
@@ -67,7 +66,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		return
 	}
 	lastindex, err := database.GetLastPostId(db)
-	fmt.Fprintln(os.Stderr, err)
+	// fmt.Fprintln(os.Stderr, err)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
