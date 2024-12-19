@@ -97,10 +97,10 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
     })
     let commentInput = commentsection.querySelector(".comment-input");
     const error = commentsection.querySelector('.error-comment')
-    const JsonResponse = await response.json();
+    const newComment = await response.json();
     switch (response.status) {
       case 400:
-        error.textContent = JsonResponse.error;
+        error.textContent = newComment.error;
         commentInput.value = content;
         break
       case 401:
@@ -109,13 +109,9 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
       case 201:
         const reaction = await getReactInfo({
           target_type: "comment",
-          target_id: JsonResponse.comment_id,
+          target_id: newComment.comment_id,
         }, "GET")
 
-        const newComment = {
-          post_id: postId,
-          content: content,
-        }
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
         commentsContainer.prepend(commentSection)
