@@ -5,19 +5,22 @@ const commentSize = 3
 const comentIndex = {}, commentHistory = {}
 
 export const initializeCommentSection = (postElement, post) => {
-  const toggleCommentsButton = postElement.querySelector(".toggle-comments")
-  const commentsSection = postElement.querySelector(".comments-section")
-  const showMore = postElement.querySelector(".more-comment")
+  const toggleCommentsButton = postElement.querySelector(".toggle-comments");
+  const commentsSection = postElement.querySelector(".comments-section");
+  const showMore = postElement.querySelector(".more-comment");
 
   toggleCommentsButton.addEventListener("click", async () => {
+
     if (commentsSection.style.display === "none") {
       commentsSection.style.display = "block"
-      toggleCommentsButton.textContent = "Hide Comments"
-      comentIndex[post.PostId] = 0
-      await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
+      toggleCommentsButton.textContent = "Hide Comments";
+      const comment = commentsSection.querySelector(".comments");
+      const index = comment.querySelectorAll('.comment');
+      comentIndex[post.PostId] = index.length;
+      if (index.length === 0) await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
     } else {
       commentsSection.style.display = "none"
-      toggleCommentsButton.textContent = "💬 Show Comments"
+      toggleCommentsButton.textContent = "💬 Show Comments";
     }
   });
 
@@ -34,6 +37,9 @@ export const initializeCommentSection = (postElement, post) => {
   })
 
   showMore.addEventListener('click', async () => {
+    const comment = commentsSection.querySelector(".comments");
+    const index = comment.querySelectorAll('.comment');
+    comentIndex[post.PostId] = index.length;
     await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
   })
 
@@ -45,7 +51,6 @@ export const initializeCommentSection = (postElement, post) => {
 }
 
 const loadComments = async (postId, limit, commentsContainer) => {
-  console.log(comentIndex)
   try {
     const response = await fetch(`/comments?post=${postId}&limit=${limit}&from=${comentIndex[postId]}`)
     if (!response.ok) throw new Error("Failed to load comments.")
@@ -100,7 +105,7 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
           target_type: "comment",
           target_id: JsonResponse.comment_id,
         }, "GET")
-        
+
         const newComment = {
           post_id: postId,
           content: content,
