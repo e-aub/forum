@@ -18,8 +18,6 @@ export const GetData = async (postIds = false) => {
                 postIds.push(postId);
             }
         }
-
-        console.log(postIds);
         renderPage(postIds, postsContainer);
         const debouncedRenderPage = debounce(renderPage, 1000)
         window.addEventListener('scroll', () => {
@@ -52,7 +50,6 @@ async function renderPage(postIds, postsContainer) {
     let i = 0
     while (postIds.length > 0 && i < 10) {
         console.log(postIds.length, "dd");
-
         let link = `http://localhost:8080/posts?post_id=${postIds.pop()}`;
         let postResponse = await fetch(link);
         if (postResponse.ok) {

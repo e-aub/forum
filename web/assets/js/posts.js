@@ -44,11 +44,11 @@ function generatePostHTML(post, reactInfo) {
   <br>
   <span class="categories">${post.Categories || "Not categorized"}</span>
   </div>
-  <h1 class="post-title">${post.Title}</h1>
+  <h1 class="post-title">${escapeHTML(post.Title)}</h1>
   </div>
 
   <div class="post-body">
-    <p class="content">${post.Content}</p>
+    <p class="content">${escapeHTML(post.Content)}</p>
   </div>
 
   <div class="reaction-section">
@@ -92,4 +92,15 @@ export const isValidPost = (event) => {
   }
   document.querySelector('#submition-button').disabled = true;
   event.target.submit()
+}
+
+export function escapeHTML(input) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return input.replace(/[&<>"']/g, (char) => map[char]);
 }

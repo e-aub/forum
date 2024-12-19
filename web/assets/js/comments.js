@@ -1,5 +1,6 @@
 import { getReactInfo, reactToggle } from "./likes.js";
 import { showRegistrationModal } from "./script.js";
+import { escapeHTML } from "./posts.js";
 
 const commentSize = 3
 const comentIndex = {}, commentHistory = {}
@@ -141,7 +142,7 @@ const createCommentElement = (comment, reaction) => {
   }
 
   commentElement.innerHTML = `
-    <p><strong>👤 ${comment.user_name}:</strong> ${comment.content}</p>
+    <p><strong>👤 ${comment.user_name}:</strong> ${escapeHTML(comment.content)}</p>
     <div class="reaction-section comment-likes">
       <button class="like-button ${liked ? 'clicked' : ''}" data-clicked=${liked}>
         👍 Like (<span class="count">${likeCount}</span>)
