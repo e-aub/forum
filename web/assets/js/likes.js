@@ -1,20 +1,12 @@
 import { showRegistrationModal } from "./script.js";
 
-// export function reactToggle(element /*html element*/, Id /*post or comment id*/, targetType /*post or comment*/) {
-//     const likeButton = element.querySelector('.reaction-section button:nth-child(1)'); // Select the first button as Like
-//     const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)'); // Select the second button as Dislike
-
-//     likeButton.addEventListener('click', () => handleReact(likeButton, dislikeButton, Id, "like", targetType));
-//     dislikeButton.addEventListener('click', () => handleReact(dislikeButton, likeButton, Id, "dislike", targetType));
-// }
 
 export function reactToggle(element /*html element*/, Id /*post or comment id*/, targetType /*post or comment*/) {
-    const likeButton = element.querySelector('.reaction-section button:nth-child(1)'); // Select the first button as Like
-    const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)'); // Select the second button as Dislike
+    const likeButton = element.querySelector('.reaction-section button:nth-child(1)'); 
+    const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)'); 
 
-    const debouncedHandleReact = debounce(handleReact, 300); // Adjust the wait time (300ms) as needed
+    const debouncedHandleReact = debounce(handleReact, 300); 
 
-    // Add event listeners with the correct arguments
     likeButton.addEventListener('click', () => 
         debouncedHandleReact(likeButton, dislikeButton, Id, "like", targetType)
     );
@@ -39,22 +31,6 @@ function debounce(func, wait = 0 ){
 
 	}
 }
-
-/////////////////////////////////////////////////////////////// changes
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Function to handle user interaction
 export async function handleReact(button /*ex: like*/, follow /*ex: dislike*/, id, reactionType, targetType) {
