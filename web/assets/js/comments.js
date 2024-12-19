@@ -3,18 +3,15 @@ import { showRegistrationModal } from "./script.js";
 import { escapeHTML } from "./posts.js";
 
 const commentSize = 3
-const comentIndex = {}, commentHistory = {}
+const comentIndex = {}
 
 export const initializeCommentSection = (postElement, post) => {
   const toggleCommentsButton = postElement.querySelector(".toggle-comments");
   const commentsSection = postElement.querySelector(".comments-section");
   const showMore = postElement.querySelector(".more-comment");
-  const react = postElement.querySelector(".reaction-section");
   const hidebotton = postElement.querySelector('.hide-comments');
 
-
   toggleCommentsButton.addEventListener("click", async () => {
-
     if (commentsSection.style.display === "none") {
       commentsSection.style.display = "block"
       const comment = commentsSection.querySelector(".comments");
@@ -36,8 +33,6 @@ export const initializeCommentSection = (postElement, post) => {
       const commentInput = postElement.querySelector(".comment-input");
       if (commentInput.value.trim()) {
         await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
-        commentInput.value = ""
-        commentInput.style.height = "38px"
       }
     }
   })
@@ -66,7 +61,6 @@ const loadComments = async (postId, limit, commentsContainer) => {
 
     let count = 0
     for (const comment of comments) {
-      if (commentHistory[postId] && commentHistory[postId].includes(comment.comment_id)) continue
       const reaction = await getReactInfo({
         target_type: "comment",
         target_id: comment.comment_id,
@@ -100,8 +94,10 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
     const newComment = await response.json();
     switch (response.status) {
       case 400:
-        error.textContent = newComment.error;
-        commentInput.value = content;
+        error.textContent = newComment.error
+        setTimeout(() => {
+          error.textContent = ''
+        }, 3000)
         break
       case 401:
         showRegistrationModal()
@@ -111,12 +107,11 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
           target_type: "comment",
           target_id: newComment.comment_id,
         }, "GET")
-
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
         commentsContainer.prepend(commentSection)
-        if (!commentHistory[postId]) commentHistory[postId] = []
-        commentHistory[postId].push(newComment.comment_id)
+        commentInput.style.height = "38px"
+        commentInput.value = ""
         break
     }
   } catch (error) {
