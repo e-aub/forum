@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"forum/internal/database"
@@ -42,10 +43,10 @@ func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId i
 		return
 	}
 
-	if len(post.Title) < 3 || len(post.Title) > 60 {
+	if len(strings.TrimSpace(post.Title)) < 3 || len(strings.TrimSpace(post.Title)) > 60 {
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, http.StatusBadRequest)
 		return
-	} else if len(post.Content) < 10 || len(post.Content) > 10000 {
+	} else if len(strings.TrimSpace(post.Content)) < 10 || len(strings.TrimSpace(post.Content)) > 10000 {
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, http.StatusBadRequest)
 		return
 	}
