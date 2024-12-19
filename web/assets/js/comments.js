@@ -95,9 +95,6 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
     switch (response.status) {
       case 400:
         error.textContent = newComment.error
-        setTimeout(() => {
-          error.textContent = ''
-        }, 3000)
         break
       case 401:
         showRegistrationModal()
@@ -107,6 +104,7 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
           target_type: "comment",
           target_id: newComment.comment_id,
         }, "GET")
+        error.textContent = ""
         const commentSection = createCommentElement(newComment, reaction)
         reactToggle(commentSection, newComment.comment_id, 'comment')
         commentsContainer.prepend(commentSection)
