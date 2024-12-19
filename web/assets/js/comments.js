@@ -8,21 +8,26 @@ export const initializeCommentSection = (postElement, post) => {
   const toggleCommentsButton = postElement.querySelector(".toggle-comments");
   const commentsSection = postElement.querySelector(".comments-section");
   const showMore = postElement.querySelector(".more-comment");
+  const react = postElement.querySelector(".reaction-section");
+  const hidebotton = postElement.querySelector('.hide-comments');
+
 
   toggleCommentsButton.addEventListener("click", async () => {
 
     if (commentsSection.style.display === "none") {
       commentsSection.style.display = "block"
-      toggleCommentsButton.textContent = "Hide Comments";
       const comment = commentsSection.querySelector(".comments");
       const index = comment.querySelectorAll('.comment');
       comentIndex[post.PostId] = index.length;
       if (index.length === 0) await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
-    } else {
-      commentsSection.style.display = "none"
-      toggleCommentsButton.textContent = "💬 Show Comments";
+      toggleCommentsButton.style.display = "none";
     }
   });
+
+  hidebotton.addEventListener("click", () => {
+    commentsSection.style.display = "none";
+    toggleCommentsButton.style.display = "block";
+  })
 
   const commentInput = postElement.querySelector(".comment-input");
   commentInput.addEventListener("keydown", async (event) => {

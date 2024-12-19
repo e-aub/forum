@@ -66,7 +66,10 @@ function generatePostHTML(post, reactInfo) {
   <div class="comments-section" style="display: none;">
     <div class="comments">
     </div>
+    <div calss="comment-controllers">
     <button class="more-comment">Show more</button>
+    <button class="hide-comments">hide comments</button>
+    </div>
     <div class="comment-input-wrapper">
       <textarea required placeholder="Add a comment..." class="comment-input"></textarea>
     </div>
