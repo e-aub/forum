@@ -121,12 +121,6 @@ export function showRegistrationModal() {
     dialog.showModal();
 }
 
-export function SubmitForm(category, event) {
-    event.preventDefault()
-    const params = new URLSearchParams({ category: category });
-    window.location.href = `/categories?${parfalseams}`;
-}
-
 const authNav = document.getElementById('auth-nav');
 const hasSession = document.cookie.includes('session_token');
 
