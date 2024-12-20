@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -26,7 +25,7 @@ func NewPostPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, user
 
 func NewPostHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 	if err := r.ParseForm(); err != nil {
-		log.Printf("Error parsing form: %v", err)
+		fmt.Printf("Error parsing form: %v", err)
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusBadRequest, http.StatusBadRequest)
 		return
 	}

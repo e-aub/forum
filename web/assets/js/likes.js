@@ -1,40 +1,30 @@
 import { showRegistrationModal } from "./script.js";
 
+export function reactToggle(element, Id, targetType) {
+    const likeButton = element.querySelector('.reaction-section button:nth-child(1)');
+    const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)');
+    const debouncedHandleReact = debounce(handleReact, 300);
 
-export function reactToggle(element /*html element*/, Id /*post or comment id*/, targetType /*post or comment*/) {
-    const likeButton = element.querySelector('.reaction-section button:nth-child(1)'); 
-    const dislikeButton = element.querySelector('.reaction-section button:nth-child(2)'); 
-
-    const debouncedHandleReact = debounce(handleReact, 300); 
-
-    likeButton.addEventListener('click', () => 
+    likeButton.addEventListener('click', () =>
         debouncedHandleReact(likeButton, dislikeButton, Id, "like", targetType)
     );
-    dislikeButton.addEventListener('click', () => 
+    dislikeButton.addEventListener('click', () =>
         debouncedHandleReact(dislikeButton, likeButton, Id, "dislike", targetType)
     );
 }
 
-function debounce(func, wait = 0 ){
-
-	let timeout; 
-	
-	return function(...args){
-
-		clearTimeout(timeout);
-		
-		timeout = setTimeout(()=>{
-
-			func.apply(this, args)
-
-		}, wait);
-
-	}
+function debounce(func, wait = 0) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            func.apply(this, args)
+        }, wait);
+    }
 }
 
 // Function to handle user interaction
-export async function handleReact(button /*ex: like*/, follow /*ex: dislike*/, id, reactionType, targetType) {
-    // Determine the HTTP method
+export async function handleReact(button, follow, id, reactionType, targetType) {
     let method = button.getAttribute("data-clicked") === "true" ? "DELETE" : "PUT";
 
     try {
@@ -71,21 +61,17 @@ export async function getReactInfo(params, method) {
         });
 
         if (!response.ok) {
-            // Handle non-OK responses
             const errorText = await response.text(); // Use text() for error body
             console.error("API error:", errorText);
             return { success: false, error: errorText || "Unknown error" };
         }
-
         // If response has no body, return success with no data
         const contentLength = response.headers.get("Content-Length");
         if (!contentLength || parseInt(contentLength) === 0) {
             return { success: true, data: null };
         }
-
         // Parse JSON response
         return { success: true, data: await response.json() };
-
     } catch (err) {
         console.error("Fetch error:", err);
         return { success: false, error: err.message };
@@ -122,4 +108,3 @@ function interactiveLike(button, follow) {
         button.classList.remove("clicked");
     }
 }
-

@@ -26,6 +26,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
+
 		postIds := []int{}
 		for rows.Next() {
 			var postId int
@@ -35,9 +36,9 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 				return
 			}
-
 			postIds = append(postIds, postId)
 		}
+
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -53,6 +54,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
+
 		postIds := []int{}
 		for rows.Next() {
 			var postId int
@@ -61,9 +63,9 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 				fmt.Fprintln(os.Stderr, err)
 				tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			}
-
 			postIds = append(postIds, postId)
 		}
+
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -73,7 +75,6 @@ func MeHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
 		tmpl.ExecuteTemplate(w, []string{"posts", "sideBar"}, http.StatusOK, string(jsonIds))
 	default:
 		tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
-
 	}
 }
 
@@ -99,8 +100,6 @@ func CheckPasswordHash(password, hash *string) bool {
 func isValidEmail(email *string) bool {
 	*email = strings.ToLower(*email)
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-
 	re := regexp.MustCompile(emailRegex)
-
 	return re.MatchString(*email)
 }

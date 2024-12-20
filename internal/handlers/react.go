@@ -16,8 +16,6 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 	targetType := r.URL.Query().Get("target_type")
 	id := r.URL.Query().Get("target_id")
 
-	fmt.Println(reactionType, targetType, id)
-
 	if targetType != "" && reactionType != "" {
 		var insertQuery string
 		switch targetType {
@@ -35,6 +33,7 @@ func InsertOrUpdateReactionHandler(w http.ResponseWriter, r *http.Request, db *s
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		_, err := db.Exec(insertQuery, reactionType, userID, id, targetType)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -66,11 +65,9 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 		_, err := db.Exec(deleteQuery, userID, id, targetType)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-
 			return
 		}
 		w.WriteHeader(200)
-
 	} else {
 		utils.RespondWithJSON(w, http.StatusBadRequest, `{"error": "Bad Request1"}`)
 		return
@@ -78,7 +75,6 @@ func DeleteReactionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, u
 }
 
 func GetReactionsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
-	// reaction_type := r.URL.Query().Get("reaction_type")
 	targetID := r.URL.Query().Get("target_id")
 	targetType := r.URL.Query().Get("target_type")
 

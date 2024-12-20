@@ -44,7 +44,7 @@ func CreateTables(db *sql.DB) {
 func CleanupExpiredSessions(db *sql.DB) {
 	_, err := db.Exec("DELETE FROM sessions WHERE  expires_at < ?", time.Now())
 	if err != nil {
-		log.Printf("Error cleaning up expired sessions: %v", err)
+		fmt.Printf("Error cleaning up expired sessions: %v", err)
 	}
 }
 
@@ -85,7 +85,6 @@ func InsertPost(p *utils.Post, db *sql.DB, categories []string) (int64, error) {
 		transaction.Rollback()
 		fmt.Fprintln(os.Stderr, "transaction aborted")
 		return 0, err
-
 	}
 	return lastPostID, nil
 }
@@ -96,6 +95,7 @@ func ReadPost(db *sql.DB, userId int, postId int) (*utils.Post, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	Post := &utils.Post{}
 	err = row.Scan(&Post.PostId, &Post.UserId, &Post.Title, &Post.Content, &Post.CreatedAt)
 	if err != nil {
@@ -115,6 +115,7 @@ func GetLastPostId(db *sql.DB) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	result := 0
 	err = row.Scan(&result)
 	if err != nil {
@@ -143,6 +144,7 @@ func CreateComment(c *utils.Comment, db *sql.DB) error {
 	INSERT INTO comments (user_id, post_id, content, created_at)
 	VALUES (?, ?, ?, ?)
 	`
+
 	result, err := db.Exec(query, c.User_id, c.Post_id, c.Content, c.Created_at)
 	if err != nil {
 		return err
@@ -184,6 +186,7 @@ func GetComments(postID int, db *sql.DB, userId, limit, from int) ([]utils.Comme
 	if err = rows.Err(); err != nil {
 		return nil, errors.New(err.Error() + "here 3")
 	}
+
 	return comments, nil
 }
 
@@ -192,6 +195,7 @@ func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var ids []int
 	for rows.Next() {
 		tmp := 0
@@ -201,6 +205,7 @@ func GetCategoryContentIds(db *sql.DB, categoryId string) ([]int, error) {
 		}
 		ids = append(ids, tmp)
 	}
+
 	return ids, nil
 }
 
@@ -210,6 +215,7 @@ func GetUserName(id int, db *sql.DB) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	err = row.Scan(&name)
 	if err != nil {
 		return "", err
@@ -223,14 +229,14 @@ func GetPostCategories(db *sql.DB, PostId int, userId int) ([]string, error) {
 	FROM post_categories
 	JOIN categories ON categories.id = post_categories.category_id
 	AND post_categories.post_id = ?;
-`
+	`
+
 	rows, err := utils.QueryRows(db, query, PostId)
 	if err != nil {
 		return nil, err
 	}
 
 	var categories []string
-
 	for rows.Next() {
 		var category string
 		err := rows.Scan(&category)
@@ -239,6 +245,7 @@ func GetPostCategories(db *sql.DB, PostId int, userId int) ([]string, error) {
 		}
 		categories = append(categories, category)
 	}
+
 	return categories, nil
 }
 

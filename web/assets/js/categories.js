@@ -4,7 +4,6 @@ function categoriesListListener() {
         if (event.target.tagName === 'LI' || 'A' || 'SPAN') {
             const id = event.target.closest('LI').getAttribute("categoryId")
             SubmitForm(id)
-            console.log(id);
         }
     })
 }

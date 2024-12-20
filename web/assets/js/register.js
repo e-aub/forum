@@ -1,5 +1,6 @@
 document.getElementById("signup-form").addEventListener("submit", async function (event) {
     event.preventDefault();
+
     const username = document.getElementById("signup-username").value;
     const email = document.getElementById("signup-email").value;
     const password = document.getElementById("signup-password").value;
@@ -16,15 +17,15 @@ document.getElementById("signup-form").addEventListener("submit", async function
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ username, email, password, confirmPassword}),
+            body: JSON.stringify({ username, email, password, confirmPassword }),
         });
 
         if (response.ok) {
             messageElement.textContent = "Registration successful!";
             messageElement.style.color = "green";
-            window.location.href = '/';  // Redirect after successful registration
+            window.location.href = '/';
         } else {
-            const errorData = await response.text();  // Get error text
+            const errorData = await response.text();
             messageElement.textContent = `Error: ${errorData}`;
             messageElement.style.color = "red";
         }

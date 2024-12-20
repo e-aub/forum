@@ -23,6 +23,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
+
 		var exists bool
 		if err := result.Scan(&exists); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -33,12 +34,14 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
 			return
 		}
+
 		postIds, err := database.GetCategoryContentIds(db, category)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusInternalServerError, http.StatusInternalServerError)
 			return
 		}
+
 		jsonIds, err := json.Marshal(postIds)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -61,6 +64,7 @@ func GetCategories(db *sql.DB) ([]models.Category, error) {
 	var result []models.Category
 	var err error
 	var rows *sql.Rows
+
 	rows, err = utils.QueryRows(db, `SELECT id, name, description FROM categories`)
 	if err != nil {
 		return nil, err
@@ -73,5 +77,6 @@ func GetCategories(db *sql.DB) ([]models.Category, error) {
 			return nil, err
 		}
 	}
+
 	return result, nil
 }

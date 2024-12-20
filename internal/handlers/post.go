@@ -8,9 +8,8 @@ import (
 	"os"
 	"strconv"
 
-	tmpl "forum/web"
-
 	database "forum/internal/database"
+	tmpl "forum/web"
 )
 
 func HomePageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int) {
@@ -35,6 +34,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		post, err := database.ReadPost(db, userId, postId)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -45,18 +45,21 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
+
 		post.Categories, err = database.GetPostCategories(db, post.PostId, userId)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		json, err := json.Marshal(post)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		_, err = w.Write(json)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -65,19 +68,20 @@ func PostsHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userId int
 		}
 		return
 	}
+
 	lastindex, err := database.GetLastPostId(db)
-	// fmt.Fprintln(os.Stderr, err)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	json, err := json.Marshal(lastindex)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
-
 		return
 	}
+
 	_, err = w.Write(json)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

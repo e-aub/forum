@@ -1,8 +1,0 @@
-root = "."
- 
-[build]
-cmd = "go build -o forum ./cmd/main.go"  
-bin = "forum"  
-
-[watch]
-include_ext = ["go", "html", "css", "js", "Dockerfile"] 

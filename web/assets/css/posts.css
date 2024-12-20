@@ -11,8 +11,6 @@
     margin-bottom: 20px;
 }
 
-
-
 .post-title {
     font-size: 24px;
     font-weight: bold;
@@ -82,7 +80,6 @@
     transition: background-color 0.3s;
 }
 
-
 .toggle-comments {
     background: var(--yellow);
     color: rgb(0, 0, 0);
@@ -98,7 +95,6 @@
 .more-comment,
 .hide-comments {
     background: linear-gradient(to bottom, var(--yellow), var(--light-gray));
-    /* Yellow at the top, white at the bottom */
     color: rgb(0, 0, 0);
     width: 200px;
     border: none;
@@ -106,9 +102,6 @@
     padding: 10px 20px;
     cursor: pointer;
     font-size: 14px;
-    /* display: block; */
-    /* margin-left: auto;
-    margin-right: auto; */
 }
 
 .comments-section {

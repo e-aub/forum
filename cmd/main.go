@@ -15,10 +15,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-
 func main() {
 	dbPath := os.Getenv("DB_PATH")
 	port := os.Getenv("PORT")
+
 	// Create Database file
 	db := database.CreateDatabase(dbPath)
 	defer db.Close()
@@ -36,7 +36,6 @@ func main() {
 	// Create a multipluxer
 	router := http.NewServeMux()
 
-	// File Server (need some improvement by rearrange css and js files by separating them)
 	router.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusNotFound, http.StatusNotFound)
@@ -48,7 +47,6 @@ func main() {
 
 	// HomePage handler
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// handlers.HomePageHandler(w, r, db, 0)
 		auth.AuthMiddleware(db, handlers.HomePageHandler, true).ServeHTTP(w, r)
 	})
 
@@ -67,7 +65,6 @@ func main() {
 		switch r.Method {
 		case "GET":
 			handlers.LoginPageHandler(w, r, db)
-
 		case "POST":
 			handlers.LoginHandler(w, r, db)
 		default:
@@ -98,13 +95,11 @@ func main() {
 			auth.AuthMiddleware(db, handlers.NewPostPageHandler, false).ServeHTTP(w, r)
 		case "POST":
 			auth.AuthMiddleware(db, handlers.NewPostHandler, false).ServeHTTP(w, r)
-		// We need to add UPDATE and DELETE methods to handle theses operations on posts
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)
 		}
 	})
 
-	// We need to add UPDATE and DELETE methods to handle theses operations on comments
 	router.HandleFunc("/comments", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
@@ -135,7 +130,6 @@ func main() {
 	router.HandleFunc("/categories", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
-			// auth.AuthMiddleware(db, handlers.CategoriesHandler, true).ServeHTTP(w, r)
 			handlers.CategoriesHandler(w, r, db, 0)
 		default:
 			tmpl.ExecuteTemplate(w, []string{"error"}, http.StatusMethodNotAllowed, http.StatusMethodNotAllowed)

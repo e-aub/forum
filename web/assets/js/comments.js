@@ -89,9 +89,11 @@ const addComment = async (postId, content, commentsContainer, commentsection) =>
         content: content
       }),
     })
+
     let commentInput = commentsection.querySelector(".comment-input");
     const error = commentsection.querySelector('.error-comment')
     const newComment = await response.json();
+
     switch (response.status) {
       case 400:
         error.textContent = newComment.error

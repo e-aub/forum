@@ -45,12 +45,12 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request, db *sql.DB, userI
 	}
 
 	comment := utils.Comment{}
-
 	err = json.NewDecoder(r.Body).Decode(&comment)
 	if err != nil {
 		http.Error(w, "Failed to parse JSON", http.StatusBadRequest)
 		return
 	}
+
 	comment.Content = strings.TrimSpace(comment.Content)
 	if len(strings.TrimSpace(comment.Content)) < 1 || len(comment.Content) > 2000 {
 		utils.RespondWithJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: "Comment must be between 3 and 2000 characters"})

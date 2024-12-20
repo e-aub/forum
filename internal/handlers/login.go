@@ -33,7 +33,6 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -49,7 +48,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	password := userData.Password
 	err := middleware.ValidCredential(db, &userData)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Incorect Username or password", http.StatusUnauthorized)
@@ -81,12 +79,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
 	userData.Expiration = time.Now().Add(1 * time.Hour)
 	err = database.InsertSession(db, &userData)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Path:    "/",
@@ -95,5 +95,4 @@ func LoginHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	})
 
 	w.WriteHeader(http.StatusOK)
-
 }

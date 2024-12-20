@@ -1,1 +1,2 @@
-db/data.db-*
+./*
+db/data.db

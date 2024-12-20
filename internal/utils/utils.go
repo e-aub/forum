@@ -61,7 +61,6 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload any) {
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-
 	w.WriteHeader(code)
 	w.Write(response)
 }

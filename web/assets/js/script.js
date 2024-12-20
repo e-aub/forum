@@ -1,6 +1,5 @@
 import { renderPosts } from "./posts.js";
 
-// Fetch data and render posts
 export const GetData = async (postIds = false) => {
     if (postIds == null) {
         return;
@@ -8,6 +7,7 @@ export const GetData = async (postIds = false) => {
 
     const postsContainer = document.querySelector(".posts");
     postsContainer.innerHTML = "";
+
     try {
         if (postIds === false) {
             postIds = [];
@@ -18,21 +18,20 @@ export const GetData = async (postIds = false) => {
                 postIds.push(postId);
             }
         }
+
         renderPage(postIds, postsContainer);
         const debouncedRenderPage = debounce(renderPage, 1000)
+
         window.addEventListener('scroll', () => {
             const scrollPosition = window.scrollY;
             const documentHeight = document.documentElement.scrollHeight;
             const windowHeight = window.innerHeight;
             if (scrollPosition + windowHeight >= documentHeight - 10) {
                 debouncedRenderPage(postIds, postsContainer)
-                // renderPage(postIds, postsContainer);
-
             }
         });
-
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 };
 
@@ -49,7 +48,6 @@ async function renderPage(postIds, postsContainer) {
     let target = [];
     let i = 0
     while (postIds.length > 0 && i < 10) {
-        console.log(postIds.length, "dd");
         let link = `http://localhost:8080/posts?post_id=${postIds.pop()}`;
         let postResponse = await fetch(link);
         if (postResponse.ok) {
@@ -62,8 +60,6 @@ async function renderPage(postIds, postsContainer) {
         }
         i++
     }
-
-    console.log(target);
     await renderPosts(postsContainer, target);
 }
 
@@ -78,7 +74,6 @@ export const logoutEvent = (log) => {
             });
 
             if (response.ok) {
-                console.log('Logged out successfully');
                 window.location.href = "/"
             } else {
                 console.error('Logout failed');
@@ -92,7 +87,6 @@ export const logoutEvent = (log) => {
 
 export function showRegistrationModal() {
     const dialog = document.createElement('dialog');
-
     dialog.innerHTML = `
         <h2 id="dialogTitle">Access Restricted</h2>
         <p id="dialogMessage">You need to be logged in to react. Please register or log in to continue.</p>
@@ -106,28 +100,24 @@ export function showRegistrationModal() {
     const closeButton = dialog.querySelector('.close-btn');
 
     registerButton.addEventListener('click', () => {
-        window.location.href = '/register'; // Replace with your registration URL
+        window.location.href = '/register';
     });
 
     loginButton.addEventListener('click', () => {
-        window.location.href = '/login'; // Replace with your login URL
+        window.location.href = '/login';
     });
 
     closeButton.addEventListener('click', () => {
         dialog.close();
     });
 
-    // Close dialog when clicking outside
     dialog.addEventListener('click', (event) => {
         if (event.target === dialog) {
             dialog.close();
         }
     });
 
-    // Append dialog to the body
     document.body.appendChild(dialog);
-
-    // Show the dialog
     dialog.showModal();
 }
 
@@ -137,18 +127,14 @@ export function SubmitForm(category, event) {
     window.location.href = `/categories?${parfalseams}`;
 }
 
-
 const authNav = document.getElementById('auth-nav');
-
 const hasSession = document.cookie.includes('session_token');
-
 
 if (hasSession) {
     authNav.innerHTML = `
         <a href="/" class="active">Logout</a>
     `;
     const logoutLink = authNav.querySelector('a');
-
     logoutEvent(logoutLink);
 } else {
     authNav.innerHTML = `
@@ -156,6 +142,7 @@ if (hasSession) {
         <a href="/register">Signup</a>
     `;
 }
+
 function handleResize() {
     const menuButton = document.querySelector('.menu-button');
     const sideBar = document.querySelector('.sidebar');

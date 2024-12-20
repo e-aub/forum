@@ -115,10 +115,12 @@ func RemoveUser(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 		Value:   "",
 		Expires: time.Unix(0, 0),
 	})
+
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		return err
 	}
+
 	stmt, err := db.Prepare("DELETE FROM sessions WHERE session_id = ?")
 	if err != nil {
 		return err
