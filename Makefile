@@ -9,26 +9,27 @@ PORT           = 8080
 DB_PATH        = db/data.db
 
 # Build the Docker image
-build:
+build: 
 	@echo "Building Docker image: $(IMAGE_NAME)"
-	docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
+	sudo docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
 # Run the Docker container
 run:
 	@echo "Running Docker container: $(CONTAINER_NAME)"
-	docker run --name $(CONTAINER_NAME) -v $(APP_DIR):/app -p $(PORT):$(PORT) $(IMAGE_NAME)
+	@echo $(PORT)
+	sudo docker run --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
 
 # Stop and remove the Docker container
 stop:
 	@echo "Stopping and removing Docker container: $(CONTAINER_NAME)"
-	docker stop $(CONTAINER_NAME) || true
+	sudo docker stop $(CONTAINER_NAME) || true
 
 # Clean up files and Docker resources
 clean:
 	@echo "Cleaning up temporary files and Docker resources"
 	rm -rf forum || true
-	docker rm -f $(CONTAINER_NAME) || true
-	docker rmi -f $(IMAGE_NAME) || true
+	sudo docker rm -f $(CONTAINER_NAME) || true
+	sudo docker rmi -f $(IMAGE_NAME) || true
 
 # Push changes to Git repository
 push: clean
@@ -39,7 +40,7 @@ push: clean
 	git push
 
 # Combined target for stopping, cleaning, building, and running
-docker: stop clean build run
+all: stop clean build run
 
 # Run the application directly (outside of Docker)
 run-app:
