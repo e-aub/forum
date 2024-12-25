@@ -46,5 +46,3 @@ all: stop clean build run
 run-app:
 	@echo "Running application directly on host"
 	PORT=$(PORT) DB_PATH=$(DB_PATH) go run cmd/main.go
-
-.PHONY: build run stop clean push docker run-app
