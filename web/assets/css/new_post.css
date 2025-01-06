@@ -1,80 +1,147 @@
-:root {
-    --background: #0f0f0f;
-    --header-footer: #121212;
-    --neon-green: #15F5BA;
-    --primary-text: #e4e4e4;
-    --secondary-text: #b2b2b2;
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: var(--light-gray);
+    box-sizing: border-box;
 }
 
-body {
-    background-color: var(--background);
-    font-family: 'Orbitron', sans-serif;
-    color: var(--primary-text);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+.create-post {
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    background-color: var(--white);
+    border: 1px solid var(--smoke-white);
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    text-align: center;
     margin: 0;
 }
 
-h1,
-h2 {
-    color: var(--neon-green);
-    margin-bottom: 10px;
+.create-post h2 {
+    font-size: 28px;
+    color: var(--black);
+    margin-bottom: 25px;
 }
 
-h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-}
-
-form {
-    background-color: var(--header-footer);
-    padding: 20px;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-textarea,
-select {
-    background-color: var(--header-footer);
-    border: 1px solid var(--neon-green);
-    color: var(--primary-text);
+.create-post form {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    font-size: 1em;
 }
 
-textarea::placeholder {
-    color: var(--secondary-text);
+.create-post .post-title,
+.create-post .post-content,
+.create-post .post-category {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--smoke-white);
+    border-radius: 6px;
+    font-size: 16px;
+    color: var(--gray);
+    background-color: var(--white);
+    margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
-select {
-    background-color: var(--background);
-    color: var(--primary-text);
-    padding: 8px;
+.create-post .post-content {
+    height: 62px;
 }
 
-button[type="submit"] {
-    font-family: 'Orbitron', sans-serif;
-    color: var(--background);
-    background-color: var(--neon-green);
+.create-post .post-content {
+    overflow: hidden;
+    resize: none;
+    box-sizing: border-box;
+}
+
+.create-post .post-title:focus,
+.create-post .post-content:focus,
+.create-post .post-category:focus {
+    border-color: var(--yellow);
+    outline: none;
+    box-shadow: 0 0 5px var(--yellow);
+}
+
+.create-post .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--gray);
+    font-weight: bold;
+    text-align: left;
+}
+
+.create-post button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--yellow);
+    color: var(--black);
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 1.2em;
+    transition: background-color 0.3s;
 }
 
-button[type="submit"]:hover {
-    background-color: var(--primary-text);
-    color: var(--background);
+.create-post button[type="submit"]:hover {
+    background-color: var(--light-gray);
+}
+
+#responseMessage {
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+    color: red;
+}
+
+@media screen and (max-width: 768px) {
+    .create-post {
+        padding: 20px;
+    }
+
+    .create-post h2 {
+        font-size: 24px;
+    }
+
+    .create-post .post-title,
+    .create-post .post-content,
+    .create-post .post-category {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .create-post button[type="submit"] {
+        font-size: 16px;
+        padding: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .create-post {
+        padding: 15px;
+    }
+
+    .create-post h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .create-post .post-title,
+    .create-post .post-content,
+    .create-post .post-category {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .create-post button[type="submit"] {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+textarea {
+    padding: 0px;
+    margin: 0px;
 }

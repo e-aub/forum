@@ -4,41 +4,27 @@
 
 <head>
     <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
-    <link rel="icon" href="/assets/icons/forum_icon.png" />
-    <link rel="stylesheet" href="/assets/css/{{.Style}}" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="icon" type="image/x-icon" href="/assets/icons/logo.png">
+    {{template "style"}}
+    <title>{{template "title"}}</title>
 </head>
 
 <body>
-    <header class="main_header">
-        {{template "header" . }}
+    <header>
+        <button class="menu-button">☰</button>
+        <a href="/">
+            <div class="logo">
+                <img src="/assets/icons/logo.png" alt="Logo">
+            </div>
+        </a>
+        <nav class="top-bar" id="auth-nav">
+        </nav>
     </header>
-    <main>
-        {{template "main" .}}
-    </main>
-    <aside class="left-sidebar" >
-        <h3>You</h3>
-        <ul>
-            <li><a href="/me/liked_posts">Liked Posts</a></li>
-            <li><a href="/me/created_posts">Created Posts</a></li>
-        </ul>
-        <h3>Categories</h3>
-        <ul>
-            <li><a href="/categories">Categories</a></li>
-        </ul>
-    </aside>
-    <aside class="right-sidebar">
-        <h2>Profile</h2>
-        <ul>
-        <li><a href="#">Profile Settings</a></li>
-        <li><a href="#">Notifications</a></li>
-        </ul>
-    </aside>
-    <footer>
-
-    </footer>
+    {{template "body" .}}
+    <script type="module" src="/assets/js/script.js"></script>
+    {{template "script" .}}
 </body>
 
 </html>

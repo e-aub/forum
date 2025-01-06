@@ -1,136 +1,147 @@
-import {  getReactInfo, reactToggle } from "./likes.js";
+import { getReactInfo, reactToggle } from "./likes.js";
 import { showRegistrationModal } from "./script.js";
+import { escapeHTML } from "./posts.js";
 
+const commentSize = 3
+const comentIndex = {}
 
-export async function commentToggle(post, element, display_comment){
-    post.querySelector('.comment-button').addEventListener('click', async (e) => {
-        if (!display_comment) {
-            const comment = document.createElement('div');
-            comment.classList.add('comments-section');
-            comment.innerHTML = `
-            <div class="comments-list">
-            </div>
-            <div class="add_comment" >
-                <textarea placeholder="Add a comment..."  class="comment-input"></textarea>
-                <button class="comment-submit">Submit</button>
-            <div>
-            `
-            post.appendChild(comment)
+export const initializeCommentSection = (postElement, post) => {
+  const toggleCommentsButton = postElement.querySelector(".toggle-comments");
+  const commentsSection = postElement.querySelector(".comments-section");
+  const showMore = postElement.querySelector(".more-comment");
+  const hidebotton = postElement.querySelector('.hide-comments');
 
-            await createComment(comment, comment.querySelector('.comments-list'), element.PostId)
+  toggleCommentsButton.addEventListener("click", async () => {
+    if (commentsSection.style.display === "none") {
+      commentsSection.style.display = "block"
+      const comment = commentsSection.querySelector(".comments");
+      const index = comment.querySelectorAll('.comment');
+      comentIndex[post.PostId] = index.length;
+      if (index.length === 0) await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
+      toggleCommentsButton.style.display = "none";
+    }
+  });
 
-            await getComment(comment.querySelector('.comments-list'), element.PostId)
+  hidebotton.addEventListener("click", () => {
+    commentsSection.style.display = "none";
+    toggleCommentsButton.style.display = "block";
+  })
 
-            display_comment = true
-
-        } else {
-            post.querySelector('.comments-section').remove()
-            display_comment = false
-        }
-    })
-};
-
-const createComment = async (post, comment_part, post_id) => {
-  const comment = post.querySelector('.comment-input')
-  post.querySelector('.comment-submit').addEventListener('click', async (e) => {
-    try {
-      if (comment.value) {
-        const res = await fetch(
-            `http://localhost:8080/comments?post=${post_id}&comment=${comment.value}`,
-            { method: 'POST', headers: { "Content-Type": 'application/json' } 
-        })
-        const respons = await res.json()
-
-        if (res.status === 401) {
-            //alert("you are unautherized")
-            showRegistrationModal()
-        } else if (res.ok) {
-            const com = document.createElement('div');
-            com.classList.add('comment');
-            let info = {
-                liked_by : []    ,
-                disliked_by : []  , 
-                user_reaction : "" , 
-            }
-            com.innerHTML = commentTemplate(respons, info)
-            reactToggle(com, respons.comment_id, "comment")
-            comment_part.insertAdjacentElement('beforeend', com);
-        }
-        comment.value = ''
+  const commentInput = postElement.querySelector(".comment-input");
+  commentInput.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      const commentInput = postElement.querySelector(".comment-input");
+      if (commentInput.value.trim()) {
+        await addComment(post.PostId, commentInput.value.trim(), commentsSection.querySelector(".comments"), commentsSection);
       }
-    } catch (error) {
-      console.error(error);
     }
   })
+
+  showMore.addEventListener('click', async () => {
+    const comment = commentsSection.querySelector(".comments");
+    const index = comment.querySelectorAll('.comment');
+    comentIndex[post.PostId] = index.length;
+    await loadComments(post.PostId, commentSize, commentsSection.querySelector(".comments"))
+  })
+
+  commentInput.addEventListener('input', () => {
+    commentInput.style.height = 'auto'
+    commentInput.style.height = commentInput.scrollHeight + "px"
+  });
+
 }
 
+const loadComments = async (postId, limit, commentsContainer) => {
+  try {
+    const response = await fetch(`/comments?post=${postId}&limit=${limit}&from=${comentIndex[postId]}`)
+    if (!response.ok) throw new Error("Failed to load comments.")
 
-export const getComment = async (element , id) => {
-    try {
-        const res = await fetch(`http://localhost:8080/comments?post=${id}`)
-        if (res.ok) {
-            const allComment = await res.json()
-            if (allComment) {
-                for (let comment of allComment) {
-                    console.log(comment)
-                    const com = document.createElement('div');
-                    com.classList.add('comment');
+    const comments = await response.json()
+    if (!comments || comments.length === 0) return
 
-                    try{
-                        // Fetch reaction info
-                        const reactInfo = await getReactInfo({
-                            target_type: "comment",
-                            target_id: comment.comment_id,
-                        }, "GET");
-
-
-                        com.innerHTML = commentTemplate(comment, reactInfo.data)
-                        reactToggle(com, comment.comment_id, "comment")
-                        
-                        // Add event listeners for like and dislike buttons
-                        element.append(com)
-                    }catch (error) {
-                        console.error("Error rendering post:", error);
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error(error);
+    let count = 0
+    for (const comment of comments) {
+      const reaction = await getReactInfo({
+        target_type: "comment",
+        target_id: comment.comment_id,
+      }, "GET")
+      const commentSection = createCommentElement(comment, reaction)
+      reactToggle(commentSection, comment.comment_id, 'comment')
+      commentsContainer.appendChild(commentSection)
+      count++
     }
+    comentIndex[postId] += count
+
+    if (count < limit) return
+    await loadComments(postId, commentSize - count, commentsContainer)
+  } catch (error) {
+    console.error("Error loading comments:", error);
+  }
 }
 
-function commentTemplate(comment,reactInfo){
-    console.log(reactInfo)
-    let liked = false ;
-    let disliked = false ;
+const addComment = async (postId, content, commentsContainer, commentsection) => {
+  try {
+    const response = await fetch(`/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        post_id: postId,
+        content: content
+      }),
+    })
 
-    let likeCount = reactInfo.liked_by? reactInfo.liked_by.length : 0 ;
-    let disLikeCount = reactInfo.disliked_by? reactInfo.disliked_by.length : 0 ; 
+    let commentInput = commentsection.querySelector(".comment-input");
+    const error = commentsection.querySelector('.error-comment')
+    const newComment = await response.json();
 
-    if (!!reactInfo.user_reaction){
-      liked = reactInfo.user_reaction === "like"
-      disliked = !liked
-    }else{
-      liked = false 
-      disliked = false;
+    switch (response.status) {
+      case 400:
+        error.textContent = newComment.error
+        break
+      case 401:
+        showRegistrationModal()
+        break
+      case 201:
+        const reaction = await getReactInfo({
+          target_type: "comment",
+          target_id: newComment.comment_id,
+        }, "GET")
+        error.textContent = ""
+        const commentSection = createCommentElement(newComment, reaction)
+        reactToggle(commentSection, newComment.comment_id, 'comment')
+        commentsContainer.prepend(commentSection)
+        commentInput.style.height = "38px"
+        commentInput.value = ""
+        break
     }
+  } catch (error) {
+    console.error("Error adding comment:", error)
+  }
+}
 
-    const innerHTML = `
-    <div class="one_comment">
-        <p><i class="fa fa-user"></i> ${comment.user_name}:<i> ${comment.content}</i> </p> 
-        <div class="actions">
-            <button data-clicked="${liked}" class="like" id="com_like" 
-            style="background-color: ${liked ? '#15F5BA' : 'white'};">
-                <i class="fas fa-thumbs-up"></i> <span class="count">${likeCount}</span>
-            </button>
+const createCommentElement = (comment, reaction) => {
+  const commentElement = document.createElement("div")
+  commentElement.classList.add("comment")
 
-            <button data-clicked="${disliked}" class="dislike" id="com_dislike" 
-            style="background-color: ${disliked ? '#15F5BA' : 'white'};">
-                <i class="fas fa-thumbs-down"></i> <span class="count">${disLikeCount}</span>
-            </button>
-        </div>
-    <div>
-    `;
-    return innerHTML
+  let liked = false, disliked = false
+  let likeCount = reaction.data.liked_by ? reaction.data.liked_by.length : 0
+  let disLikeCount = reaction.data.disliked_by ? reaction.data.disliked_by.length : 0
+
+  if (reaction.data.user_reaction) {
+    liked = reaction.data.user_reaction === "like"
+    disliked = !liked
+  }
+
+  commentElement.innerHTML = `
+    <p><strong>👤 ${comment.user_name}:</strong> ${escapeHTML(comment.content)}</p>
+    <div class="reaction-section comment-likes">
+      <button class="like-button ${liked ? 'clicked' : ''}" data-clicked=${liked}>
+        👍 Like (<span class="count">${likeCount}</span>)
+      </button>
+      <button class="dislike-button ${disliked ? 'clicked' : ''}" data-clicked=${disliked}>
+        👎 Dislike (<span class="count">${disLikeCount}</span>)
+      </button>
+    </div>
+  `
+  return commentElement
 }

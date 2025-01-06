@@ -3,25 +3,20 @@ package utils
 import (
 	"database/sql"
 	"encoding/json"
-	"html/template"
 	"net/http"
 	"time"
 )
 
 var Colors = map[string]string{"green": "\033[42m", "red": "\033[41m", "reset": "\033[0m"}
 
-type Err struct {
-	Message      string
-	Unauthorized bool
-}
-
 type User struct {
-	UserId     int64
-	UserName   string `json:"username"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	SessionId  string
-	Expiration time.Time
+	UserId               int64
+	UserName             string `json:"username"`
+	Email                string `json:"email"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"confirmPassword"`
+	SessionId            string
+	Expiration           time.Time
 }
 
 type Post struct {
@@ -34,16 +29,9 @@ type Post struct {
 	CreatedAt  time.Time
 }
 
-// type Reaction struct {
-// 	UserId     int    `json:"user_id"`
-// 	TargetId   int    `json:"target_id"`
-// 	ReactionId string `json:"reaction_id"`
-// 	Name       string `json:"name"`
-// }
-
 type Reaction struct {
-	LikedBy     []int  `json:"liked_by"`
-	DislikedBy  []int  `json:"disliked_by"`
+	LikedBy      []int  `json:"liked_by"`
+	DislikedBy   []int  `json:"disliked_by"`
 	UserReaction string `json:"user_reaction"`
 }
 
@@ -56,12 +44,16 @@ type Comment struct {
 	Created_at string `json:"created_at"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func (p *Post) Update_Post(title string, content string, time time.Time) {
 	p.Title = title
 	p.Content = content
 }
 
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func RespondWithJSON(w http.ResponseWriter, code int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -69,19 +61,8 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
-
 	w.WriteHeader(code)
 	w.Write(response)
-}
-
-func RespondWithError(w http.ResponseWriter, Err Err, statuscode int) {
-	tmpl, err := template.ParseFiles("web/templates/error.html")
-	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(statuscode)
-	tmpl.Execute(w, Err)
 }
 
 func QueryRows(db *sql.DB, query string, args ...any) (*sql.Rows, error) {

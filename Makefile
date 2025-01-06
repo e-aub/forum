@@ -1,31 +1,48 @@
-IMAGE_NAME=forum-image
+# Docker-related variables
+DOCKERFILE     = Dockerfile
+IMAGE_NAME     = forum-image
+CONTAINER_NAME = forum-container
 
-DOCKERFILE=Dockerfile.dev
+# Application-related variables
+APP_DIR        = $(PWD)
+PORT           = 8080
+DB_PATH        = db/data.db
 
-CONTAINER_NAME=forum-container
+# Build the Docker image
+build: 
+	@echo "Building Docker image: $(IMAGE_NAME)"
+	docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
 
-build:
-	 docker build -f $(DOCKERFILE) -t $(IMAGE_NAME) .
-
+# Run the Docker container
 run:
-	 docker run --name $(CONTAINER_NAME) -p "8080:8080" -v $(PWD):/app $(IMAGE_NAME)
+	@echo "Running Docker container: $(CONTAINER_NAME)"
+	@echo $(PORT)
+	 docker run --name $(CONTAINER_NAME) -p $(PORT):$(PORT) $(IMAGE_NAME)
 
+# Stop and remove the Docker container
 stop:
+	@echo "Stopping and removing Docker container: $(CONTAINER_NAME)"
 	 docker stop $(CONTAINER_NAME) || true
-	 docker rm $(CONTAINER_NAME) || true
 
+# Clean up files and Docker resources
 clean:
-	 rm -rf forum tmp || true
-	 docker rm -f $(CONTAINER_NAME) || true
-	 docker rmi -f $(IMAGE_NAME) || true
+	@echo "Cleaning up temporary files and Docker resources"
+	rm -rf forum || true
+	docker rm -f $(CONTAINER_NAME) || true
+	docker rmi -f $(IMAGE_NAME) || true
+
+# Push changes to Git repository
 push: clean
+	@echo "Committing and pushing changes to Git"
 	@read -p "Enter commit message: " msg; \
 	git add .; \
 	git commit -m "$$msg"; \
 	git push
+
+# Combined target for stopping, cleaning, building, and running
 all: stop clean build run
 
-.PHONY: build run stop clean up
-
-test:
-	DB_PATH=db/data.db go run cmd/main.go
+# Run the application directly (outside of Docker)
+run-app:
+	@echo "Running application directly on host"
+	PORT=$(PORT) DB_PATH=$(DB_PATH) go run cmd/main.go
